@@ -3,14 +3,25 @@ import { useEffect, useState } from "react"
 
 export default function GoUp() {
 
-    const [scrolled, setScrolled] = useState(false);
-    // window.onscroll(setScrolled(true));
-    document.onscroll(setScrolled(true))
+    const [visible, setVisible] = useState(false);
+    useEffect(() => {
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset >= 200) {
+                setVisible(true);
+            }
+            else {
+                setVisible(false);
+            }
+        })
+    }, [])
 
     return (
         <>
-            {scrolled && <button onClick={() => { window.scrollTo(0, 0) }} className="m-auto cursor-pointer items-center flex sticky bottom-4 rounded-full p-2 bg-gold"><ArrowUpIcon className="fill-white size-8" /></button>}
-            {!scrolled && <button onClick={() => { window.scrollTo(0, 0) }} className="hidden cursor-pointer m-auto items-center sticky bottom-4 rounded-full p-2 bg-gold"><ArrowUpIcon className="fill-white size-8" /></button>}
+            {visible &&
+                <button onClick={() => { window.scrollTo({ top: 0, left: 0, behavior: 'smooth' }); }} className="m-auto cursor-pointer fixed bottom-2 right-2 rounded-full p-3 bg-linear-to-r from-gold to-yellow-200 animate-bounce">
+                    <ArrowUpIcon className="fill-darkgreen size-6" />
+                </button>
+            }
         </>
     )
 }

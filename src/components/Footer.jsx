@@ -26,12 +26,12 @@ export default function Footer() {
                     <p className="font-bold">Join our newsletter to get latest news and updates right into your mail inbox.</p>
                     <div className="flex flex-col items-start gap-0.5 py-2">
                         <label htmlFor="Email" className="text-white text-xl">Email Address</label>
-                        <div className="flex flex-row gap-1 items-center bg-white border-1 border-black w-full p-2 rounded-sm">
+                        <div className="flex flex-row gap-1 items-center bg-white border border-black w-full p-2 rounded-sm">
                             <EnvelopeIcon className="size-8 fill-activetab" />
                             <input type="email" value={mail} name="Email" id="Email" placeholder="xyz@gmail.com" className="focus:outline-0 w-full font-normal text-black" onChange={(e) => setMail(e.target.value)} />
                         </div>
                     </div>
-                    <input type="submit" value="Join" className="bg-gradient-to-r font-bold from-activetab to-yellow-200 cursor-pointer p-2 rounded-sm border-1 border-black text-black hover:scale-105 transition-all ease-in duration-200" />
+                    <input type="submit" value="Join" className="bg-linear-to-r font-bold from-activetab to-yellow-200 cursor-pointer p-2 rounded-sm border border-black text-black hover:scale-105 transition-all ease-in duration-200" />
                 </div>
                 <hr className="border-amber-50 md:hidden block" />
 
@@ -39,14 +39,13 @@ export default function Footer() {
                     <h1 className="font-bold text-2xl text-gold">Quick Links</h1>
                     <div className="flex flex-col items-start justify-evenly h-full">
                         <NavLink to="/" className="hover:text-gold hover:underline hover:underline-offset-2 font-bold">Home</NavLink>
-                        <NavLink to="/" className="hover:text-gold hover:underline hover:underline-offset-2 font-bold">About</NavLink>
-                        <NavLink to="/" className="hover:text-gold hover:underline hover:underline-offset-2 font-bold">Services</NavLink>
-                        <NavLink to="/" className="hover:text-gold hover:underline hover:underline-offset-2 font-bold">Programs</NavLink>
-                        <NavLink to="/" className="hover:text-gold hover:underline hover:underline-offset-2 font-bold">Faqs</NavLink>
+                        <NavLink to="/about" className="hover:text-gold hover:underline hover:underline-offset-2 font-bold">About</NavLink>
+                        <NavLink to="/services" className="hover:text-gold hover:underline hover:underline-offset-2 font-bold">Services</NavLink>
+                        <NavLink to="/programs" className="hover:text-gold hover:underline hover:underline-offset-2 font-bold">Programs</NavLink>
+                        <NavLink to="/faqs" className="hover:text-gold hover:underline hover:underline-offset-2 font-bold">Faqs</NavLink>
                     </div>
                 </div>
                 <hr className="border-amber-50 md:hidden block" />
-
                 <div className="flex flex-col h-full md:m-auto text-white md:w-11/12 lg:w-auto">
                     <h1 className="font-bold text-2xl text-gold">Visit Us</h1>
                     <address className="flex flex-col items-start justify-evenly h-full">
