@@ -49,7 +49,7 @@ export default function SideNav() {
         { path: `/${role}/rentals`, icon: Truck, name: "Rentals", index: 2 },
         { path: `/${role}/shop`, icon: Shopping, name: "Shop", index: 3 },
         { path: `/${role}/transport`, icon: Truck, name: "Transport", index: 4 },
-        { path: `/${role}/contractfarming`, icon: Document, name: "Contract Farming", index: 5 },
+        { path: `/${role}/contract`, icon: Document, name: "Contract Farming", index: 5 },
         { path: `/${role}/coldstorage`, icon: Building, name: "Cold Storage", index: 6 },
         { path: `/${role}/aitoolkit`, icon: Sparkles, name: "AI Tool Kit", index: 7 }
     ]
@@ -82,7 +82,7 @@ export default function SideNav() {
                                 </NavLink>
                             ))}
                             <div className="flex flex-col items-center justify-center gap-2 border-t border-darkgreen m-auto">
-                                <Link className="hover:rounded-xl cursor-pointer p-2 m-auto">
+                                <Link to="/serviceprovider/profile" className="hover:rounded-xl cursor-pointer p-2 m-auto">
                                     <UserCircleIcon className="size-10" />
                                 </Link>
                                 <button onClick={() => { logout() }} className="group p-2 hover:bg-red-400 rounded-xl m-auto cursor-pointer"><ArrowLeftEndOnRectangleIcon className="size-8 stroke-red-600 group-hover:stroke-white" /></button>
@@ -99,7 +99,7 @@ export default function SideNav() {
                                 </NavLink>
                             ))}
                             <div className="flex flex-col items-center justify-center gap-2 border-t border-darkgreen m-auto">
-                                <Link className="hover:rounded-xl cursor-pointer p-2 m-auto">
+                                <Link to="/farmer/profile" className="hover:rounded-xl cursor-pointer p-2 m-auto">
                                     <UserCircleIcon className="size-10" />
                                 </Link>
                                 <button onClick={() => { logout() }} className="group p-2 hover:bg-red-400 rounded-xl m-auto cursor-pointer"><ArrowLeftEndOnRectangleIcon className="size-8 stroke-red-600 group-hover:stroke-white" /></button>
@@ -129,7 +129,7 @@ export default function SideNav() {
                                 </NavLink>
                             ))}
                             <div className="flex flex-col items-start justify-center gap-2 border-t border-darkgreen my-auto fixed bottom-4">
-                                <Link className="flex flex-row items-center justify-between pt-2 pl-2 gap-2">
+                                <Link to="/serviceprovider/profile" className="flex flex-row items-center justify-between pt-2 pl-2 gap-2">
                                     <UserCircleIcon className="size-10" />
                                     <p className="text-xl text-darkgreen">Username</p>
                                 </Link>
@@ -151,7 +151,7 @@ export default function SideNav() {
                                 </NavLink>
                             ))}
                             <div className="flex flex-col items-start justify-center gap-2 border-t border-darkgreen my-auto fixed bottom-4">
-                                <Link className="flex flex-row items-center justify-between gap-2 pt-2 pl-2">
+                                <Link to="/farmer/profile" className="flex flex-row items-center justify-between gap-2 pt-2 pl-2">
                                     <UserCircleIcon className="size-10" />
                                     <p className="text-xl text-darkgreen">Username</p>
                                 </Link>
@@ -201,7 +201,7 @@ export default function SideNav() {
                                     </NavLink>
                                 ))}
                                 <div className="flex flex-col items-start justify-start gap-2 border-t border-darkgreen w-full">
-                                    <Link className="flex flex-row items-center justify-start pt-2 gap-2 w-full">
+                                    <Link to="/serviceprovider/profile" className="flex flex-row items-center justify-start pt-2 gap-2 w-full">
                                         <UserCircleIcon className="size-10" />
                                         <p className="text-xl text-darkgreen">Username</p>
                                     </Link>
@@ -223,7 +223,7 @@ export default function SideNav() {
                                     </NavLink>
                                 ))}
                                 <div className="flex flex-col items-start justify-center gap-2 border-t border-darkgreen w-full">
-                                    <Link className="flex flex-row items-center justify-start gap-2 pt-2 w-full">
+                                    <Link to="/farmer/profile" className="flex flex-row items-center justify-start gap-2 pt-2 w-full">
                                         <UserCircleIcon className="size-10" />
                                         <p className="text-xl text-darkgreen">Username</p>
                                     </Link>

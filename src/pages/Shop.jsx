@@ -14,9 +14,9 @@ export default function Shop() {
 const {isOpen, setIsOpen} = UseAppContext();
 
     const [products, setProducts] = useState([]);
-    axios.get("http://localhost:3000/shop").then((response) => {
-        setProducts(response.data);
-    })
+    // axios.get("http://localhost:3000/shop").then((response) => {
+    //     setProducts(response.data);
+    // })
     // setProducts([axios.get("http://localhost:3000/shop")]);
 
 

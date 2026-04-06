@@ -20,6 +20,11 @@ import ShopService from './pages/ShopService';
 import NotFound from './pages/NotFound';
 import Filters from './components/Filters';
 import GoUp from './components/GoUp';
+import FProfile from './pages/FProfile';
+import SPProfile from './pages/SPProfile';
+import ContractFarming from './pages/ContractFarming';
+import ContractFarming2 from './pages/ContractFarming_2';
+import ContractFarmingService from './pages/ContractFarmingService';
 
 
 const Wrapper = ({ children }) => {
@@ -54,14 +59,16 @@ export default function App() {
 							<Route path='/farmer/shop' element={<Shop />} />
 							<Route path='/farmer/rentals' element={<Rentals />} />
 							<Route path='/farmer/transport' element={<Transport />} />
-							{/* <Route path='/farmer/profile' element={<FProfile />} /> */}
+							<Route path='/farmer/profile' element={<FProfile />} />
+							<Route path='/farmer/contract' element={<ContractFarming />} />
 						</Route>
 						<Route path='/serviceprovider'>
 							<Route index element={<Dashboard />} />
 							<Route path='/serviceprovider/transport' element={<TransportService />} />
 							<Route path='/serviceprovider/rentals' element={<RentalsService />} />
 							<Route path='/serviceprovider/shop' element={<ShopService />} />
-							{/* <Route path='/serviceprovider/profile' element={<SPProfile />} /> */}
+							<Route path='/serviceprovider/profile' element={<SPProfile />} />
+							<Route path='/serviceprovider/contract' element={<ContractFarmingService/>} />
 						</Route>
 						<Route path='*' element={<NotFound />} />
 					</Routes>
