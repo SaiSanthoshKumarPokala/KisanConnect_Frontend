@@ -1,60 +1,168 @@
-import { FunnelIcon, MagnifyingGlassIcon, MapPinIcon } from "@heroicons/react/24/outline";
-import Footer from "../components/Footer";
-import NavBar from "../components/NavBar";
+import { useMemo, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import SideNav from "../components/SideNav";
-import { useContext, useState } from "react";
-import axios from "axios";
-import { SidenavContext } from "../context/Contexts";
+import ModuleHeader from "../components/ModuleHeader";
+import ModuleFilters from "../components/ModuleFilters";
 import { UseAppContext } from "../context/AppContext";
 
+const SHOP_UI_DATA = [
+  {
+    _id: "ui-1",
+    name: "Premium Urea",
+    seller: "GreenLeaf Agro Store",
+    price: 500,
+    rating: 4.6,
+    category: "Fertilizers",
+    state: "telangana",
+    image: "/urea.png",
+    description: "Balanced nitrogen support for strong vegetative crop growth.",
+  },
+  {
+    _id: "ui-2",
+    name: "Hybrid Paddy Seeds",
+    seller: "Kisan Seed House",
+    price: 820,
+    rating: 4.8,
+    category: "Seeds",
+    state: "andhra pradesh",
+    image: "/seeds.webp",
+    description: "High-yield seed variety suited for strong germination rates.",
+  },
+  {
+    _id: "ui-3",
+    name: "Crop Shield Pesticide",
+    seller: "Agri Protect",
+    price: 680,
+    rating: 4.4,
+    category: "Pesticides",
+    state: "maharashtra",
+    image: "/fertilizers.png",
+    description: "Protective treatment for common seasonal pest pressure.",
+  },
+  {
+    _id: "ui-4",
+    name: "Power Sprayer Kit",
+    seller: "Field Tools Hub",
+    price: 2450,
+    rating: 4.5,
+    category: "Equipment",
+    state: "karnataka",
+    image: "/shop.avif",
+    description: "Durable spraying setup for field care and quick application cycles.",
+  },
+  {
+    _id: "ui-5",
+    name: "Organic Soil Booster",
+    seller: "Nature Root Supplies",
+    price: 740,
+    rating: 4.7,
+    category: "Fertilizers",
+    state: "kerala",
+    image: "/fertilizers.svg",
+    description: "Organic nutrient blend for healthier soil structure and recovery.",
+  },
+  {
+    _id: "ui-6",
+    name: "Vegetable Seed Pack",
+    seller: "FreshGrow Traders",
+    price: 360,
+    rating: 4.3,
+    category: "Seeds",
+    state: "telangana",
+    image: "/seeds.webp",
+    description: "Mixed seed pack for kitchen-garden and market crop planting.",
+  },
+];
 
 export default function Shop() {
-    const [showfilters, setShowfilters] = useState(true);
-const {isOpen, setIsOpen} = UseAppContext();
+  const { isOpen, setIsOpen } = UseAppContext();
+  const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [stateLocation, setStateLocation] = useState("select");
+  const [products] = useState([]);
+  const filters = ["All", "Fertilizers", "Seeds", "Pesticides", "Equipment"];
 
-    const [products, setProducts] = useState([]);
-    // axios.get("http://localhost:3000/shop").then((response) => {
-    //     setProducts(response.data);
-    // })
-    // setProducts([axios.get("http://localhost:3000/shop")]);
+  const displayProducts = products.length > 0 ? products : SHOP_UI_DATA;
 
+  const filteredProducts = useMemo(() => {
+    return displayProducts.filter((item) => {
+      const query = search.trim().toLowerCase();
+      const matchesSearch =
+        !query ||
+        item.name.toLowerCase().includes(query) ||
+        item.seller.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query);
+      const matchesCategory = activeFilter === "All" || item.category === activeFilter;
+      const matchesState = stateLocation === "select" || item.state === stateLocation;
 
-    return (
-        <>
-            <button className="flex md:hidden flex-row gap-1 cursor-pointer items-center bg-linear-to-br from-gold to-yellow-200 border border-black p-2 rounded-full bottom-2 left-2 fixed" onClick={() => setShowfilters(!showfilters)}>
-                <FunnelIcon className="stroke-2 size-6 stroke-darkgreen fill-darkgreen" />
-                <p>Filters</p>
-            </button>
-            <SideNav />
-            <div className={`flex flex-col ${isOpen ? "md:ml-52" : "md:ml-16"}`}>
-                {showfilters &&
-                    <div className="filters md:sticky md:top-0 w-full h-fit m-auto bg-linear-to-r from-gold to-yellow-200 border-b border-darkgreen">
-                        <div className="flex flex-row flex-wrap w-10/12 h-fit m-auto rounded-md items-center my-4 gap-2 justify-center">
-                            <div className="flex flex-row gap-1 items-center bg-white border border-black p-2 rounded-full w-auto">
-                                <MagnifyingGlassIcon className="size-6 stroke-2 stroke-gold" />
-                                <input type="search" name="search" id="search" placeholder="Search" className="focus:outline-0 w-auto font-normal text-black" />
-                            </div>
-                            <div className="flex flex-row gap-1 items-center bg-white border border-black w-auto p-2 rounded-full">
-                                <MapPinIcon className="size-6 stroke-2 stroke-gold" />
-                                <select name="state" id="state" className="focus:outline-0 w-full font-normal text-black">
-                                    <option value="select">State</option>
-                                    <option value="telangana">Telangana</option>
-                                    <option value="andhra pradesh">Andhra Pradesh</option>
-                                    <option value="maharashtra">Maharashtra</option>
-                                    <option value="karnataka">Karnataka</option>
-                                    <option value="kerala">Kerala</option>
-                                </select>
-                            </div>
-                        </div>
+      return matchesSearch && matchesCategory && matchesState;
+    });
+  }, [activeFilter, displayProducts, search, stateLocation]);
 
-                    </div>}
-                <div className="flex flex-row flex-wrap items-center justify-center w-10/12 md:w-11/12 gap-8 m-auto my-4 font-montserrat">
-                    {products.map((item) => (
-                        <ProductCard key={item._id} name={item.name} seller={item.seller} price={item.price} rating={item.rating} category={item.category} />
-                    ))}
-                </div>
+  const resultLabel =
+    activeFilter === "All" ? "showing all products" : `showing ${activeFilter.toLowerCase()}`;
+  const stateLabel = stateLocation === "select" ? "all states" : stateLocation;
+
+  return (
+    <div className="min-h-dvh bg-darkgreen">
+      <SideNav />
+      <div
+        className={`flex min-h-dvh flex-col transition-all duration-300 ${
+          isOpen ? "md:ml-[250px]" : "md:ml-[80px]"
+        }`}
+      >
+        <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
+          <ModuleHeader
+            title="Shop Community"
+            search={search}
+            onSearchChange={setSearch}
+            onOpenSidebar={() => setIsOpen(!isOpen)}
+          />
+          <ModuleFilters
+            filters={filters}
+            activeFilter={activeFilter}
+            setActiveFilter={setActiveFilter}
+            state={stateLocation}
+            setState={setStateLocation}
+          />
+
+          <div className="flex flex-wrap items-center gap-2 px-6 pt-4">
+            <span className="font-montserrat text-sm font-bold text-white">
+              {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""} found
+            </span>
+            <span className="font-montserrat text-xs text-white/60">
+              . {resultLabel} in {stateLabel}
+            </span>
+            {search.trim() && (
+              <span className="font-montserrat text-xs text-[#FFF085]">
+                . matching "{search.trim()}"
+              </span>
+            )}
+          </div>
+
+          {filteredProducts.length === 0 ? (
+            <div className="px-6 py-10 font-montserrat text-sm text-white/70">
+              No products match your current search and filters.
             </div>
-        </>
-    )
+          ) : (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px] p-6">
+              {filteredProducts.map((item) => (
+                <ProductCard
+                  key={item._id}
+                  name={item.name}
+                  seller={item.seller}
+                  price={item.price}
+                  rating={item.rating}
+                  category={item.category}
+                  image={item.image}
+                  description={item.description}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

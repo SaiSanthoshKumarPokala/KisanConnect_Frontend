@@ -1,101 +1,201 @@
-import { useState, useRef, useContext } from "react"
-import NavBar from "../components/NavBar";
-import SideNav from "../components/SideNav";
-import { PlusCircleIcon } from "@heroicons/react/24/outline";
-import { XCircleIcon } from "@heroicons/react/24/solid";
+import { useState } from "react";
+import ModuleHeader from "../components/ModuleHeader";
 import RentalsServiceCard from "../components/RentalsServiceCard";
-import { SidenavContext } from "../context/Contexts";
+import ServiceProviderCatalogForm from "../components/ServiceProviderCatalogForm";
+import SideNav from "../components/SideNav";
 import { UseAppContext } from "../context/AppContext";
+import { PlusCircleIcon } from "@heroicons/react/24/outline";
+
+const DEFAULT_RENTAL_IMAGE = "/harvester.png";
+
+const initialForm = {
+  name: "",
+  category: "Harvester",
+  price: "",
+  location: "",
+  status: "Available",
+  description: "",
+  image: DEFAULT_RENTAL_IMAGE,
+};
+
+const SAMPLE_RENTALS = [
+  {
+    id: 9001,
+    name: "Mahindra 575 DI",
+    category: "Tractor",
+    price: "2200",
+    location: "Kompally, Hyderabad",
+    status: "Available",
+    description: "Reliable tractor for ploughing, haulage, and long field days.",
+    image: "/harvester.png",
+  },
+  {
+    id: 9002,
+    name: "Harvester Prime X9",
+    category: "Harvester",
+    price: "5400",
+    location: "Warangal, Telangana",
+    status: "Busy",
+    description: "Fast harvesting support for peak-season paddy and grain work.",
+    image: "/harvester.png",
+  },
+];
+
+const rentalFields = [
+  { key: "name", label: "Machine Name", placeholder: "Enter machine name", required: true },
+  { key: "category", label: "Category", type: "select", options: ["Harvester", "Tractor", "Seeder", "Rotavator"], required: true },
+  { key: "price", label: "Price Per Day", type: "number", placeholder: "Enter price per day", required: true },
+  { key: "location", label: "Location", placeholder: "Enter machine location", required: true },
+  { key: "status", label: "Status", type: "select", options: ["Available", "Busy", "Maintenance"], required: true },
+  { key: "description", label: "Description", type: "textarea", placeholder: "Share rental details, condition, and usage notes", required: true },
+];
+
 export default function RentalsService() {
+  const { isOpen, setIsOpen } = UseAppContext();
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [search, setSearch] = useState("");
+  const [rentals, setRentals] = useState(SAMPLE_RENTALS);
 
-const {isOpen, setIsOpen} = UseAppContext();
-    const add = useRef(null);
-    const [lostitem, setLostitem] = useState("");
-    const [name, setName] = useState("");
-    const [year, setYear] = useState("1st");
-    const [dept, setDept] = useState("CSE");
-    const [desc, setDesc] = useState("");
-    const [whatsappNo, setWhatsappNo] = useState("");
-    const [isEmpty, setisEmpty] = useState(false);
+  const filteredRentals = rentals.filter((item) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return [item.name, item.category, item.location, item.status, item.description].some((value) =>
+      value.toLowerCase().includes(query)
+    );
+  });
 
-    return (
-        <>
-            <SideNav />
-            {isEmpty ? <div className={`items-center justify-center h-dvh flex flex-col m-auto gap-6 p-10 text-center ${isOpen ? "md:ml-52" : "md:ml-16"}`}>
-                <p className="font-bold text-xl text-darkgreen text-wrap">You don't provide any rentals service yet. Get started by adding one.
-                </p>
-                <button onClick={() => { add.current.showModal() }} className="group border-2 h-80 w-45 flex flex-col items-center justify-center border-gold hover:text-gold hover:bg-darkgreen/70 text-darkgreen font-bold py-2 px-6 cursor-pointer rounded-xl">
-                    <PlusCircleIcon className="size-8 text-darkgreen group-hover:text-gold" />
-                    <p className="font-bold text-darkgreen group-hover:text-gold text-2xl">Add</p>
-                </button>
-            </div> :
-                <div className={`${isOpen ? "md:ml-52" : "md:ml-16"}`}>
-                    <div className={`flex flex-row flex-wrap items-center justify-center py-4 w-10/12 md:w-11/12 gap-8 m-auto`}>
-                        <RentalsServiceCard />
-                        <RentalsServiceCard />
-                        <RentalsServiceCard />
-                        <RentalsServiceCard />
-                        <RentalsServiceCard />
-                        <button onClick={() => { add.current.showModal() }} className="flex flex-col items-center justify-center border-2 border-gold cursor-pointer hover:bg-darkgreen/70 rounded-xl h-100 w-55 lg:h-105 lg:w-60">
-                            <PlusCircleIcon className="size-8 text-gold" />
-                            <p className="font-bold text-gold text-2xl">Add more</p>
-                        </button>
-                    </div>
-                </div>
-            }
-            <dialog ref={add} className="m-auto p-6 rounded-md bg-white/50 backdrop-blur-2xl backdrop:backdrop-blur-lg">
-                <form>
-                    <div className="flex flex-col gap-4 font-bold">
-                        <div className="flex flex-row items-center justify-end">
-                            <p>Close</p>
-                            <button type="button" className="cursor-pointer" onClick={() => { add.current.close() }}>
-                                <XCircleIcon className="size-8 cursor-pointer hover:rotate-90 transition-all ease-in duration-200 hover:scale-105 hover:fill-red-500 hover:stroke-white" />
-                            </button>
-                        </div>
-                        <div className="flex flex-row gap-2 items-center">
-                            <label htmlFor="Name">Name: </label>
-                            <input type="text" name="Name" id="Name" value={name} onChange={(e) => setName(e.target.value)} className="border-b-2 focus:outline-none border-b-black" />
-                        </div>
-                        <div className="flex flex-row gap-2 items-center">
-                            <label htmlFor="Year">Year: </label>
-                            <select name="Year" id="Year" className="focus:outline-none" value={year} onChange={(e) => setYear(e.target.value)}>
-                                <option value="1st">1st</option>
-                                <option value="2nd">2nd</option>
-                                <option value="3rd">3rd</option>
-                                <option value="4th">4th</option>
-                            </select>
-                        </div>
-                        <div className="flex flex-row gap-2 items-center">
-                            <label htmlFor="Department">Department: </label>
-                            <select name="Department" id="Department" className="focus:outline-none" value={dept} onChange={(e) => setDept(e.target.value)}>
-                                <option value="CSE">CSE</option>
-                                <option value="ECE">ECE</option>
-                                <option value="EEE">EEE</option>
-                                <option value="MECH">MECH</option>
-                            </select>
-                        </div>
-                        <div className="flex flex-row gap-2 items-center">
-                            <label htmlFor="Whatsapp">Whatsapp Number: </label>
-                            <input type="text" name="Whatsapp" id="Whatsapp" value={whatsappNo} onChange={(e) => setWhatsappNo(e.target.value)} className="focus:outline-none border-b-2 border-b-black" />
-                        </div>
-                        <div className="flex flex-row gap-2 items-center">
-                            <label htmlFor="LostItem">Lost Item: </label>
-                            <input type="text" name="LostItem" id="LostItem" value={lostitem} onChange={(e) => setLostitem(e.target.value)} className="focus:outline-none border-b-2 border-b-black" />
-                        </div>
-                        <div className="flex flex-row gap-2 items-center">
-                            <label htmlFor="Description">Description: </label>
-                            <input type="text" name="Description" id="Description" value={desc} onChange={(e) => setDesc(e.target.value)} className="focus:outline-none border-b-2 border-b-black" />
-                        </div>
-                        <div className="flex flex-row gap-2 items-center">
-                            <label htmlFor="Photo">Photo: </label>
-                            <input type="file" name="Photo" id="Photo" accept="image/*" className="focus:outline-none file:border-2 file:p-1 file:bg-gray-300 hover:file:bg-gray-400 file:cursor-pointer file:rounded-md" onChange={(e) => fileChange(e)} />
-                        </div>
-                        <div className="text-center">
-                            <button type="submit" className="p-2 px-4 rounded-r-full rounded-l-full rounded-md border-2 transition-colors ease-in duration-200 hover:bg-green-600 hover:text-white cursor-pointer border-black" onClick={() => { }}>Confirm</button>
-                        </div>
-                    </div>
-                </form>
-            </dialog>
-        </>
-    )
+  const handleOpenForm = () => {
+    setEditingId(null);
+    setShowFormModal(true);
+  };
+
+  const handleEdit = (item) => {
+    setEditingId(item.id);
+    setShowFormModal(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowFormModal(false);
+    setEditingId(null);
+  };
+
+  const handleSave = (formData) => {
+    const payload = {
+      ...formData,
+      price: String(formData.price),
+      image: formData.image || DEFAULT_RENTAL_IMAGE,
+    };
+
+    if (editingId) {
+      setRentals((prev) => prev.map((item) => (item.id === editingId ? { ...payload, id: editingId } : item)));
+    } else {
+      setRentals((prev) => [{ ...payload, id: Date.now() }, ...prev]);
+    }
+
+    handleCloseForm();
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("Delete this rental listing?")) {
+      setRentals((prev) => prev.filter((item) => item.id !== id));
+    }
+  };
+
+  return (
+    <div className="bg-darkgreen min-h-dvh">
+      <SideNav />
+      <div className={`flex min-h-dvh flex-col transition-all duration-300 ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
+        <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-darkgreen font-montserrat shadow-2xl md:mx-6">
+          <ModuleHeader
+            title="My Rentals"
+            search={search}
+            onSearchChange={setSearch}
+            onOpenSidebar={() => setIsOpen(!isOpen)}
+          />
+
+          {rentals.length === 0 ? (
+            <div className="flex min-h-[calc(100dvh-9rem)] flex-1 flex-col items-center justify-center gap-6 bg-[#081D0C] p-10 text-center">
+              <p className="max-w-xl text-xl font-bold text-white">
+                You do not provide any rental service yet. Add your first machine to start receiving requests.
+              </p>
+              <button
+                onClick={handleOpenForm}
+                className="group flex h-80 w-56 cursor-pointer flex-col items-center justify-center rounded-[18px] border border-dashed border-gold/60 bg-[#050505] text-gold transition hover:-translate-y-1 hover:border-gold hover:bg-[#111111]"
+              >
+                <PlusCircleIcon className="size-10 text-gold" />
+                <p className="mt-3 text-2xl font-bold text-gold">Add Rental</p>
+              </button>
+            </div>
+          ) : filteredRentals.length === 0 ? (
+            <div className="flex min-h-[calc(100dvh-9rem)] flex-1 flex-col items-center justify-center gap-3 bg-[#081D0C] p-10 text-center">
+              <p className="text-xl font-bold text-white">No rental cards match your search.</p>
+              <button onClick={() => setSearch("")} className="text-sm font-bold text-gold underline underline-offset-4">
+                Clear Search
+              </button>
+            </div>
+          ) : (
+            <div className="flex-1 bg-[#081D0C] p-6">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px]">
+              {filteredRentals.map((item) => (
+                <RentalsServiceCard key={item.id} item={item} onEdit={handleEdit} onDelete={handleDelete} />
+              ))}
+
+              <button
+                onClick={handleOpenForm}
+                className="flex min-h-[360px] cursor-pointer flex-col items-center justify-center rounded-[18px] border border-dashed border-gold/60 bg-[#050505] transition hover:-translate-y-1 hover:border-gold hover:bg-[#111111]"
+              >
+                <PlusCircleIcon className="size-10 text-gold" />
+                <p className="mt-3 text-2xl font-bold text-gold">Add Rental</p>
+              </button>
+            </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showFormModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.76)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            zIndex: 300,
+          }}
+          onClick={handleCloseForm}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(860px, 100%)",
+              maxHeight: "min(88vh, 920px)",
+              overflow: "auto",
+              background: "#000000",
+              border: "1px solid rgba(212, 175, 55, 0.32)",
+              borderRadius: "22px",
+              boxShadow: "0 24px 60px rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <ServiceProviderCatalogForm
+              title={editingId ? "Edit Rental Listing" : "Add Rental Listing"}
+              introText="Fill the basic details for your rental machine listing so farmers can quickly understand availability and pricing."
+              imageLabel="Upload machine image"
+              uploadText="Click to upload rental machine image"
+              submitText={editingId ? "Save Rental" : "Save Rental"}
+              initialData={editingId ? rentals.find((item) => item.id === editingId) : initialForm}
+              fields={rentalFields}
+              onBack={handleCloseForm}
+              onSave={handleSave}
+              isModal={true}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

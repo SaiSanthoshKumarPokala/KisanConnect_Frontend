@@ -1,132 +1,117 @@
-import { UserIcon, PhoneIcon, MapPinIcon, HomeIcon, CalendarIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
-import { Link } from "react-router";
-import SideNav from "../components/SideNav";
+import {
+  CalendarIcon,
+  EnvelopeIcon,
+  HomeIcon,
+  MapPinIcon,
+  PhoneIcon,
+  UserIcon,
+} from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { UseAppContext } from "../context/AppContext";
 
+function ProfileField({ icon: Icon, label, value }) {
+  return (
+    <div className="rounded-2xl border border-gold/20 bg-black/30 p-4 shadow-lg shadow-black/20">
+      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-gold/60">
+        <Icon className="size-4 text-gold" />
+        <span>{label}</span>
+      </div>
+      <div className="text-base font-semibold text-white">
+        {value || "Not added yet"}
+      </div>
+    </div>
+  );
+}
+
 export default function FProfile() {
+  const { axios } = UseAppContext();
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    address: "",
+    phonenumber: "",
+    dateofbirth: "",
+    pincode: "",
+    state: "",
+  });
 
-    const { navigate, role, axios } = UseAppContext();
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [address, setAddress] = useState("");
-    const [phonenumber, setPhonenumber] = useState("");
-    const [dateofbirth, setDateofbirth] = useState(new Date());
-    const [pincode, setPincode] = useState("");
-    const [state, setstate] = useState("");
+  useEffect(() => {
+    async function fetchFData() {
+      try {
+        const farmer = await axios.get("/api/farmer/data", {
+          headers: {
+            Authorization: `${localStorage.getItem("token")}`,
+          },
+        });
 
-    useEffect(() => {
-        async function fetchFData() {
-            const farmer = await axios.get("/api/farmer/data", {
-                headers: {
-                    "Authorization": `${localStorage.getItem('token')}`
-                }
-            });
-            // console.log(farmer)
-            if (farmer.data.success) {
-                setName(farmer.data.user.name);
-                setEmail(farmer.data.user.email);
-                setAddress(farmer.data.user.address);
-                setPhonenumber(farmer.data.user.phonenumber);
-                setDateofbirth(farmer.data.user.dateofbirth);
-                setPincode(farmer.data.user.pincode);
-                setstate(farmer.data.user.state.toLowerCase());
-            }
-            else {
-                window.alert("Wrong");
-            }
+        if (farmer.data.success) {
+          const user = farmer.data.user;
+          setProfile({
+            name: user.name || "",
+            email: user.email || "",
+            address: user.address || "",
+            phonenumber: user.phonenumber || "",
+            dateofbirth: user.dateofbirth || "",
+            pincode: user.pincode || "",
+            state: user.state || "",
+          });
+        } else {
+          window.alert("Unable to load farmer profile.");
         }
-        fetchFData();
-    }, [name])
-
-
-    const SubmitDetails = async () => {
-        try {
-            const response = await axios.post(`/api/${role}/submitdetails`, {
-                email, name, dateofbirth, phonenumber, address, pincode, state
-            });
-            if (response.data.success) {
-                window.alert(response.data.message);
-                navigate(`/${role}/`);
-            }
-            else {
-                window.alert("An Error occurred in response. Try again.");
-            }
-        } catch (error) {
-            console.log(error.message);
-            window.alert("An Error occurred in request. Try again.");
-        }
+      } catch (error) {
+        console.log(error.message);
+        window.alert("Unable to load farmer profile.");
+      }
     }
 
-    return (
-        <>
-            <div className="min-h-dvh bg-[url(/background.png)] bg-cover bg-center font-montserrat bg-darkgreen">
-                <div className="backdrop-brightness-80 font-montserrat backdrop-blur-sm w-full min-h-dvh flex m-auto items-center justify-center text-gold font-bold p-6">
-                    <div className="w-full md:w-11/12 lg:w-10/12 h-11/12 p-6 flex flex-col m-auto items-center justify-center rounded-2xl bg-darkgreen/20 ">
-                        <h1 className="text-2xl md:text-3xl font-bold p-2 text-gold text-center">Update yout details</h1>
-                        <hr className="border-gold w-full" />
-                        <div className="flex flex-col w-full md:w-10/12 lg:w-8/12">
-                            <div className="flex flex-col items-start gap-0.5 p-2">
-                                <label htmlFor="name" className="text-lg">Full name</label>
-                                <div className="flex flex-row gap-1 items-center bg-white border border-black w-full p-2 rounded-sm">
-                                    <UserIcon className="size-6 fill-gold" />
-                                    <input type="text" name="name" id="name" value={name} onChange={(e) => { setName(e.target.value) }} placeholder="Enter your full name" className="focus:outline-0 w-full font-normal text-black" />
-                                </div>
-                            </div>
-                            <div className="flex flex-col items-start gap-0.5 p-2">
-                                <label htmlFor="dob" className="text-lg">Date of Birth</label>
-                                <div className="flex flex-row gap-1 items-center bg-white border border-black w-full p-2 rounded-sm">
-                                    <CalendarIcon className="size-6 fill-gold" />
-                                    <input type="date" name="dob" id="dob" value={dateofbirth} onChange={(e) => { setDateofbirth(e.target.value) }} placeholder="Enter your Date of Birth" className="focus:outline-0 w-full font-normal text-black" />
-                                </div>
-                            </div>
-                            <div className="flex flex-col items-start gap-0.5 p-2">
-                                <label htmlFor="phno" className="text-lg">Phone Number</label>
-                                <div className="flex flex-row gap-1 items-center bg-white border border-black w-full p-2 rounded-sm">
-                                    <PhoneIcon className="size-6 fill-gold" />
-                                    <input type="tel" name="phno" id="phno" value={phonenumber} onChange={(e) => { setPhonenumber(e.target.value) }} placeholder="Enter your phone number" className="focus:outline-0 w-full font-normal text-black" />
-                                </div>
-                            </div>
-                            <div className="flex flex-col items-start gap-0.5 p-2">
-                                <label htmlFor="email" className="text-lg">Email</label>
-                                <div className="flex flex-row gap-1 items-center bg-white border border-black w-full p-2 rounded-sm">
-                                    <EnvelopeIcon className="size-6 fill-gold" />
-                                    <input type="email" name="email" id="email" value={email} onChange={(e) => { setEmail(e.target.value) }} placeholder="Enter your Email" className="focus:outline-0 w-full font-normal text-black" />
-                                </div>
-                            </div>
-                            <div className="flex flex-col items-start gap-0.5 p-2">
-                                <label htmlFor="address" className="text-lg">Address</label>
-                                <div className="flex flex-row gap-1 items-center bg-white border border-black w-full p-2 rounded-sm">
-                                    <HomeIcon className="size-6 fill-gold" />
-                                    <input type="text" name="address" id="address" value={address} onChange={(e) => { setAddress(e.target.value) }} placeholder="Enter your Address" className="focus:outline-0 w-full font-normal text-black" />
-                                </div>
-                            </div>
-                            <div className="flex flex-col items-start gap-0.5 p-2">
-                                <label htmlFor="pincode" className="text-lg">Pin Code</label>
-                                <div className="flex flex-row gap-1 items-center bg-white border border-black w-full p-2 rounded-sm">
-                                    <MapPinIcon className="size-6 fill-gold" />
-                                    <input type="text" name="pincode" id="pincode" value={pincode} onChange={(e) => { setPincode(e.target.value) }} placeholder="Enter your pincode" className="focus:outline-0 w-full font-normal text-black" />
-                                </div>
-                            </div>
-                            <div className="flex flex-col items-start gap-0.5 p-2">
-                                <label htmlFor="state" className="text-lg">State</label>
-                                <div className="flex flex-row gap-1 items-center bg-white border border-black w-full p-2 rounded-sm">
-                                    <MapPinIcon className="size-6 fill-gold" />
-                                    <select name="state" id="state" value={state} onChange={(e) => { setstate(e.target.value) }} className="focus:outline-0 w-full font-normal text-black">
-                                        <option value="select">Select</option>
-                                        <option value="telangana">Telangana</option>
-                                        <option value="andhra pradesh">Andhra Pradesh</option>
-                                        <option value="maharashtra">Maharashtra</option>
-                                        <option value="karnataka">Karnataka</option>
-                                        <option value="kerala">Kerala</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <button onClick={SubmitDetails} className="text-xl mt-4 w-auto font-bold bg-gold py-2 px-4 rounded-md text-darkgreen cursor-pointer" >Next</button>
-                    </div>
-                </div>
+    fetchFData();
+  }, [axios]);
+
+  return (
+    <div className="min-h-dvh bg-[url(/background.png)] bg-cover bg-center bg-darkgreen font-montserrat">
+      <div className="flex min-h-dvh items-center justify-center bg-darkgreen/75 p-6 backdrop-blur-sm backdrop-brightness-75">
+        <div className="w-full max-w-5xl overflow-hidden rounded-[30px] border border-gold/25 bg-black/55 shadow-[0_26px_60px_rgba(0,0,0,0.45)]">
+          <div className="border-b border-gold/20 bg-gradient-to-r from-gold/15 via-gold/5 to-transparent px-6 py-8 md:px-10">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-gold/65">
+                  Farmer Profile
+                </p>
+                <h1 className="mt-2 text-3xl font-extrabold text-gold md:text-4xl">
+                  View Your Details
+                </h1>
+                <p className="mt-3 max-w-2xl text-sm text-white/70 md:text-base">
+                  This profile is kept in view mode for farmers, so you can quickly
+                  check your registered details without editing them here.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-gold/25 bg-gold/10 px-5 py-4 text-sm text-gold/90">
+                <div className="font-semibold">Profile Status</div>
+                <div className="mt-1 text-white/75">Read-only access</div>
+              </div>
             </div>
-        </>
-    )
+          </div>
+
+          <div className="grid gap-4 p-6 md:grid-cols-2 md:gap-5 md:p-10">
+            <ProfileField icon={UserIcon} label="Full Name" value={profile.name} />
+            <ProfileField icon={EnvelopeIcon} label="Email" value={profile.email} />
+            <ProfileField
+              icon={PhoneIcon}
+              label="Phone Number"
+              value={profile.phonenumber}
+            />
+            <ProfileField
+              icon={CalendarIcon}
+              label="Date of Birth"
+              value={profile.dateofbirth}
+            />
+            <ProfileField icon={HomeIcon} label="Address" value={profile.address} />
+            <ProfileField icon={MapPinIcon} label="Pin Code" value={profile.pincode} />
+            <ProfileField icon={MapPinIcon} label="State" value={profile.state} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

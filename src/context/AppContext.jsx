@@ -13,6 +13,59 @@ export const AppProvider = ({ children }) => {
     const [role, setRole] = useState("");
     const [rentals, setRentals] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [notificationsOpen, setNotificationsOpen] = useState(false);
+    const [serviceProviderNotifications, setServiceProviderNotifications] = useState([
+        {
+            id: 1,
+            farmerName: "Rajesh Kumar",
+            farmerAvatar: "RK",
+            module: "Rentals",
+            title: "Harvester rental request",
+            detail: "Needs Harvester Prime X9 from 14 Apr to 16 Apr for paddy harvesting in Medchal.",
+        },
+        {
+            id: 2,
+            farmerName: "Venkat Rao",
+            farmerAvatar: "VR",
+            module: "Transport",
+            title: "Truck booking request",
+            detail: "Requested a 12 tonne truck for Hyderabad to Guntur crop movement on 18 Apr.",
+        },
+        {
+            id: 3,
+            farmerName: "Sowmya Naik",
+            farmerAvatar: "SN",
+            module: "Cold Storage",
+            title: "Cold storage booking request",
+            detail: "Wants 4 days of storage for tomatoes with an estimated load of 2.5 tonnes.",
+        },
+        {
+            id: 4,
+            farmerName: "Arjun Patel",
+            farmerAvatar: "AP",
+            module: "Contract Farming",
+            title: "Contract interest message",
+            detail: "Applied for your maize contract with 8 acres in Warangal and asked for input support details.",
+        },
+    ]);
+    const [farmerNotifications, setFarmerNotifications] = useState([
+        {
+            id: 101,
+            providerName: "Srinivasa Cold Storage",
+            providerAvatar: "SC",
+            status: "accepted",
+            title: "Cold storage request accepted",
+            detail: "Your tomato storage request for 14 Apr to 18 Apr was accepted by Srinivasa Cold Storage.",
+        },
+        {
+            id: 102,
+            providerName: "Venkat Logistics",
+            providerAvatar: "VL",
+            status: "rejected",
+            title: "Transport request rejected",
+            detail: "Your reefer van request from Hyderabad to Guntur was rejected due to limited availability.",
+        },
+    ]);
 
 
 
@@ -61,6 +114,34 @@ export const AppProvider = ({ children }) => {
         navigate('/auth');
     }
 
+    const handleProviderNotificationAction = (id, action) => {
+        const notification = serviceProviderNotifications.find((item) => item.id === id);
+        if (!notification) return;
+
+        const nextStatus = action === "accept" ? "accepted" : "rejected";
+        const providerName = user?.name || "Service Provider";
+        const providerAvatar = providerName
+            .split(" ")
+            .map((part) => part[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase();
+
+        setFarmerNotifications((prev) => [
+            {
+                id: Date.now(),
+                providerName,
+                providerAvatar,
+                status: nextStatus,
+                title: `${notification.module} request ${nextStatus}`,
+                detail: `${providerName} ${nextStatus} ${notification.farmerName}'s ${notification.module.toLowerCase()} request.`,
+            },
+            ...prev,
+        ]);
+
+        setServiceProviderNotifications((prev) => prev.filter((item) => item.id !== id));
+    };
+
     useEffect(() => {
         const role = localStorage.getItem('role');
 
@@ -99,6 +180,13 @@ export const AppProvider = ({ children }) => {
         logout,
         isOpen,
         setIsOpen,
+        notificationsOpen,
+        setNotificationsOpen,
+        serviceProviderNotifications,
+        setServiceProviderNotifications,
+        farmerNotifications,
+        setFarmerNotifications,
+        handleProviderNotificationAction,
         axios
     }
 

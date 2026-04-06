@@ -1,6 +1,7 @@
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import SideNav from "../components/SideNav";
 import { UseAppContext } from "../context/AppContext";
+import ModuleHeader from "../components/ModuleHeader";
 import {
     PlusCircleIcon,
     ChevronDownIcon,
@@ -13,6 +14,49 @@ const CROP_OPTIONS     = ["Rice / Paddy","Wheat","Cotton","Maize","Sugarcane","S
 const SEASON_OPTIONS   = ["Kharif 2025","Rabi 2025-26","Zaid 2026","Kharif 2026"];
 const DURATION_OPTIONS = ["1 month","2 months","3 months","4 months","5 months","6 months","1 year","2 years"];
 const PAYMENT_OPTIONS  = ["On delivery","Within 7 days","Within 15 days","Within 30 days","50% advance + 50% on delivery"];
+const SAMPLE_CONTRACTS = [
+    {
+        _id: "sample-1",
+        crop: "Maize",
+        variety: "Hybrid Yellow",
+        company: "AgroCorp India Pvt. Ltd.",
+        region: "Warangal, Telangana",
+        season: "Kharif 2025",
+        minLand: 5,
+        totalLand: 120,
+        farmersNeeded: 18,
+        duration: "6 months",
+        priceMin: 2200,
+        priceMax: 2800,
+        paymentTerms: "Within 15 days",
+        inputSupport: true,
+        status: "Active",
+        applications: [
+            { _id: "a-1", name: "Ramesh Goud", location: "Warangal", experience: "6 years", land: 8, phone: "9876543210", message: "Ready to join this season.", status: "Pending" },
+            { _id: "a-2", name: "Meena Bai", location: "Hanamkonda", experience: "4 years", land: 6, phone: "9988776655", message: "Interested if seed support is included.", status: "Accepted" },
+        ],
+    },
+    {
+        _id: "sample-2",
+        crop: "Chilli",
+        variety: "Teja",
+        company: "FreshRoots Processors",
+        region: "Guntur, Andhra Pradesh",
+        season: "Rabi 2025-26",
+        minLand: 3,
+        totalLand: 60,
+        farmersNeeded: 12,
+        duration: "4 months",
+        priceMin: 5100,
+        priceMax: 5900,
+        paymentTerms: "50% advance + 50% on delivery",
+        inputSupport: false,
+        status: "Active",
+        applications: [
+            { _id: "a-3", name: "Venkatesh Rao", location: "Guntur", experience: "8 years", land: 5, phone: "9123456780", message: "Need quality grade details.", status: "Pending" },
+        ],
+    },
+];
 
 // ─── Farmer Application Row ───────────────────────────────────────────────────
 function ApplicationRow({ app, onDecision }) {
@@ -59,9 +103,10 @@ function ContractFarmingServiceCard({ contract, onDecision, onClose }) {
     const accepted = contract.applications.filter(a => a.status === "Accepted").length;
 
     return (
-        <div className="rounded-xl font-montserrat flex flex-col border-2 border-gold bg-darkgreen/70 w-80">
+        <div className="flex h-full flex-col overflow-hidden rounded-[18px] border bg-black font-montserrat transition-all duration-200 hover:-translate-y-1"
+            style={{ borderColor: "#d4af37", boxShadow: "0 0 0 1px rgba(212, 175, 55, 0.26), 0 12px 28px rgba(0, 0, 0, 0.42)" }}>
             {/* Image area */}
-            <div className="bg-darkgreen rounded-t-xl flex items-center justify-center h-40 relative">
+            <div className="bg-darkgreen rounded-t-xl flex items-center justify-center h-40 relative border-b border-gold/20">
                 <img src="/contractdoc.svg" alt="Contract" className="size-24 opacity-80" />
                 <span className={`absolute top-3 right-3 text-xs font-bold px-3 py-1 rounded-full border ${contract.status === "Active" ? "bg-green-500/20 border-green-400 text-green-400" : "bg-gray-500/20 border-gray-400 text-gray-400"}`}>
                     {contract.status}
@@ -69,7 +114,7 @@ function ContractFarmingServiceCard({ contract, onDecision, onClose }) {
             </div>
 
             {/* Body */}
-            <div className="flex flex-col items-start p-4 text-white bg-darkgreen rounded-b-xl gap-3">
+            <div className="flex flex-col items-start gap-3 bg-black p-4 text-white">
                 {/* Crop + company */}
                 <div className="w-full">
                     <h1 className="text-lg font-bold text-gold">
@@ -166,13 +211,13 @@ function ContractFarmingServiceCard({ contract, onDecision, onClose }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ContractFarmingService() {
-    const { isOpen, axios } = UseAppContext();
-    const addRef = useRef(null);
+    const { isOpen, setIsOpen, axios } = UseAppContext();
 
     const [contracts, setContracts] = useState([]);
     const [loading, setLoading]     = useState(true);
     const [posting, setPosting]     = useState(false);
     const [isEmpty, setIsEmpty]     = useState(false);
+    const [showFormModal, setShowFormModal] = useState(false);
 
     // Form state
     const [fCompany, setFCompany]         = useState("");
@@ -197,13 +242,16 @@ export default function ContractFarmingService() {
         try {
             const { data } = await axios.get("/api/contractfarming/mycontracts");
             if (data.success) {
-                setContracts(data.contracts);
-                setIsEmpty(data.contracts.length === 0);
+                const nextContracts = data.contracts.length > 0 ? data.contracts : SAMPLE_CONTRACTS;
+                setContracts(nextContracts);
+                setIsEmpty(nextContracts.length === 0);
             } else {
-                alert(data.message);
+                setContracts(SAMPLE_CONTRACTS);
+                setIsEmpty(false);
             }
         } catch (error) {
-            alert(error.message);
+            setContracts(SAMPLE_CONTRACTS);
+            setIsEmpty(false);
         } finally {
             setLoading(false);
         }
@@ -230,7 +278,7 @@ export default function ContractFarmingService() {
                 // Add new contract with empty applications to list
                 setContracts(prev => [{ ...data.contract, applications: [] }, ...prev]);
                 setIsEmpty(false);
-                addRef.current.close();
+                setShowFormModal(false);
                 // Reset form
                 setFCompany(""); setFCompanyType(""); setFCrop(""); setFVariety("");
                 setFRegion(""); setFMinLand(""); setFTotalLand(""); setFFarmers("");
@@ -286,7 +334,7 @@ export default function ContractFarmingService() {
         return (
             <>
                 <SideNav />
-                <div className={`flex items-center justify-center h-dvh ${isOpen ? "md:ml-52" : "md:ml-16"}`}>
+                <div className={`flex items-center justify-center h-dvh ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
                     <p className="text-white font-montserrat font-bold text-lg animate-pulse">Loading contracts...</p>
                 </div>
             </>
@@ -299,19 +347,29 @@ export default function ContractFarmingService() {
 
             {isEmpty ? (
                 /* Empty state */
-                <div className={`items-center justify-center h-dvh flex flex-col m-auto gap-6 p-10 text-center ${isOpen ? "md:ml-52" : "md:ml-16"}`}>
+                <div className={`min-h-dvh bg-darkgreen ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
+                    <div className="mx-2 my-4 flex min-h-[calc(100dvh-2rem)] flex-col items-center justify-center gap-6 rounded-[26px] border border-gold/30 bg-black p-10 text-center shadow-2xl md:mx-6">
                     <p className="font-bold text-xl text-white font-montserrat text-wrap">
                         You haven't posted any contracts yet. Get started by adding one.
                     </p>
-                    <button onClick={() => addRef.current.showModal()}
-                        className="group border-2 h-80 w-45 flex flex-col items-center justify-center border-gold hover:text-gold hover:bg-darkgreen/70 text-gold font-bold py-2 px-6 cursor-pointer rounded-xl">
+                    <button onClick={() => setShowFormModal(true)}
+                        className="group flex h-80 w-56 cursor-pointer flex-col items-center justify-center rounded-[18px] border border-dashed border-gold/60 bg-[#050505] text-gold transition hover:-translate-y-1 hover:border-gold hover:bg-[#111111]">
                         <PlusCircleIcon className="size-10 text-gold" />
-                        <p className="font-bold text-gold text-2xl">Add</p>
+                        <p className="mt-3 font-bold text-gold text-2xl">Add</p>
                     </button>
+                    </div>
                 </div>
             ) : (
-                <div className={`${isOpen ? "md:ml-52" : "md:ml-16"}`}>
-                    <div className="flex flex-row flex-wrap items-start justify-center py-4 w-10/12 md:w-11/12 gap-8 m-auto">
+                <div className={`min-h-dvh bg-darkgreen ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
+                    <div className="mx-2 my-4 overflow-hidden rounded-[26px] border border-gold/30 bg-darkgreen font-montserrat shadow-2xl md:mx-6">
+                        <ModuleHeader
+                            title="Contract Management"
+                            search=""
+                            onSearchChange={() => {}}
+                            onOpenSidebar={() => setIsOpen(!isOpen)}
+                        />
+                    <div className="bg-[#081D0C] p-6">
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px]">
                         {contracts.map(c => (
                             <ContractFarmingServiceCard
                                 key={c._id}
@@ -320,27 +378,62 @@ export default function ContractFarmingService() {
                                 onClose={handleClose}
                             />
                         ))}
-                        <button onClick={() => addRef.current.showModal()}
-                            className="flex flex-col items-center justify-center border-2 border-gold cursor-pointer hover:bg-darkgreen/70 rounded-xl h-80 w-80 gap-2 transition-all ease-in duration-150">
+                        <button onClick={() => setShowFormModal(true)}
+                            className="flex min-h-[360px] cursor-pointer flex-col items-center justify-center rounded-[18px] border border-dashed border-gold/60 bg-[#050505] transition hover:-translate-y-1 hover:border-gold hover:bg-[#111111]">
                             <PlusCircleIcon className="size-10 text-gold" />
                             <p className="font-bold text-gold text-xl font-montserrat">Post a Contract</p>
                         </button>
                     </div>
+                    </div>
+                    </div>
                 </div>
             )}
 
-            {/* Post Contract dialog */}
-            <dialog ref={addRef} className="m-auto p-6 rounded-xl bg-darkgreen border-2 border-gold backdrop:backdrop-blur-sm w-full max-w-lg max-h-[90vh] overflow-y-auto font-montserrat">
-                <div className="flex flex-row items-center justify-between mb-4 pb-3 border-b border-gold/30">
+            {showFormModal && (
+            <div
+                style={{
+                    position: "fixed",
+                    inset: 0,
+                    background: "rgba(0, 0, 0, 0.76)",
+                    backdropFilter: "blur(6px)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "20px",
+                    zIndex: 300,
+                }}
+                onClick={() => !posting && setShowFormModal(false)}
+            >
+            <div
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                    width: "min(860px, 100%)",
+                    maxHeight: "min(88vh, 920px)",
+                    overflow: "auto",
+                    background: "#000000",
+                    border: "1px solid rgba(212, 175, 55, 0.32)",
+                    borderRadius: "22px",
+                    boxShadow: "0 24px 60px rgba(0, 0, 0, 0.5)",
+                    fontFamily: "'Montserrat', sans-serif",
+                }}
+            >
+                <div style={{ background: "#000000", borderBottom: "1px solid rgba(212, 175, 55, 0.22)", padding: "14px 24px" }}>
+                <div className="flex flex-row items-center justify-between gap-4">
                     <div>
                         <h2 className="text-gold font-black text-lg">Post a New Contract</h2>
                         <p className="text-white/50 text-sm">Farmers will see and apply to this listing</p>
                     </div>
-                    <button type="button" onClick={() => addRef.current.close()}>
+                    <button type="button" onClick={() => !posting && setShowFormModal(false)}>
                         <XCircleIcon className="size-8 cursor-pointer text-white hover:rotate-90 hover:text-red-500 transition-all ease-in duration-200" />
                     </button>
                 </div>
+                </div>
 
+                <div className="bg-[#081D0C] p-6">
+                <div className="mx-auto max-w-4xl rounded-[18px] border border-gold/20 bg-black/20 p-6">
+                <div className="mb-5 text-sm text-white/60">
+                    Fill the basic details for your contract listing so farmers can understand crop, pricing, land requirements, and payment terms at a glance.
+                </div>
                 <div className="flex flex-col gap-4">
                     {[
                         ["Company Name *", fCompany, setFCompany, "text", "e.g. AgroCorp India Pvt. Ltd."],
@@ -398,7 +491,7 @@ export default function ContractFarmingService() {
                     </div>
 
                     <div className="flex flex-row gap-3 mt-2 text-center">
-                        <button type="button" onClick={() => addRef.current.close()}
+                        <button type="button" onClick={() => setShowFormModal(false)}
                             className="flex-1 p-2 px-4 rounded-lg border-2 border-gold text-gold hover:bg-gold hover:text-darkgreen cursor-pointer font-bold transition-all ease-in duration-150">
                             Cancel
                         </button>
@@ -408,7 +501,11 @@ export default function ContractFarmingService() {
                         </button>
                     </div>
                 </div>
-            </dialog>
+                </div>
+                </div>
+            </div>
+            </div>
+            )}
         </>
     );
 }

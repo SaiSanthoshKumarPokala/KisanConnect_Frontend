@@ -1,18 +1,12 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import SideNav from "../components/SideNav";
 import { UseAppContext } from "../context/AppContext";
+import ModuleHeader from "../components/ModuleHeader";
 import {
-    MagnifyingGlassIcon,
-    MapPinIcon,
     ChevronDownIcon,
     CheckCircleIcon,
     XCircleIcon,
 } from "@heroicons/react/24/outline";
-import { FunnelIcon } from "@heroicons/react/24/solid";
-
-const CROPS = ["All Crops", "Rice / Paddy", "Wheat", "Cotton", "Maize", "Sugarcane", "Groundnut", "Turmeric", "Chilli", "Tomato", "Other"];
-const REGIONS = ["All Regions", "Telangana", "Andhra Pradesh", "Karnataka", "Maharashtra", "Tamil Nadu", "Odisha", "Punjab", "Haryana"];
-const SEASONS = ["All Seasons", "Kharif 2025", "Rabi 2025-26", "Zaid 2026", "Kharif 2026"];
 
 // ─── My Application Row ───────────────────────────────────────────────────────
 function MyApplicationRow({ app }) {
@@ -51,9 +45,10 @@ function ContractFarmingCard({ contract, applied, onApply }) {
         : 0;
 
     return (
-        <div className="rounded-xl font-montserrat flex flex-col border-2 border-gold bg-darkgreen/70 min-w-72 max-w-80">
+        <div className="flex h-full flex-col overflow-hidden rounded-[18px] border bg-black font-montserrat transition-all duration-200 hover:-translate-y-1"
+            style={{ borderColor: "#d4af37", boxShadow: "0 0 0 1px rgba(212, 175, 55, 0.26), 0 12px 28px rgba(0, 0, 0, 0.42)" }}>
             {/* Image area */}
-            <div className="bg-darkgreen rounded-t-xl flex items-center justify-center h-40 relative">
+            <div className="bg-darkgreen rounded-t-xl flex items-center justify-center h-40 relative border-b border-gold/20">
                 <img src="/contractdoc.svg" alt="Contract" className="size-24 opacity-80" />
                 <span className="absolute top-3 right-3 bg-green-500/20 border border-green-400 text-green-400 text-xs font-bold px-3 py-1 rounded-full">
                     {contract.status}
@@ -61,7 +56,7 @@ function ContractFarmingCard({ contract, applied, onApply }) {
             </div>
 
             {/* Body */}
-            <div className="flex flex-col items-start justify-evenly p-4 text-white bg-darkgreen rounded-b-xl gap-2">
+            <div className="flex flex-col items-start justify-evenly gap-3 bg-black p-4 text-white">
                 {/* Crop + company */}
                 <div>
                     <h1 className="text-lg font-bold text-gold">
@@ -123,7 +118,7 @@ function ContractFarmingCard({ contract, applied, onApply }) {
                 </button>
 
                 {showDetails && (
-                    <div className="w-full bg-black/30 border border-gold/20 rounded-lg p-3 text-xs text-white/60 space-y-2">
+                    <div className="w-full bg-[#050505] border border-gold/20 rounded-lg p-3 text-xs text-white/60 space-y-2">
                         <div>
                             <p className="text-gold font-bold uppercase tracking-wider text-[10px] mb-1">Quality Standards</p>
                             <p>{contract.qualityStd || "Not specified"}</p>
@@ -155,7 +150,7 @@ function ContractFarmingCard({ contract, applied, onApply }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ContractFarming() {
-    const { isOpen, axios } = UseAppContext();
+    const { isOpen, setIsOpen, axios } = UseAppContext();
     const applyRef = useRef(null);
 
     const [contracts, setContracts] = useState([]);
@@ -164,13 +159,9 @@ export default function ContractFarming() {
     const [submitting, setSubmitting] = useState(false);
     const [targetContract, setTargetContract] = useState(null);
     const [applied, setApplied] = useState(false);
-    const [showFilters, setShowFilters] = useState(true);
 
     // Filters
     const [search, setSearch] = useState("");
-    const [cropFilter, setCropFilter] = useState("All Crops");
-    const [regionFilter, setRegionFilter] = useState("All Regions");
-    const [seasonFilter, setSeasonFilter] = useState("All Seasons");
 
     // Application form state
     const [fName, setFName] = useState("");
@@ -267,11 +258,8 @@ export default function ContractFarming() {
                 c.company.toLowerCase().includes(search.toLowerCase()) ||
                 c.region.toLowerCase().includes(search.toLowerCase())
             );
-        if (cropFilter !== "All Crops") list = list.filter(c => c.crop === cropFilter);
-        if (regionFilter !== "All Regions") list = list.filter(c => c.region.includes(regionFilter));
-        if (seasonFilter !== "All Seasons") list = list.filter(c => c.season === seasonFilter);
         return list;
-    }, [contracts, search, cropFilter, regionFilter, seasonFilter]);
+    }, [contracts, search]);
 
     if (loading) {
         return (
@@ -286,69 +274,37 @@ export default function ContractFarming() {
 
     return (
         <>
-            {/* Mobile filter toggle */}
-            <button
-                className="flex md:hidden flex-row gap-1 cursor-pointer items-center bg-linear-to-br from-gold to-yellow-200 border border-black p-2 rounded-full bottom-2 left-2 fixed z-50"
-                onClick={() => setShowFilters(!showFilters)}
-            >
-                <FunnelIcon className="stroke-2 size-6 stroke-darkgreen fill-darkgreen" />
-                <p>Filters</p>
-            </button>
-
             <SideNav />
 
-            <div className={`flex flex-col ${isOpen ? "md:ml-52" : "md:ml-16"}`}>
+            <div className={`flex min-h-dvh flex-col bg-darkgreen transition-all duration-300 ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
+                <div className="my-4 mr-2 ml-0 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mr-6 md:ml-2">
+                    <ModuleHeader
+                        title="Contract Farming"
+                        search={search}
+                        onSearchChange={setSearch}
+                        onOpenSidebar={() => setIsOpen(!isOpen)}
+                    />
 
-                {/* Filter bar */}
-                {showFilters && (
-                    <div className="filters md:sticky md:top-0 w-full h-fit m-auto bg-linear-to-r from-gold to-yellow-200 border-b border-darkgreen">
-                        <div className="flex flex-row flex-wrap w-11/12 h-fit m-auto rounded-md items-center my-4 gap-2 justify-center">
-                            <div className="flex flex-row gap-1 items-center bg-white border border-black p-2 rounded-full">
-                                <MagnifyingGlassIcon className="size-5 stroke-2 stroke-gold" />
-                                <input type="search" placeholder="Search crop, company..."
-                                    className="focus:outline-0 font-normal text-black w-36"
-                                    value={search} onChange={e => setSearch(e.target.value)} />
+                    {/* My Applications section */}
+                    {myApplications.length > 0 && (
+                        <div className="mx-6 my-4">
+                            <div className="overflow-hidden rounded-[18px] border border-gold/30 font-montserrat bg-black">
+                                <div className="flex items-center justify-between border-b border-gold/20 bg-[#050505] px-5 py-4">
+                                    <p className="text-white font-black text-sm uppercase tracking-widest">My Applications</p>
+                                    <span className="text-gold text-xs font-bold">{myApplications.length} submitted</span>
                             </div>
-                            <div className="flex flex-row gap-1 items-center bg-white border border-black p-2 rounded-full">
-                                <select className="focus:outline-0 font-normal text-black" value={cropFilter} onChange={e => setCropFilter(e.target.value)}>
-                                    {CROPS.map(c => <option key={c}>{c}</option>)}
-                                </select>
-                            </div>
-                            <div className="flex flex-row gap-1 items-center bg-white border border-black p-2 rounded-full">
-                                <MapPinIcon className="size-5 stroke-2 stroke-gold" />
-                                <select className="focus:outline-0 font-normal text-black" value={regionFilter} onChange={e => setRegionFilter(e.target.value)}>
-                                    {REGIONS.map(r => <option key={r}>{r}</option>)}
-                                </select>
-                            </div>
-                            <div className="flex flex-row gap-1 items-center bg-white border border-black p-2 rounded-full">
-                                <select className="focus:outline-0 font-normal text-black" value={seasonFilter} onChange={e => setSeasonFilter(e.target.value)}>
-                                    {SEASONS.map(s => <option key={s}>{s}</option>)}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* My Applications section */}
-                {myApplications.length > 0 && (
-                    <div className="w-11/12 m-auto my-4">
-                        <div className="border-2 border-gold rounded-xl overflow-hidden font-montserrat">
-                            <div className="bg-gold px-5 py-3 flex items-center justify-between">
-                                <p className="text-darkgreen font-black text-sm uppercase tracking-widest">My Applications</p>
-                                <span className="text-darkgreen text-xs font-bold">{myApplications.length} submitted</span>
-                            </div>
-                            <div className="bg-darkgreen/70">
+                                <div className="bg-black">
                                 {myApplications.map(app => (
                                     <MyApplicationRow key={app._id} app={app} />
                                 ))}
                             </div>
                         </div>
                     </div>
-                )}
+                    )}
 
-                {/* Contracts grid */}
-                {filtered.length > 0 ? (
-                    <div className="flex flex-row flex-wrap items-center justify-center w-10/12 md:w-11/12 gap-8 m-auto my-4">
+                    {/* Contracts grid */}
+                    {filtered.length > 0 ? (
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px] p-6">
                         {filtered.map(c => (
                             <ContractFarmingCard
                                 key={c._id}
@@ -357,19 +313,20 @@ export default function ContractFarming() {
                                 onApply={handleOpenApply}
                             />
                         ))}
-                    </div>
-                ) : (
-                    <div className="flex flex-col items-center justify-center h-64 gap-4 text-center w-11/12 m-auto my-8">
+                        </div>
+                    ) : (
+                        <div className="flex h-64 flex-col items-center justify-center gap-4 px-6 text-center">
                         <img src="/contractdoc.svg" alt="" className="size-16 opacity-20" />
                         <p className="text-white/50 font-montserrat font-bold text-lg">No contracts match your filters</p>
                         <button
-                            onClick={() => { setSearch(""); setCropFilter("All Crops"); setRegionFilter("All Regions"); setSeasonFilter("All Seasons"); }}
+                            onClick={() => { setSearch(""); }}
                             className="text-gold underline underline-offset-4 font-semibold text-sm cursor-pointer"
                         >
-                            Clear all filters
+                            Clear search
                         </button>
                     </div>
-                )}
+                    )}
+                </div>
             </div>
 
             {/* Apply dialog */}
