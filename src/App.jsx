@@ -1,11 +1,9 @@
-import { useState, useLayoutEffect, useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import './App.css';
 import './index.css';
-import { AppContext, RoleContext, SidenavContext } from './context/Contexts';
 import { AppProvider, UseAppContext } from './context/AppContext';
-import NavBar from './components/NavBar';
 import Authentication from './pages/Authentication';
-import { Routes, Route, useLocation } from 'react-router';
+import { Routes, Route, useLocation, Navigate } from 'react-router';
 import UserInfo from './pages/UserInfo';
 import Services from './pages/Services';
 import Shop from './pages/Shop';
@@ -23,14 +21,14 @@ import GoUp from './components/GoUp';
 import FProfile from './pages/FProfile';
 import SPProfile from './pages/SPProfile';
 import ContractFarming from './pages/ContractFarming';
-import ContractFarming2 from './pages/ContractFarming_2';
 import ContractFarmingService from './pages/ContractFarmingService';
 import FarmerStorageListing from './pages/FarmerStorageListing';
 import ServiceProviderStorageListing from './pages/ServiceProviderStorageListing';
 import NotificationPanel from './components/NotificationPanel';
 import Cart from './pages/Cart';
 import Marketplace from './pages/Marketplace';
-
+import AIToolkit from './pages/AIToolkit';
+import Bookings from './pages/Bookings';
 
 const Wrapper = ({ children }) => {
 	const location = useLocation();
@@ -43,11 +41,13 @@ const Wrapper = ({ children }) => {
 	return children;
 };
 
-
+const AIToolkitRedirect = () => {
+	const { role } = UseAppContext();
+	const fallbackRole = role || localStorage.getItem('role') || 'farmer';
+	return <Navigate to={`/${fallbackRole}/aitoolkit`} replace />;
+};
 
 export default function App() {
-	
-
 	return (
 		<>
 			<Wrapper>
@@ -57,6 +57,7 @@ export default function App() {
 						<Route path='/auth' element={<Authentication />} />
 						<Route path='/role' element={<Role />} />
 						<Route path='/userinfo' element={<UserInfo />} />
+						<Route path='/aitoolkit' element={<AIToolkitRedirect />} />
 						<Route path='/services' element={<Services />} />
 						<Route path='/filters' element={<Filters />} />
 						<Route path='/farmer'>
@@ -67,8 +68,10 @@ export default function App() {
 							<Route path='/farmer/transport' element={<Transport />} />
 							<Route path='/farmer/coldstorage' element={<FarmerStorageListing />} />
 							<Route path='/farmer/cart' element={<Cart />} />
+							<Route path='/farmer/bookings' element={<Bookings />} />
 							<Route path='/farmer/profile' element={<FProfile />} />
 							<Route path='/farmer/contract' element={<ContractFarming />} />
+							<Route path='/farmer/aitoolkit' element={<AIToolkit />} />
 						</Route>
 						<Route path='/serviceprovider'>
 							<Route index element={<Dashboard />} />
@@ -78,8 +81,10 @@ export default function App() {
 							<Route path='/serviceprovider/marketplace' element={<Marketplace />} />
 							<Route path='/serviceprovider/coldstorage' element={<ServiceProviderStorageListing />} />
 							<Route path='/serviceprovider/cart' element={<Cart />} />
+							<Route path='/serviceprovider/bookings' element={<Bookings />} />
 							<Route path='/serviceprovider/profile' element={<SPProfile />} />
 							<Route path='/serviceprovider/contract' element={<ContractFarmingService/>} />
+							<Route path='/serviceprovider/aitoolkit' element={<AIToolkit />} />
 						</Route>
 						<Route path='*' element={<NotFound />} />
 					</Routes>

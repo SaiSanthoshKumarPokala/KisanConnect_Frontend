@@ -23,86 +23,97 @@ const SHOP_UI_DATA = [
     _id: "ui-1",
     name: "Premium Urea",
     seller: "GreenLeaf Agro Store",
+    location: "Kompally, Hyderabad",
     price: 500,
     rating: 4.6,
+    reviewCount: "2,264",
     category: "Fertilizers",
     state: "telangana",
     image: "/urea.png",
-    description: "Balanced nitrogen support for strong vegetative crop growth.",
+    description: "Balanced nitrogen support for strong vegetative crop growth. Farmers generally rely on this product when they want a familiar, effective nutrient option that supports leaf development and overall crop vigor during important growth stages.",
     availability: "Available",
   },
   {
     _id: "ui-2",
     name: "Hybrid Paddy Seeds",
     seller: "Kisan Seed House",
+    location: "Guntur, Andhra Pradesh",
     price: 820,
     rating: 4.8,
+    reviewCount: "3,048",
     category: "Seeds",
     state: "andhra pradesh",
     image: "/seeds.webp",
-    description: "High-yield seed variety suited for strong germination rates.",
+    description: "High-yield seed variety suited for strong germination rates. It is commonly selected by growers looking for better field establishment, more confident early crop growth, and a seed option with dependable planting performance.",
     availability: "Available",
   },
   {
     _id: "ui-3",
     name: "Crop Shield Pesticide",
     seller: "Agri Protect",
+    location: "Nashik, Maharashtra",
     price: 680,
     rating: 4.4,
+    reviewCount: "1,614",
     category: "Pesticides",
     state: "maharashtra",
     image: "/fertilizers.png",
-    description: "Protective treatment for common seasonal pest pressure.",
+    description: "Protective treatment for common seasonal pest pressure. This product is useful when crops begin facing recurring pest stress and farmers want a practical control option that supports more stable field conditions over time.",
     availability: "Out of Stock",
   },
   {
     _id: "ui-4",
     name: "Power Sprayer Kit",
     seller: "Field Tools Hub",
+    location: "Mysuru, Karnataka",
     price: 2450,
     rating: 4.5,
+    reviewCount: "1,982",
     category: "Equipment",
     state: "karnataka",
     image: "/shop.avif",
-    description: "Durable spraying setup for field care and quick application cycles.",
+    description: "Durable spraying setup for field care and quick application cycles. It helps farmers cover ground efficiently when repeated spray rounds are needed and a dependable field-use tool matters as much as speed.",
     availability: "Available",
   },
   {
     _id: "ui-5",
     name: "Organic Soil Booster",
     seller: "Nature Root Supplies",
+    location: "Thrissur, Kerala",
     price: 740,
     rating: 4.7,
+    reviewCount: "2,571",
     category: "Fertilizers",
     state: "kerala",
     image: "/fertilizers.svg",
-    description: "Organic nutrient blend for healthier soil structure and recovery.",
+    description: "Organic nutrient blend for healthier soil structure and recovery. It is a strong choice when the goal is to improve soil condition gradually while still supporting crop performance through a more balanced feeding approach.",
     availability: "Booked",
   },
   {
     _id: "ui-6",
     name: "Vegetable Seed Pack",
     seller: "FreshGrow Traders",
+    location: "Warangal, Telangana",
     price: 360,
     rating: 4.3,
+    reviewCount: "1,246",
     category: "Seeds",
     state: "telangana",
     image: "/seeds.webp",
-    description: "Mixed seed pack for kitchen-garden and market crop planting.",
+    description: "Mixed seed pack for kitchen-garden and market crop planting. Farmers and small growers often pick this when they want variety, flexibility, and a practical starting set for more diverse planting plans.",
     availability: "Available",
   },
 ];
 
 export default function Shop() {
   const location = useLocation();
-  const { isOpen, setIsOpen } = UseAppContext();
+  const { isOpen, setIsOpen, addBooking } = UseAppContext();
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
-  const [showBooked, setShowBooked] = useState(false);
   const [products] = useState([]);
   const filters = ["All", "Fertilizers", "Seeds", "Pesticides", "Equipment"];
   const isFarmerRoute = location.pathname.startsWith("/farmer");
-  const pageTitle = isFarmerRoute ? "Agri Marketplace" : "Shop Marketplace";
+  const pageTitle = "Shop";
   const cartEnabled = location.pathname.startsWith("/farmer") || location.pathname.startsWith("/serviceprovider");
 
   const [selectedItem, setSelectedItem] = useState(null);
@@ -139,6 +150,16 @@ export default function Shop() {
       return;
     }
 
+    addBooking({
+      module: "Shop",
+      itemName: selectedItem.name,
+      providerName: selectedItem.seller,
+      image: selectedItem.image,
+      priceLabel: `₹${selectedItem.price} / unit`,
+      summary: `${bookingForm.quantity} requested • ${bookingForm.deliveryAddress}`,
+      notificationTitle: "Shop purchase request",
+      notificationDetail: `${selectedItem.name} purchase request placed for ${bookingForm.quantity}.`,
+    });
     window.alert(`Purchase request for ${selectedItem.name} sent successfully to ${selectedItem.seller}.`);
     setActiveDetailTab("about");
     resetBookingForm();
@@ -157,17 +178,12 @@ export default function Shop() {
         item.description.toLowerCase().includes(query);
       const matchesCategory = activeFilter === "All" || item.category === activeFilter;
       
-      const isItemBooked = item.availability === "Booked" || item.availability === "Out of Stock";
-      const matchesBooked = showBooked ? isItemBooked : true;
-
-      return matchesSearch && matchesCategory && matchesBooked;
+      return matchesSearch && matchesCategory;
     });
-  }, [displayProducts, activeFilter, search, showBooked]);
+  }, [displayProducts, activeFilter, search]);
 
   const resultLabel =
     activeFilter === "All" ? "showing all products" : `showing ${activeFilter.toLowerCase()}`;
-  const bookedLabel = showBooked ? "(Out of Stock/Booked)" : "";
-
   return (
     <>
       <style>{`
@@ -203,7 +219,7 @@ export default function Shop() {
           .kc-booking-grid { grid-template-columns: 1fr; }
         }
       `}</style>
-      <div className="min-h-dvh bg-darkgreen">
+      <div className="min-h-dvh bg-black">
         <SideNav />
         <div
         className={`flex min-h-dvh flex-col transition-all duration-300 ${
@@ -221,8 +237,6 @@ export default function Shop() {
             filters={filters}
             activeFilter={activeFilter}
             setActiveFilter={setActiveFilter}
-            showBooked={showBooked}
-            setShowBooked={setShowBooked}
           />
 
           <div className="flex flex-wrap items-center gap-2 px-6 pt-4">
@@ -230,7 +244,7 @@ export default function Shop() {
               {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""} found
             </span>
             <span className="font-montserrat text-xs text-white/60">
-              . {resultLabel} {bookedLabel}
+              . {resultLabel}
             </span>
             {search.trim() && (
               <span className="font-montserrat text-xs text-[#FFF085]">
@@ -250,8 +264,10 @@ export default function Shop() {
                   key={item._id}
                   name={item.name}
                   seller={item.seller}
+                  location={item.location}
                   price={item.price}
                   rating={item.rating}
+                  reviewCount={item.reviewCount}
                   category={item.category}
                   image={item.image}
                   description={item.description}
@@ -368,9 +384,9 @@ export default function Shop() {
                     <div style={{ color: "#E7C957", fontWeight: 700, fontSize: 16, marginBottom: 8 }}>
                       About This Product
                     </div>
-                    <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, lineHeight: 1.7 }}>
-                      {selectedItem.description}
-                    </div>
+                        <div style={{ color: "rgba(255,255,255,0.86)", fontSize: 15, lineHeight: 1.85 }}>
+                          {selectedItem.description}
+                        </div>
                   </div>
                 </div>
               )}
@@ -489,8 +505,8 @@ export default function Shop() {
                         <div style={{ color: "#FFF085", fontSize: 18, fontWeight: 800 }}>
                           Purchase Details
                         </div>
-                        <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 4 }}>
-                          Define quantity and delivery address to purchase this product.
+                        <div style={{ color: "rgba(255,255,255,0.72)", fontSize: 14, marginTop: 6, lineHeight: 1.75 }}>
+                          Provide the quantity you want, the contact number for delivery coordination, and the complete drop address so the seller can review your order request properly. Clear instructions here make it easier for the provider to confirm stock readiness, packaging expectations, and dispatch planning without unnecessary back-and-forth.
                         </div>
                       </div>
 

@@ -1,13 +1,11 @@
-export default function ModuleFilters({ filters, activeFilter, setActiveFilter, showBooked, setShowBooked }) {
-  const bookedToggleVisible = typeof showBooked === "boolean" && typeof setShowBooked === "function";
-
+export default function ModuleFilters({ filters, activeFilter, setActiveFilter }) {
   return (
     <div
       className="kc-filters-pad w-full"
       style={{
         background: "#000000",
         borderTop: "1px solid rgba(212, 175, 55, 0.18)",
-        borderBottom: "1px solid rgba(212, 175, 55, 0.28)",
+        borderBottom: "none",
         padding: "11px 24px",
         display: "flex",
         alignItems: "center",
@@ -56,28 +54,6 @@ export default function ModuleFilters({ filters, activeFilter, setActiveFilter, 
         ))}
       </div>
 
-      {bookedToggleVisible && (
-        <div style={{ flexShrink: 0 }}>
-          <button
-            onClick={() => setShowBooked(!showBooked)}
-            style={{
-              border: showBooked ? "1px solid #D4AF37" : "1px solid rgba(212, 175, 55, 0.3)",
-              borderRadius: 999,
-              padding: "8px 20px",
-              background: showBooked ? "rgba(212, 175, 55, 0.15)" : "rgba(255,255,255,0.05)",
-              color: showBooked ? "#FFF085" : "#ffffff",
-              fontSize: 13,
-              fontWeight: 700,
-              fontFamily: "'Montserrat', sans-serif",
-              cursor: "pointer",
-              transition: "all 0.18s ease",
-              boxShadow: showBooked ? "0 0 12px rgba(212, 175, 55, 0.2) inset" : "none",
-            }}
-          >
-            {showBooked ? "Show All" : "Booked"}
-          </button>
-        </div>
-      )}
     </div>
   );
 }

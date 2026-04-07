@@ -2,16 +2,7 @@ import { useState } from "react";
 import { farmerStorageTheme as C } from "./farmerStorageTheme";
 import ModuleHeader from "./ModuleHeader";
 import ModuleFilters from "./ModuleFilters";
-
-function Stars({ rating }) {
-  return (
-    <span style={{ color: C.gold, fontSize: 12, letterSpacing: 1 }}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <span key={i} style={{ opacity: i <= Math.round(rating) ? 1 : 0.2 }}>*</span>
-      ))}
-    </span>
-  );
-}
+import { UseAppContext } from "../context/AppContext";
 
 function StatusBadge({ status }) {
   const cfg = {
@@ -144,11 +135,14 @@ function StorageCard({ storage, onViewDetails }) {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "auto", paddingTop: 2 }}>
-          <div>
-            <Stars rating={storage.rating} />
-            <div style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>
-              {storage.rating} reviews: {storage.reviews}
-            </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+            <span style={{ color: "#ffffff", fontWeight: 700 }}>Reviews:</span>
+            <span style={{ color: C.goldLight, fontWeight: 700 }}>{storage.rating}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill={C.goldLight} aria-hidden="true">
+              <path d="M12 2.8l2.84 5.75 6.34.92-4.59 4.47 1.08 6.32L12 17.28l-5.67 2.98 1.08-6.32L2.82 9.47l6.34-.92L12 2.8z" />
+            </svg>
+            <span style={{ color: C.textMuted }}>|</span>
+            <span style={{ color: C.textSub }}>{storage.reviews}</span>
           </div>
 
           <div style={{ display: "flex", gap: "8px" }}>
@@ -204,6 +198,7 @@ export default function FarmerStorageContent({
   setSortBy,
   onOpenSidebar,
 }) {
+  const { addBooking } = UseAppContext();
   const [selectedStorage, setSelectedStorage] = useState(null);
   const [activeImage, setActiveImage] = useState(null);
   const [bookHover, setBookHover] = useState(false);
@@ -258,6 +253,16 @@ export default function FarmerStorageContent({
       return;
     }
 
+    addBooking({
+      module: "Cold Storage",
+      itemName: selectedStorage.name,
+      providerName: selectedStorage.owner,
+      image: selectedStorage.image,
+      priceLabel: `₹${selectedStorage.price} / day / ton`,
+      summary: `${bookingForm.cropName} • ${bookingForm.estimatedWeight} • ${bookingForm.startDate} to ${bookingForm.endDate}`,
+      notificationTitle: "Cold storage booking request",
+      notificationDetail: `${bookingForm.cropName} storage request for ${selectedStorage.name} from ${bookingForm.startDate} to ${bookingForm.endDate}.`,
+    });
     window.alert(`Booking request sent successfully to ${selectedStorage.owner} for ${selectedStorage.name}.`);
     setActiveDetailTab("about");
     resetBookingForm();
@@ -630,9 +635,12 @@ export default function FarmerStorageContent({
                       <StatusBadge status={selectedStorage.status} />
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                      <Stars rating={selectedStorage.rating} />
-                      <span style={{ color: "#ffffff", fontWeight: 700, fontSize: 14 }}>{selectedStorage.rating}</span>
-                      <span style={{ color: C.textMuted, fontSize: 13 }}>from {selectedStorage.reviews} reviews</span>
+                      <span style={{ color: "#ffffff", fontWeight: 700, fontSize: 14 }}>Reviews:</span>
+                      <span style={{ color: C.goldLight, fontWeight: 700, fontSize: 14 }}>{selectedStorage.rating}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill={C.goldLight} aria-hidden="true">
+                        <path d="M12 2.8l2.84 5.75 6.34.92-4.59 4.47 1.08 6.32L12 17.28l-5.67 2.98 1.08-6.32L2.82 9.47l6.34-.92L12 2.8z" />
+                      </svg>
+                      <span style={{ color: C.textMuted, fontSize: 13 }}>| {selectedStorage.reviews}</span>
                     </div>
                     <div style={{ color: C.textSub, fontSize: 14, lineHeight: 1.6 }}>
                       Best suited for: {selectedStorage.produce}

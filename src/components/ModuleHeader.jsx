@@ -19,6 +19,8 @@ function getSearchPlaceholder(title, role) {
     "serviceprovider:contract management": "Search your contract postings...",
     "farmer:saved cart": "Search saved items in your cart...",
     "serviceprovider:saved cart": "Search saved items in your cart...",
+    "farmer:bookings": "Search your bookings...",
+    "serviceprovider:bookings": "Search your bookings...",
     "farmer:my shop": "Search your shop products...",
   };
 
@@ -61,8 +63,8 @@ export default function ModuleHeader({
     <header
       className="kc-header-pad w-full"
       style={{
-        background: C.bgCard,
-        borderBottom: `1px solid ${C.border}`,
+        background: "#000000",
+        borderBottom: `1px solid rgba(212, 175, 55, 0.18)`,
         padding: "14px 24px",
         flexShrink: 0,
       }}
@@ -154,6 +156,25 @@ export default function ModuleHeader({
           </div>
 
           <div className="flex gap-2" style={{ position: "relative", flexShrink: 0 }}>
+            <button
+              onClick={() => navigate(`/${effectiveRole}/bookings`)}
+              title="Booked items"
+              style={{
+                position: "relative",
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                border: `1px solid ${C.border}`,
+                background: "#000000",
+                color: "#E7C957",
+                cursor: "pointer",
+              }}
+            >
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style={{ margin: "auto" }}>
+                <path d="M7 4.5h10A1.5 1.5 0 0 1 18.5 6v14l-6.5-3-6.5 3V6A1.5 1.5 0 0 1 7 4.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+              </svg>
+            </button>
+
             {showCartButton && (
               <button
                 onClick={() => {

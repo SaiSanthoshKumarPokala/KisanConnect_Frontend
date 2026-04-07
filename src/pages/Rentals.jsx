@@ -32,9 +32,10 @@ const RENTALS_UI_DATA = [
     price: 2200,
     horsepower: 47,
     rating: 4.8,
+    reviewCount: "2,168",
     owner: "Rajesh Kumar",
     availability: "Available",
-    description: "Reliable tractor for ploughing, haulage, and long field days.",
+    description: "Reliable tractor for ploughing, haulage, and long field days. Farmers usually choose this machine when they want a steady combination of field strength, practical handling, and dependable performance across repeated daily work like tilling, pulling, and general transport support.",
     image: image1,
   },
   {
@@ -46,9 +47,10 @@ const RENTALS_UI_DATA = [
     price: 2600,
     horsepower: 55,
     rating: 4.7,
+    reviewCount: "1,842",
     owner: "Venkat Rao",
     availability: "Available",
-    description: "High-torque machine suited for heavier tilling and transport work.",
+    description: "High-torque machine suited for heavier tilling and transport work. It is especially useful on larger plots where stronger pulling power, stable field movement, and better long-hour performance matter during busy seasonal operations.",
     image: image2,
   },
   {
@@ -60,9 +62,10 @@ const RENTALS_UI_DATA = [
     price: 5400,
     horsepower: 98,
     rating: 4.9,
+    reviewCount: "3,106",
     owner: "Meera Agro Infra",
     availability: "Booked",
-    description: "Fast, clean harvesting support for peak-season grain and paddy work.",
+    description: "Fast, clean harvesting support for peak-season grain and paddy work. This option is often preferred by growers who want quicker turnaround during harvest windows while keeping crop handling efficient and reducing labor pressure on the field.",
     image: image3,
   },
   {
@@ -74,9 +77,10 @@ const RENTALS_UI_DATA = [
     price: 4900,
     horsepower: 88,
     rating: 4.5,
+    reviewCount: "1,265",
     owner: "Arjun Patel",
     availability: "Limited",
-    description: "Compact harvester that handles medium-size farms with ease.",
+    description: "Compact harvester that handles medium-size farms with ease. It works well for farmers who want practical harvesting help on moderate acreage without stepping up to a much larger or more expensive machine.",
     image: image4,
   },
   {
@@ -88,9 +92,10 @@ const RENTALS_UI_DATA = [
     price: 1400,
     horsepower: 28,
     rating: 4.6,
+    reviewCount: "1,908",
     owner: "Sowmya Naik",
     availability: "Available",
-    description: "Uniform row sowing with quick setup for busy planting schedules.",
+    description: "Uniform row sowing with quick setup for busy planting schedules. The machine is a strong fit when timely planting matters because it helps maintain row consistency while reducing manual effort at the start of the season.",
     image: image5,
   },
   {
@@ -102,18 +107,18 @@ const RENTALS_UI_DATA = [
     price: 1100,
     horsepower: 24,
     rating: 4.4,
+    reviewCount: "1,122",
     owner: "Naveen Goud",
     availability: "Available",
-    description: "Budget-friendly option for rapid soil preparation before planting.",
+    description: "Budget-friendly option for rapid soil preparation before planting. It is commonly selected for routine pre-sowing work where the goal is to prepare land quickly, keep cost manageable, and still rely on a machine that feels consistent in day-to-day use.",
     image: image2,
   },
 ];
 
 export default function Rentals() {
-  const { isOpen, setIsOpen } = UseAppContext();
+  const { isOpen, setIsOpen, addBooking } = UseAppContext();
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
-  const [showBooked, setShowBooked] = useState(false);
   const filters = ["All", "Tractors", "Harvesters", "Implements"];
 
   const [selectedItem, setSelectedItem] = useState(null);
@@ -155,6 +160,16 @@ export default function Rentals() {
       return;
     }
 
+    addBooking({
+      module: "Rentals",
+      itemName: selectedItem.name,
+      providerName: selectedItem.owner,
+      image: selectedItem.image,
+      priceLabel: `₹${selectedItem.price} / day`,
+      summary: `${bookingForm.startDate} to ${bookingForm.endDate} • ${bookingForm.deliveryAddress}`,
+      notificationTitle: "Rental booking request",
+      notificationDetail: `${selectedItem.name} requested from ${bookingForm.startDate} to ${bookingForm.endDate} for delivery at ${bookingForm.deliveryAddress}.`,
+    });
     window.alert(`Rental request sent successfully to ${selectedItem.owner} for ${selectedItem.name}.`);
     setActiveDetailTab("about");
     resetBookingForm();
@@ -172,16 +187,12 @@ export default function Rentals() {
         item.description.toLowerCase().includes(query);
       const matchesCategory = activeFilter === "All" || item.category === activeFilter;
       
-      const isItemBooked = item.availability === "Booked";
-      const matchesBooked = showBooked ? isItemBooked : true;
-
-      return matchesSearch && matchesCategory && matchesBooked;
+      return matchesSearch && matchesCategory;
     });
-  }, [activeFilter, search, showBooked]);
+  }, [activeFilter, search]);
 
   const resultLabel =
     activeFilter === "All" ? "showing all equipment" : `showing ${activeFilter.toLowerCase()}`;
-  const bookedLabel = showBooked ? "(Booked)" : "";
 
   return (
     <>
@@ -218,7 +229,7 @@ export default function Rentals() {
           .kc-booking-grid { grid-template-columns: 1fr; }
         }
       `}</style>
-      <div className="min-h-dvh bg-darkgreen">
+      <div className="min-h-dvh bg-black">
         <SideNav />
         <div
         className={`flex min-h-dvh flex-col transition-all duration-300 ${
@@ -236,8 +247,6 @@ export default function Rentals() {
             filters={filters}
             activeFilter={activeFilter}
             setActiveFilter={setActiveFilter}
-            showBooked={showBooked}
-            setShowBooked={setShowBooked}
           />
 
           <div className="flex flex-wrap items-center gap-2 px-6 pt-4">
@@ -245,7 +254,7 @@ export default function Rentals() {
               {filteredRentals.length} machine{filteredRentals.length !== 1 ? "s" : ""} found
             </span>
             <span className="font-montserrat text-xs text-white/60">
-              . {resultLabel} {bookedLabel}
+              . {resultLabel}
             </span>
             {search.trim() && (
               <span className="font-montserrat text-xs text-[#FFF085]">
@@ -374,9 +383,9 @@ export default function Rentals() {
                     <div style={{ color: "#E7C957", fontWeight: 700, fontSize: 16, marginBottom: 8 }}>
                       About This Equipment
                     </div>
-                    <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, lineHeight: 1.7 }}>
-                      {selectedItem.description}
-                    </div>
+                        <div style={{ color: "rgba(255,255,255,0.86)", fontSize: 15, lineHeight: 1.85 }}>
+                          {selectedItem.description}
+                        </div>
                   </div>
                 </div>
               )}
@@ -496,8 +505,8 @@ export default function Rentals() {
                         <div style={{ color: "#FFF085", fontSize: 18, fontWeight: 800 }}>
                           Rental Request Details
                         </div>
-                        <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 4 }}>
-                          Define schedule and delivery points for the equipment rental.
+                        <div style={{ color: "rgba(255,255,255,0.72)", fontSize: 14, marginTop: 6, lineHeight: 1.75 }}>
+                          Share the full rental schedule, your field or delivery location, and any usage notes the owner should know before confirming the machine. This helps the provider understand the work window, prepare the right equipment condition, and coordinate transport or handover more smoothly.
                         </div>
                       </div>
 

@@ -1,21 +1,17 @@
 import Google from "/google.svg";
-import Background from "/background.png";
 import { useState } from "react";
 import { EnvelopeIcon, EyeIcon, EyeSlashIcon, UserCircleIcon, LockClosedIcon, UserIcon } from "@heroicons/react/24/solid";
-import { useNavigate, Navigate } from "react-router";
 import { UseAppContext } from "../context/AppContext";
 
 export default function Authentication() {
 
-    const { navigate, role, setToken, axios, fetchUser, setRole, setUser } = UseAppContext();
+    const { navigate, setToken, axios, fetchUser } = UseAppContext();
     const [auth, setAuth] = useState("signin");
     const [show, setShow] = useState("password");
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmpassword, setConfirmPassword] = useState("");
-
-
     const Login = async (e) => {
         try {
             e.preventDefault();
@@ -33,17 +29,6 @@ export default function Authentication() {
                 axios.defaults.headers.common['Authorization'] = `${data.token}`
 
                 await fetchUser();
-                // const user = await axios.get('/api/user/data');
-                // if (user.data.success) {
-                //     setUser(user.data.user);
-                //     setRole(user.data.user.role);
-                //     navigate(`/${user.data.user.role}`);
-                //     localStorage.setItem('role', user.data.user.role);
-                // } else {
-                //     navigate('/auth');
-                //     return null;
-                // }
-                // console.log(user);
 
                 window.alert("Logged in");
             } else {
@@ -59,6 +44,10 @@ export default function Authentication() {
             e.preventDefault();
             e.stopPropagation();
             const { data } = await axios.post('/api/user/register', { username, email, password });
+            if (password !== confirmpassword) {
+                alert("Passwords do not match.");
+                return;
+            }
             setUsername("");
             setEmail("");
             setPassword("");
@@ -76,7 +65,6 @@ export default function Authentication() {
 
         }
     }
-
 
     return (
         <>

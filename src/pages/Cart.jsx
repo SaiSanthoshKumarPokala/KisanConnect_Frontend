@@ -150,7 +150,7 @@ export default function Cart() {
   };
 
   return (
-    <div className="min-h-dvh bg-darkgreen">
+    <div className="min-h-dvh bg-black">
       <SideNav />
       <div
         className={`flex min-h-dvh flex-col transition-all duration-300 ${

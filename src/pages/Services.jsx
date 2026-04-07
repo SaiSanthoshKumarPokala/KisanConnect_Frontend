@@ -1,7 +1,5 @@
 import Footer from "../components/Footer";
-import GoUp from "../components/GoUp";
 import NavBar from "../components/NavBar";
-import SideNav from "../components/SideNav";
 
 export default function Services() {
 

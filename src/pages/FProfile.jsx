@@ -1,4 +1,5 @@
 import {
+  ArrowLeftEndOnRectangleIcon,
   CalendarIcon,
   EnvelopeIcon,
   HomeIcon,
@@ -6,34 +7,53 @@ import {
   PhoneIcon,
   UserIcon,
 } from "@heroicons/react/24/solid";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import SideNav from "../components/SideNav";
 import { UseAppContext } from "../context/AppContext";
 
-function ProfileField({ icon: Icon, label, value }) {
+const previewProfile = {
+  name: "Rishi Kumar",
+  email: "rishi.kumar@kisanconnect.in",
+  address: "12-4 Green Fields Road, Medchal",
+  phonenumber: "+91 98765 43210",
+  dateofbirth: "2002-08-17",
+  pincode: "501401",
+  state: "telangana",
+  bio: "Progressive farmer focused on efficient crop planning, better post-harvest decisions, and using digital tools to improve farm operations.",
+  focus: "Paddy, vegetables, and seasonal cash crops",
+  profileImage: "/logo.svg",
+};
+
+function ProfileStat({ label, value }) {
   return (
-    <div className="rounded-2xl border border-gold/20 bg-black/30 p-4 shadow-lg shadow-black/20">
-      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-gold/60">
-        <Icon className="size-4 text-gold" />
-        <span>{label}</span>
+    <div className="rounded-2xl border border-gold/20 bg-gradient-to-br from-[#111d11] via-[#0b120b] to-[#070707] px-4 py-4 shadow-[0_16px_30px_rgba(0,0,0,0.22)]">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold/55">
+        {label}
       </div>
-      <div className="text-base font-semibold text-white">
-        {value || "Not added yet"}
+      <div className="mt-2 text-base font-bold text-[#fff7be]">{value || "Not added yet"}</div>
+    </div>
+  );
+}
+
+function InfoRow({ icon: Icon, label, value }) {
+  return (
+    <div className="flex items-start gap-3 rounded-2xl border border-gold/15 bg-gradient-to-r from-[#0a160d] via-[#060806] to-[#050505] px-4 py-4 shadow-[0_14px_28px_rgba(0,0,0,0.18)]">
+      <div className="rounded-xl border border-gold/15 bg-gradient-to-br from-gold/25 to-gold/10 p-2">
+        <Icon className="size-5 text-gold" />
+      </div>
+      <div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold/55">
+          {label}
+        </div>
+        <div className="mt-1 text-sm font-semibold text-white/90">{value || "Not added yet"}</div>
       </div>
     </div>
   );
 }
 
 export default function FProfile() {
-  const { axios } = UseAppContext();
-  const [profile, setProfile] = useState({
-    name: "",
-    email: "",
-    address: "",
-    phonenumber: "",
-    dateofbirth: "",
-    pincode: "",
-    state: "",
-  });
+  const { axios, isOpen, logout } = UseAppContext();
+  const [profile, setProfile] = useState(previewProfile);
 
   useEffect(() => {
     async function fetchFData() {
@@ -46,72 +66,111 @@ export default function FProfile() {
 
         if (farmer.data.success) {
           const user = farmer.data.user;
-          setProfile({
-            name: user.name || "",
-            email: user.email || "",
-            address: user.address || "",
-            phonenumber: user.phonenumber || "",
-            dateofbirth: user.dateofbirth || "",
-            pincode: user.pincode || "",
-            state: user.state || "",
-          });
-        } else {
-          window.alert("Unable to load farmer profile.");
+          setProfile((prev) => ({
+            ...prev,
+            name: user.name || prev.name,
+            email: user.email || prev.email,
+            address: user.address || prev.address,
+            phonenumber: user.phonenumber || prev.phonenumber,
+            dateofbirth: user.dateofbirth || prev.dateofbirth,
+            pincode: user.pincode || prev.pincode,
+            state: user.state || prev.state,
+          }));
         }
       } catch (error) {
         console.log(error.message);
-        window.alert("Unable to load farmer profile.");
       }
     }
 
     fetchFData();
   }, [axios]);
 
-  return (
-    <div className="min-h-dvh bg-[url(/background.png)] bg-cover bg-center bg-darkgreen font-montserrat">
-      <div className="flex min-h-dvh items-center justify-center bg-darkgreen/75 p-6 backdrop-blur-sm backdrop-brightness-75">
-        <div className="w-full max-w-5xl overflow-hidden rounded-[30px] border border-gold/25 bg-black/55 shadow-[0_26px_60px_rgba(0,0,0,0.45)]">
-          <div className="border-b border-gold/20 bg-gradient-to-r from-gold/15 via-gold/5 to-transparent px-6 py-8 md:px-10">
-            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-gold/65">
-                  Farmer Profile
-                </p>
-                <h1 className="mt-2 text-3xl font-extrabold text-gold md:text-4xl">
-                  View Your Details
-                </h1>
-                <p className="mt-3 max-w-2xl text-sm text-white/70 md:text-base">
-                  This profile is kept in view mode for farmers, so you can quickly
-                  check your registered details without editing them here.
-                </p>
-              </div>
+  const detailRows = useMemo(
+    () => [
+      { icon: EnvelopeIcon, label: "Email", value: profile.email },
+      { icon: PhoneIcon, label: "Phone Number", value: profile.phonenumber },
+      { icon: CalendarIcon, label: "Date of Birth", value: profile.dateofbirth },
+      { icon: HomeIcon, label: "Address", value: profile.address },
+      { icon: MapPinIcon, label: "Pin Code", value: profile.pincode },
+      { icon: MapPinIcon, label: "State", value: profile.state },
+    ],
+    [profile]
+  );
 
-              <div className="rounded-2xl border border-gold/25 bg-gold/10 px-5 py-4 text-sm text-gold/90">
-                <div className="font-semibold">Profile Status</div>
-                <div className="mt-1 text-white/75">Read-only access</div>
+  const farmerInitials = (profile.name || "Farmer")
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <>
+      <SideNav />
+      <div className="min-h-dvh bg-black">
+        <div
+          className={`flex min-h-dvh flex-col transition-all duration-300 ${
+            isOpen ? "md:ml-[250px]" : "md:ml-[80px]"
+          }`}
+        >
+          <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
+            <div className="border-b border-gold/15 bg-[radial-gradient(circle_at_top_left,rgba(212,175,55,0.14),transparent_32%),linear-gradient(135deg,#0d1a0f_0%,#070707_58%,#050505_100%)] px-6 py-6">
+              <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+                <div className="rounded-[24px] border border-gold/20 bg-gradient-to-b from-[#102415] via-[#09110b] to-[#050505] p-5 shadow-[0_22px_40px_rgba(0,0,0,0.3)]">
+                  <div className="mx-auto flex h-36 w-36 items-center justify-center overflow-hidden rounded-full border-4 border-gold/35 bg-gradient-to-br from-[#f7de72] via-[#d4af37] to-[#7a5f12] shadow-[0_0_30px_rgba(212,175,55,0.15)]">
+                    <span className="text-4xl font-extrabold tracking-[0.08em] text-black">
+                      {farmerInitials}
+                    </span>
+                  </div>
+                  <div className="mt-5 text-center">
+                    <div className="text-2xl font-extrabold text-gold drop-shadow-[0_0_16px_rgba(212,175,55,0.2)]">{profile.name}</div>
+                    <div className="mt-2 text-sm font-medium text-[#f5efc3]">{profile.focus}</div>
+                  </div>
+                  <div className="mt-5 rounded-2xl border border-gold/15 bg-[#040704] px-4 py-4 text-sm leading-7 text-white/78">
+                    {profile.bio}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="mt-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-red-500/30 bg-[#140707] px-4 py-3 text-sm font-bold text-red-400 transition-all duration-150 hover:-translate-y-[1px] hover:border-red-400/55 hover:bg-red-500/12 hover:text-red-300"
+                  >
+                    <ArrowLeftEndOnRectangleIcon className="size-5" />
+                    Logout
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-5">
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <ProfileStat label="Profile Type" value="Farmer" />
+                    <ProfileStat label="Primary Region" value={profile.state} />
+                    <ProfileStat label="Status" value="Active Member" />
+                  </div>
+
+                  <div className="rounded-[24px] border border-gold/20 bg-gradient-to-br from-[#0f1c10] via-[#090909] to-[#050505] p-5 shadow-[0_22px_40px_rgba(0,0,0,0.28)]">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <div className="text-xs font-semibold uppercase tracking-[0.28em] text-gold/55">
+                          Personal Details
+                        </div>
+                        <div className="mt-2 text-2xl font-extrabold text-white">
+                          Account Overview
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-4 md:grid-cols-2">
+                      {detailRows.map((row) => (
+                        <InfoRow key={row.label} icon={row.icon} label={row.label} value={row.value} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-
-          <div className="grid gap-4 p-6 md:grid-cols-2 md:gap-5 md:p-10">
-            <ProfileField icon={UserIcon} label="Full Name" value={profile.name} />
-            <ProfileField icon={EnvelopeIcon} label="Email" value={profile.email} />
-            <ProfileField
-              icon={PhoneIcon}
-              label="Phone Number"
-              value={profile.phonenumber}
-            />
-            <ProfileField
-              icon={CalendarIcon}
-              label="Date of Birth"
-              value={profile.dateofbirth}
-            />
-            <ProfileField icon={HomeIcon} label="Address" value={profile.address} />
-            <ProfileField icon={MapPinIcon} label="Pin Code" value={profile.pincode} />
-            <ProfileField icon={MapPinIcon} label="State" value={profile.state} />
-          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

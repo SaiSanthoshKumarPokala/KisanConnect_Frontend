@@ -52,6 +52,7 @@ export default function Marketplace() {
     isOpen,
     setIsOpen,
     user,
+    addBooking,
     marketplaceListings,
     addMarketplaceListing,
     updateMarketplaceListing,
@@ -60,7 +61,6 @@ export default function Marketplace() {
 
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
-  const [showBooked, setShowBooked] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingListing, setEditingListing] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -84,11 +84,9 @@ export default function Marketplace() {
         item.location.toLowerCase().includes(query) ||
         item.description.toLowerCase().includes(query);
       const matchesCategory = activeFilter === "All" || item.category === activeFilter;
-      const isItemBooked = item.availability === "Booked" || item.availability === "Out of Stock";
-      const matchesBooked = showBooked ? isItemBooked : true;
-      return matchesSearch && matchesCategory && matchesBooked;
+      return matchesSearch && matchesCategory;
     });
-  }, [activeFilter, marketplaceListings, search, showBooked]);
+  }, [activeFilter, marketplaceListings, search]);
 
   const resetBookingForm = () => {
     setBookingForm({
@@ -115,6 +113,16 @@ export default function Marketplace() {
       return;
     }
 
+    addBooking({
+      module: "Marketplace",
+      itemName: selectedItem.name,
+      providerName: selectedItem.seller,
+      image: selectedItem.image,
+      priceLabel: `₹${selectedItem.price} / unit`,
+      summary: `${bookingForm.quantity} requested • ${bookingForm.deliveryAddress}`,
+      notificationTitle: "Marketplace purchase request",
+      notificationDetail: `${selectedItem.name} purchase request placed for ${bookingForm.quantity}.`,
+    });
     window.alert(`Purchase request for ${selectedItem.name} sent successfully to ${selectedItem.seller}.`);
     setActiveDetailTab("about");
     resetBookingForm();
@@ -154,11 +162,10 @@ export default function Marketplace() {
     handleCloseForm();
   };
 
-  const pageTitle = isFarmerRoute ? "Marketplace Listings" : "Farm Marketplace";
+  const pageTitle = isFarmerRoute ? "Marketplace" : "Farm Marketplace";
   const resultLabel =
     activeFilter === "All" ? "showing all marketplace goods" : `showing ${activeFilter.toLowerCase()}`;
-  const bookedLabel = showBooked ? "(Booked / Out of Stock)" : "";
-  const addButtonLabel = isFarmerRoute ? "Add Marketplace" : "";
+  const addButtonLabel = isFarmerRoute ? "Add Items" : "";
 
   return (
     <>
@@ -195,7 +202,7 @@ export default function Marketplace() {
         }
       `}</style>
 
-      <div className="min-h-dvh bg-darkgreen">
+      <div className="min-h-dvh bg-black">
         <SideNav />
         <div className={`flex min-h-dvh flex-col transition-all duration-300 ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
           <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
@@ -210,7 +217,6 @@ export default function Marketplace() {
               filters={filters}
               activeFilter={activeFilter}
               setActiveFilter={setActiveFilter}
-              {...(!isFarmerRoute ? { showBooked, setShowBooked } : {})}
             />
 
             {isFarmerRoute ? (
@@ -232,7 +238,7 @@ export default function Marketplace() {
                   </button>
                 </div>
 
-                <div className="flex-1 bg-[#081D0C] p-6">
+                <div className="flex-1 bg-black p-6">
                   {filteredListings.length === 0 ? (
                     <div className="flex min-h-[calc(100dvh-14rem)] flex-col items-center justify-center gap-6 text-center">
                       <p className="max-w-xl text-xl font-bold text-white">
@@ -248,7 +254,13 @@ export default function Marketplace() {
                   ) : (
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px]">
                       {filteredListings.map((item) => (
-                        <ShopServiceCard key={item.id} item={item} onEdit={handleEdit} onDelete={deleteMarketplaceListing} />
+                        <ShopServiceCard
+                          key={item.id}
+                          item={item}
+                          onEdit={handleEdit}
+                          onDelete={deleteMarketplaceListing}
+                          hideSubtitle={true}
+                        />
                       ))}
                     </div>
                   )}
@@ -261,7 +273,7 @@ export default function Marketplace() {
                     {filteredListings.length} item{filteredListings.length !== 1 ? "s" : ""} found
                   </span>
                   <span className="font-montserrat text-xs text-white/60">
-                    . {resultLabel} {bookedLabel}
+                    . {resultLabel}
                   </span>
                 </div>
 

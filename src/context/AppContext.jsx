@@ -17,7 +17,11 @@ export const AppProvider = ({ children }) => {
         farmer: [],
         serviceprovider: [],
     });
-    const [isOpen, setIsOpen] = useState(false);
+    const [bookingsByRole, setBookingsByRole] = useState({
+        farmer: [],
+        serviceprovider: [],
+    });
+    const [isOpen, setIsOpen] = useState(true);
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [marketplaceListings, setMarketplaceListings] = useState([
         {
@@ -30,7 +34,7 @@ export const AppProvider = ({ children }) => {
             stock: "450 kg",
             location: "Medchal, Telangana",
             image: "/seeds.webp",
-            description: "Freshly harvested tomatoes sorted for mandi supply and direct bulk purchase.",
+            description: "Freshly harvested tomatoes sorted for mandi supply and direct bulk purchase. This listing is suited for buyers who want clean, market-ready produce that can move quickly into retail, resale, or nearby distribution without needing much additional sorting.",
             availability: "Available",
         },
         {
@@ -43,7 +47,7 @@ export const AppProvider = ({ children }) => {
             stock: "220 kg",
             location: "Erode, Tamil Nadu",
             image: "/fertilizers.png",
-            description: "Cleaned and dried turmeric lots ready for processing and wholesale buyers.",
+            description: "Cleaned and dried turmeric lots ready for processing and wholesale buyers. It works well for bulk buyers who want dependable handling quality, straightforward pickup planning, and stock that can move directly into the next trade or processing stage.",
             availability: "Available",
         },
         {
@@ -56,7 +60,7 @@ export const AppProvider = ({ children }) => {
             stock: "1.2 tonnes",
             location: "Anantapur, Andhra Pradesh",
             image: "/shop.avif",
-            description: "Bulk groundnut stock from this season suitable for traders and processing units.",
+            description: "Bulk groundnut stock from this season suitable for traders and processing units. The quantity and condition make it a practical option when a buyer wants one seasonal listing that supports larger-volume commercial purchase decisions.",
             availability: "Booked",
         },
     ]);
@@ -120,6 +124,7 @@ export const AppProvider = ({ children }) => {
             : "";
     const effectiveRole = routeRole || role || "farmer";
     const cart = cartsByRole[effectiveRole] || [];
+    const bookings = bookingsByRole[effectiveRole] || [];
 
 
 
@@ -193,6 +198,21 @@ export const AppProvider = ({ children }) => {
             ...prev,
         ]);
 
+        if (notification.bookingId) {
+            setBookingsByRole((prev) => ({
+                ...prev,
+                farmer: (prev.farmer || []).map((item) =>
+                    item.id === notification.bookingId
+                        ? {
+                            ...item,
+                            status: nextStatus === "accepted" ? "Accepted" : "Rejected",
+                            updatedAt: new Date().toISOString(),
+                        }
+                        : item
+                ),
+            }));
+        }
+
         setServiceProviderNotifications((prev) => prev.filter((item) => item.id !== id));
     };
 
@@ -221,6 +241,48 @@ export const AppProvider = ({ children }) => {
                 [effectiveRole]: [...currentCart, { ...item, cartModule: module }],
             };
         });
+    };
+
+    const addBooking = (bookingData) => {
+        const bookingId = bookingData.id || `booking-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        const bookingRecord = {
+            id: bookingId,
+            createdAt: new Date().toISOString(),
+            updatedAt: null,
+            status: "Pending",
+            image: bookingData.image || "",
+            ...bookingData,
+        };
+
+        setBookingsByRole((prev) => ({
+            ...prev,
+            [effectiveRole]: [bookingRecord, ...(prev[effectiveRole] || [])],
+        }));
+
+        if (effectiveRole === "farmer" && bookingData.providerName) {
+            const farmerName = user?.name || "Farmer";
+            const farmerAvatar = farmerName
+                .split(" ")
+                .map((part) => part[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase();
+
+            setServiceProviderNotifications((prev) => [
+                {
+                    id: Date.now(),
+                    bookingId,
+                    farmerName,
+                    farmerAvatar,
+                    module: bookingData.module || "Service",
+                    title: bookingData.notificationTitle || `${bookingData.module || "Service"} request`,
+                    detail: bookingData.notificationDetail || bookingData.summary || "A new booking request is waiting for review.",
+                },
+                ...prev,
+            ]);
+        }
+
+        return bookingId;
     };
 
     const addMarketplaceListing = (listing) => {
@@ -275,6 +337,10 @@ export const AppProvider = ({ children }) => {
         cart,
         setCart,
         addToCart,
+        bookings,
+        bookingsByRole,
+        setBookingsByRole,
+        addBooking,
         marketplaceListings,
         setMarketplaceListings,
         addMarketplaceListing,

@@ -34,9 +34,10 @@ const TRANSPORT_UI_DATA = [
     priceLabel: "Rs. 350 / km",
     capacity: "8 Tonnes",
     rating: 4.3,
+    reviewCount: "1,584",
     owner: "Ravi Kumar",
     availability: "Available",
-    description: "Reliable short-haul option for mandi trips and local farm pickups.",
+    description: "Reliable short-haul option for mandi trips and local farm pickups. It is well suited for routine nearby movement when farmers need predictable service, manageable operating cost, and enough space for day-to-day produce dispatches.",
     image: image1,
   },
   {
@@ -49,9 +50,10 @@ const TRANSPORT_UI_DATA = [
     priceLabel: "Rs. 420 / km",
     capacity: "12 Tonnes",
     rating: 4.7,
+    reviewCount: "2,216",
     owner: "Venkat Logistics",
     availability: "Available",
-    description: "Heavy-duty transport for longer interstate crop movement.",
+    description: "Heavy-duty transport for longer interstate crop movement. This vehicle works best when produce needs to move across longer routes with stronger carrying support and a setup that feels prepared for higher-volume trips.",
     image: image2,
   },
   {
@@ -64,9 +66,10 @@ const TRANSPORT_UI_DATA = [
     priceLabel: "Rs. 210 / km",
     capacity: "3 Tonnes",
     rating: 4.5,
+    reviewCount: "1,391",
     owner: "Anita Transport",
     availability: "Limited",
-    description: "Compact carrier suited for produce pickups from tighter rural roads.",
+    description: "Compact carrier suited for produce pickups from tighter rural roads. Farmers often prefer it for interior-village access where a smaller, more agile vehicle can reach loading points that bigger carriers struggle to handle comfortably.",
     image: image3,
   },
   {
@@ -79,9 +82,10 @@ const TRANSPORT_UI_DATA = [
     priceLabel: "Rs. 180 / km",
     capacity: "1.5 Tonnes",
     rating: 4.2,
+    reviewCount: "1,048",
     owner: "Arjun Patel",
     availability: "Available",
-    description: "Fast and practical for smaller deliveries and quick supply runs.",
+    description: "Fast and practical for smaller deliveries and quick supply runs. It is ideal for growers who need flexible transport on shorter schedules without booking a larger truck for relatively lighter loads.",
     image: image4,
   },
   {
@@ -94,9 +98,10 @@ const TRANSPORT_UI_DATA = [
     priceLabel: "Rs. 390 / km",
     capacity: "4 Tonnes",
     rating: 4.8,
+    reviewCount: "2,441",
     owner: "Sowmya Cold Logistics",
     availability: "Booked",
-    description: "Temperature-controlled movement for perishables and delicate produce.",
+    description: "Temperature-controlled movement for perishables and delicate produce. This option is especially valuable when fruits, vegetables, flowers, or sensitive goods need safer handling and more stable transit conditions from pickup to drop.",
     image: image5,
   },
   {
@@ -109,18 +114,18 @@ const TRANSPORT_UI_DATA = [
     priceLabel: "Rs. 460 / km",
     capacity: "15 Tonnes",
     rating: 4.6,
+    reviewCount: "1,877",
     owner: "Naveen Freight",
     availability: "Available",
-    description: "Built for high-volume shipments when capacity matters most.",
+    description: "Built for high-volume shipments when capacity matters most. It is a strong choice for bulk dispatch cycles where the priority is moving larger quantities efficiently without splitting loads into multiple smaller trips.",
     image: image6,
   },
 ];
 
 export default function Transport() {
-  const { isOpen, setIsOpen } = UseAppContext();
+  const { isOpen, setIsOpen, addBooking } = UseAppContext();
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
-  const [showBooked, setShowBooked] = useState(false);
   const filters = ["All", "Trucks", "Tempo", "Vans", "Reefer"];
 
   const [selectedVehicle, setSelectedVehicle] = useState(null);
@@ -166,6 +171,16 @@ export default function Transport() {
       return;
     }
 
+    addBooking({
+      module: "Transport",
+      itemName: selectedVehicle.name,
+      providerName: selectedVehicle.owner,
+      image: selectedVehicle.image,
+      priceLabel: selectedVehicle.priceLabel || selectedVehicle.price,
+      summary: `${bookingForm.pickupLocation} to ${bookingForm.dropLocation} • ${bookingForm.cropName}`,
+      notificationTitle: "Transport booking request",
+      notificationDetail: `${selectedVehicle.name} requested for ${bookingForm.cropName} transport from ${bookingForm.pickupLocation} to ${bookingForm.dropLocation}.`,
+    });
     window.alert(`Transport booking request sent to ${selectedVehicle.owner} for ${selectedVehicle.name}.`);
     setActiveDetailTab("about");
     resetBookingForm();
@@ -183,17 +198,12 @@ export default function Transport() {
         item.description.toLowerCase().includes(query);
       const matchesCategory = activeFilter === "All" || item.vehicleType.includes(activeFilter);
       
-      const isItemBooked = item.availability === "Booked";
-      const matchesBooked = showBooked ? isItemBooked : true;
-
-      return matchesSearch && matchesCategory && matchesBooked;
+      return matchesSearch && matchesCategory;
     });
-  }, [activeFilter, search, showBooked]);
+  }, [activeFilter, search]);
 
   const resultLabel =
     activeFilter === "All" ? "showing all transport options" : `showing ${activeFilter.toLowerCase()}`;
-  const bookedLabel = showBooked ? "(Booked)" : "";
-
   return (
     <>
       <style>{`
@@ -229,7 +239,7 @@ export default function Transport() {
           .kc-booking-grid { grid-template-columns: 1fr; }
         }
       `}</style>
-      <div className="min-h-dvh bg-darkgreen">
+      <div className="min-h-dvh bg-black">
         <SideNav />
         <div
         className={`flex min-h-dvh flex-col transition-all duration-300 ${
@@ -238,7 +248,7 @@ export default function Transport() {
       >
         <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
           <ModuleHeader
-            title="Transport Market"
+            title="Transport"
             search={search}
             onSearchChange={setSearch}
             onOpenSidebar={() => setIsOpen(!isOpen)}
@@ -247,8 +257,6 @@ export default function Transport() {
             filters={filters}
             activeFilter={activeFilter}
             setActiveFilter={setActiveFilter}
-            showBooked={showBooked}
-            setShowBooked={setShowBooked}
           />
 
           <div className="flex flex-wrap items-center gap-2 px-6 pt-4">
@@ -256,7 +264,7 @@ export default function Transport() {
               {filteredTransport.length} vehicle{filteredTransport.length !== 1 ? "s" : ""} found
             </span>
             <span className="font-montserrat text-xs text-white/60">
-              . {resultLabel} {bookedLabel}
+              . {resultLabel}
             </span>
             {search.trim() && (
               <span className="font-montserrat text-xs text-[#FFF085]">
@@ -385,9 +393,9 @@ export default function Transport() {
                     <div style={{ color: "#E7C957", fontWeight: 700, fontSize: 16, marginBottom: 8 }}>
                       About This Vehicle
                     </div>
-                    <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, lineHeight: 1.7 }}>
-                      {selectedVehicle.description}
-                    </div>
+                        <div style={{ color: "rgba(255,255,255,0.86)", fontSize: 15, lineHeight: 1.85 }}>
+                          {selectedVehicle.description}
+                        </div>
                   </div>
                 </div>
               )}
@@ -507,8 +515,8 @@ export default function Transport() {
                         <div style={{ color: "#FFF085", fontSize: 18, fontWeight: 800 }}>
                           Transport Booking
                         </div>
-                        <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 4 }}>
-                          Define load details and locations to book this transport.
+                        <div style={{ color: "rgba(255,255,255,0.72)", fontSize: 14, marginTop: 6, lineHeight: 1.75 }}>
+                          Enter the pickup schedule, crop or material details, estimated load, and exact route information so the transporter can judge vehicle fit, timing, and handling requirements before approving the request. The more clearly the trip is defined, the easier it becomes to avoid last-minute coordination issues.
                         </div>
                       </div>
 

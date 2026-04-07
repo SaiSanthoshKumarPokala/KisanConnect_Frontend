@@ -1,4 +1,4 @@
-import { XMarkIcon, Bars3Icon, UserCircleIcon, ArrowsRightLeftIcon, ArrowLeftEndOnRectangleIcon } from "@heroicons/react/24/outline"
+import { XMarkIcon, Bars3Icon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
 // import { TruckIcon, SparklesIcon, BuildingStorefrontIcon, CircleStackIcon, ShoppingBagIcon, DocumentTextIcon, Squares2X2Icon } from "@heroicons/react/24/solid";
 import Dashboard from "/dashboard.svg"
 import Truck from "/trucks.svg"
@@ -7,19 +7,36 @@ import Sparkles from "/sparkles.svg"
 import Document from "/document.svg"
 import Building from "/coldstorages.svg"
 import Market from "/shops.svg"
-import { useState, useRef, useContext, useEffect } from "react"
+import { useState } from "react"
 import { NavLink, Link, useLocation } from "react-router"
 import { UseAppContext } from "../context/AppContext"
-
-
 export default function SideNav() {
 
-    const { logout, role, axios, setRole, user, navigate, isOpen, setIsOpen } = UseAppContext();
+    const { role, axios, setRole, user, navigate } = UseAppContext();
+    const location = useLocation();
+    const routeRole = location.pathname.startsWith("/serviceprovider")
+        ? "serviceprovider"
+        : location.pathname.startsWith("/farmer")
+            ? "farmer"
+            : "";
+    const effectiveRole = routeRole || role || "farmer";
+    const profileInitials = (user?.name || "Profile")
+        .split(" ")
+        .filter(Boolean)
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
 
-    // console.log(role);
+    const switchRoleLocally = (nextRole) => {
+        setRole(nextRole);
+        localStorage.setItem('role', nextRole);
+        navigate(`/${nextRole}`);
+    }
+
     const changeRole = async () => {
         try {
-            if (role == "farmer") {
+            if (effectiveRole == "farmer") {
                 const { data } = await axios.post(`/api/farmer/changerole`);
                 if (data.success) {
                     setRole("serviceprovider");
@@ -29,7 +46,7 @@ export default function SideNav() {
                 } else {
                     alert(data.message);
                 }
-            } else if (role == "serviceprovider") {
+            } else if (effectiveRole == "serviceprovider") {
                 const { data } = await axios.post(`/api/serviceprovider/changerole`);
                 if (data.success) {
                     setRole("farmer");
@@ -41,77 +58,30 @@ export default function SideNav() {
                 }
             }
         } catch (error) {
-            window.alert(error.message);
+            if (effectiveRole == "farmer") {
+                switchRoleLocally("serviceprovider");
+            } else if (effectiveRole == "serviceprovider") {
+                switchRoleLocally("farmer");
+            }
         }
     }
 
     const Menu = [
-        { path: `/${role}/`, icon: Dashboard, name: "Dashboard", index: 1 },
-        { path: `/${role}/rentals`, icon: Truck, name: "Rentals", index: 2 },
-        { path: `/${role}/shop`, icon: Shopping, name: "Shop", index: 3 },
-        { path: `/${role}/marketplace`, icon: Market, name: "Marketplace", index: 4 },
-        { path: `/${role}/transport`, icon: Truck, name: "Transport", index: 5 },
-        { path: `/${role}/contract`, icon: Document, name: "Contract Farming", index: 6 },
-        { path: `/${role}/coldstorage`, icon: Building, name: "Cold Storage", index: 7 },
-        { path: `/${role}/aitoolkit`, icon: Sparkles, name: "AI Tool Kit", index: 8 }
+        { path: `/${effectiveRole}/`, icon: Dashboard, name: "Dashboard", index: 1 },
+        { path: `/${effectiveRole}/rentals`, icon: Truck, name: "Rentals", index: 2 },
+        { path: `/${effectiveRole}/shop`, icon: Shopping, name: "Shop", index: 3 },
+        { path: `/${effectiveRole}/marketplace`, icon: Market, name: "Marketplace", index: 4 },
+        { path: `/${effectiveRole}/transport`, icon: Truck, name: "Transport", index: 5 },
+        { path: `/${effectiveRole}/contract`, icon: Document, name: "Contract Farming", index: 6 },
+        { path: `/${effectiveRole}/coldstorage`, icon: Building, name: "Cold Storage", index: 7 },
+        { path: `/${effectiveRole}/aitoolkit`, icon: Sparkles, name: "AI Tool Kit", index: 8 }
     ]
-
-    // const ServideProviderMenu = [
-    //     { path: "/serviceprovider", icon: Dashboard, name: "Dashboard", index: 1 },
-    //     { path: "/serviceprovider/rentals", icon: Truck, name: "Rentals", index: 2 },
-    //     { path: "/serviceprovider/shop", icon: Shopping, name: "Shop", index: 3 },
-    //     { path: "/serviceprovider/transport", icon: Truck, name: "Transport", index: 4 },
-    //     { path: "/serviceprovider/contractfarming", icon: Document, name: "Contract Farming", index: 5 },
-    //     { path: "/serviceprovider/coldstorage", icon: Building, name: "Cold Storage", index: 6 },
-    //     { path: "/serviceprovider/aitoolkit", icon: Sparkles, name: "AI Tool Kit", index: 7 }
-    // ]
-
     const [open, setOpen] = useState(false);
-
 
     return (
         <>
             {/* For medium and large screens */}
-            {!isOpen &&
-                <div className="hidden md:flex md:flex-col items-center w-fit h-dvh fixed p-4 bg-linear-to-b from-gold to-yellow-200 border-r border-darkgreen text-white font-bold z-10">
-                    <Bars3Icon onClick={() => { setIsOpen(!isOpen) }} className="size-8 absolute -right-4 top-2 p-1 bg-darkgreen/80 rounded-full stroke-white stroke-2 cursor-pointer" />
-                    {role == "serviceprovider" ?
-                        <div className="flex flex-col items-center justify-evenly my-4 gap-2 text-darkgreen">
-                            <Link to="/"><img src="/Kisan Connect Logo 1.png" className="size-12 rounded-full cursor-pointer border-b border-darkgreen" alt="Logo" /></Link>
-                            {Menu.map((options) => (
-                                <NavLink key={options.index} to={options.path} aria-label={options.name} className={({ isActive }) => `${isActive ? "p-2 bg-darkgreen/40 rounded-xl" : "p-2 hover:bg-darkgreen/40 hover:rounded-xl"}`} end>
-                                    <img src={options.icon} alt="" className="size-8 fill-darkgreen" />
-                                </NavLink>
-                            ))}
-                            <div className="flex flex-col items-center justify-center gap-2 border-t border-darkgreen m-auto">
-                                <Link to="/serviceprovider/profile" className="hover:rounded-xl cursor-pointer p-2 m-auto">
-                                    <UserCircleIcon className="size-10" />
-                                </Link>
-                                <button onClick={() => { logout() }} className="group p-2 hover:bg-red-400 rounded-xl m-auto cursor-pointer"><ArrowLeftEndOnRectangleIcon className="size-8 stroke-red-600 group-hover:stroke-white" /></button>
-                                <button onClick={() => { changeRole() }} className="group text-center gap-2 p-2 rounded-xl hover:cursor-pointer hover:bg-darkgreen transition-all ease-in duration-100 m-auto"><ArrowsRightLeftIcon className="size-8 stroke-darkgreen group-hover:stroke-gold" /></button>
-                                {/* <Link to={"/farmer"} onClick={()=>{changeRole()}} className="group text-center gap-2 p-2 rounded-xl hover:cursor-pointer hover:bg-darkgreen transition-all ease-in duration-100 m-auto"><ArrowsRightLeftIcon className="size-8 stroke-darkgreen group-hover:stroke-gold" /></Link> */}
-                            </div>
-                        </div>
-                        :
-                        <div className="flex flex-col items-center justify-evenly my-4 gap-2 text-darkgreen">
-                            <Link to="/"><img src="/Kisan Connect Logo 1.png" className="size-12 rounded-full cursor-pointer border-b border-darkgreen" alt="Logo" /></Link>
-                            {Menu.map((options) => (
-                                <NavLink key={options.index} to={options.path} aria-label={options.name} className={({ isActive }) => `${isActive ? "p-2 bg-darkgreen/40 rounded-xl" : "p-2 hover:bg-darkgreen/40 hover:rounded-xl"}`} end>
-                                    <img src={options.icon} alt="" className="size-8 fill-darkgreen" />
-                                </NavLink>
-                            ))}
-                            <div className="flex flex-col items-center justify-center gap-2 border-t border-darkgreen m-auto">
-                                <Link to="/farmer/profile" className="hover:rounded-xl cursor-pointer p-2 m-auto">
-                                    <UserCircleIcon className="size-10" />
-                                </Link>
-                                <button onClick={() => { logout() }} className="group p-2 hover:bg-red-400 rounded-xl m-auto cursor-pointer"><ArrowLeftEndOnRectangleIcon className="size-8 stroke-red-600 group-hover:stroke-white" /></button>
-                                <button to={"/serviceprovider"} onClick={() => { changeRole() }} className="group text-center gap-2 p-2 rounded-xl hover:cursor-pointer hover:bg-darkgreen transition-all ease-in duration-100 m-auto"><ArrowsRightLeftIcon className="size-8 stroke-darkgreen group-hover:stroke-gold" /></button>
-                            </div>
-                        </div>
-                    }
-                </div>}
-            {isOpen &&
-                <div className="hidden md:flex md:flex-col w-fit h-dvh fixed p-6 bg-linear-to-b from-gold to-yellow-200 border-r border-darkgreen text-white font-bold z-10">
+            <div className="hidden md:flex md:flex-col w-fit h-dvh fixed top-0 left-0 p-6 bg-linear-to-b from-gold to-yellow-200 border-r border-darkgreen text-white font-bold z-10">
                     <div className="flex flex-row justify-between items-center">
                         <Link to="/" className="flex flex-row items-center gap-2">
                             <img src="/Kisan Connect Logo 1.png" className="size-16 rounded-full" alt="Logo" />
@@ -120,9 +90,8 @@ export default function SideNav() {
                                 <p className="font-bold text-darkgreen">CONNECT</p>
                             </div>
                         </Link>
-                        <Bars3Icon onClick={() => { setIsOpen(!isOpen) }} className="size-8 relative -right-10 p-1 bg-darkgreen/80 rounded-full stroke-white cursor-pointer" />
                     </div>
-                    {role == "serviceprovider" ?
+                    {effectiveRole == "serviceprovider" ?
                         <div className="flex flex-col items-start justify-evenly my-4 gap-2 text-darkgreen">
                             {Menu.map((options) => (
                                 <NavLink key={options.index} to={options.path} aria-label={options.name} className={({ isActive }) => `flex flex-row items-center gap-2 w-full ${isActive ? "p-2 bg-darkgreen/40 rounded-xl" : "p-2 hover:bg-darkgreen/40 hover:rounded-xl"}`} end>
@@ -130,15 +99,13 @@ export default function SideNav() {
                                     <p className="font-semibold">{options.name}</p>
                                 </NavLink>
                             ))}
-                            <div className="flex flex-col items-start justify-center gap-2 border-t border-darkgreen my-auto fixed bottom-4">
-                                <Link to="/serviceprovider/profile" className="flex flex-row items-center justify-between pt-2 pl-2 gap-2">
-                                    <UserCircleIcon className="size-10" />
-                                    <p className="text-xl text-darkgreen">Username</p>
+                            <div className="flex flex-col items-start justify-center gap-3 border-t border-darkgreen/60 pt-4 my-auto fixed bottom-4">
+                                <Link to="/serviceprovider/profile" className="flex flex-row items-center justify-start gap-3 pt-2 px-2">
+                                    <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-gradient-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                                        {profileInitials}
+                                    </div>
+                                    <p className="text-xl font-semibold text-darkgreen">Profile</p>
                                 </Link>
-                                <button onClick={() => { logout() }} className="group flex flex-row items-center justify-start gap-2 p-2 hover:bg-red-300 rounded-xl cursor-pointer w-full">
-                                    <ArrowLeftEndOnRectangleIcon className="size-8 stroke-red-600" />
-                                    <p className="text-red-600">Logout</p>
-                                </button>
                                 <button onClick={() => { changeRole() }} className="group flex flex-row items-center justify-between gap-2 p-2 text-gold rounded-xl border-gold border cursor-pointer hover:bg-gold hover:text-darkgreen bg-darkgreen transition-all ease-in duration-100">
                                     <ArrowsRightLeftIcon className="size-8 stroke-gold group-hover:stroke-darkgreen" />
                                     <p>Switch to Farmer</p>
@@ -152,15 +119,13 @@ export default function SideNav() {
                                     <p className="font-semibold">{options.name}</p>
                                 </NavLink>
                             ))}
-                            <div className="flex flex-col items-start justify-center gap-2 border-t border-darkgreen my-auto fixed bottom-4">
-                                <Link to="/farmer/profile" className="flex flex-row items-center justify-between gap-2 pt-2 pl-2">
-                                    <UserCircleIcon className="size-10" />
-                                    <p className="text-xl text-darkgreen">Username</p>
+                            <div className="flex flex-col items-start justify-center gap-3 border-t border-darkgreen/60 pt-4 my-auto fixed bottom-4">
+                                <Link to="/farmer/profile" className="flex flex-row items-center justify-start gap-3 pt-2 px-2">
+                                    <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-gradient-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                                        {profileInitials}
+                                    </div>
+                                    <p className="text-xl font-semibold text-darkgreen">Profile</p>
                                 </Link>
-                                <button onClick={() => { logout() }} className="group flex flex-row items-center justify-start gap-2 p-2 hover:bg-red-300 rounded-xl cursor-pointer w-full">
-                                    <ArrowLeftEndOnRectangleIcon className="size-8 stroke-red-600" />
-                                    <p className="text-red-600">Logout</p>
-                                </button>
                                 <button onClick={() => { changeRole() }} className="group flex flex-row items-center justify-between gap-2 p-2 text-gold rounded-xl border-gold border cursor-pointer hover:bg-gold hover:text-darkgreen bg-darkgreen transition-all ease-in duration-100">
                                     <ArrowsRightLeftIcon className="size-8 stroke-gold group-hover:stroke-darkgreen" />
                                     <p className="flex flex-col items-center">
@@ -170,7 +135,7 @@ export default function SideNav() {
                                 </button>
                             </div>
                         </div>}
-                </div>}
+                </div>
 
 
             {/* For small screens */}
@@ -194,7 +159,7 @@ export default function SideNav() {
                         <button className="p-2 cursor-pointer" onClick={() => { setOpen(false) }}><XMarkIcon className="size-10" /></button>
                     </div>
                     <div className="flex flex-col gap-2 items-start justify-start w-full h-full pb-4">
-                        {role == "serviceprovider" ?
+                        {effectiveRole == "serviceprovider" ?
                             <div className="flex flex-col items-start justify-start my-2 gap-2 w-full">
                                 {Menu.map((options) => (
                                     <NavLink key={options.index} to={options.path} aria-label={options.name} className={({ isActive }) => `flex flex-row items-center gap-2 w-full ${isActive ? "p-2 bg-white/40 rounded-xl" : "p-2 hover:bg-white/40 hover:rounded-xl"}`} end>
@@ -202,15 +167,13 @@ export default function SideNav() {
                                         <p className="font-semibold">{options.name}</p>
                                     </NavLink>
                                 ))}
-                                <div className="flex flex-col items-start justify-start gap-2 border-t border-darkgreen w-full">
-                                    <Link to="/serviceprovider/profile" className="flex flex-row items-center justify-start pt-2 gap-2 w-full">
-                                        <UserCircleIcon className="size-10" />
-                                        <p className="text-xl text-darkgreen">Username</p>
+                                <div className="flex flex-col items-start justify-start gap-3 border-t border-darkgreen/60 pt-4 w-full">
+                                    <Link to="/serviceprovider/profile" className="flex flex-row items-center justify-start gap-3 pt-2 px-2 w-full">
+                                        <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-gradient-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                                            {profileInitials}
+                                        </div>
+                                        <p className="text-xl font-semibold text-darkgreen">Profile</p>
                                     </Link>
-                                    <button onClick={() => { logout() }} className="group flex flex-row items-center justify-start gap-2 p-2 bg-red-300 rounded-xl cursor-pointer w-full">
-                                        <ArrowLeftEndOnRectangleIcon className="size-8 stroke-red-600" />
-                                        <p className="text-red-600">Logout</p>
-                                    </button>
                                     <button onClick={() => { changeRole() }} className="group flex flex-row items-center justify-start gap-2 p-2 text-gold rounded-xl border-gold border cursor-pointer hover:bg-gold hover:text-darkgreen bg-darkgreen transition-all ease-in duration-100 w-full">
                                         <ArrowsRightLeftIcon className="size-8 stroke-gold group-hover:stroke-darkgreen" />
                                         <p>Switch to Farmer</p>
@@ -224,15 +187,13 @@ export default function SideNav() {
                                         <p className="font-semibold">{options.name}</p>
                                     </NavLink>
                                 ))}
-                                <div className="flex flex-col items-start justify-center gap-2 border-t border-darkgreen w-full">
-                                    <Link to="/farmer/profile" className="flex flex-row items-center justify-start gap-2 pt-2 w-full">
-                                        <UserCircleIcon className="size-10" />
-                                        <p className="text-xl text-darkgreen">Username</p>
+                                <div className="flex flex-col items-start justify-center gap-3 border-t border-darkgreen/60 pt-4 w-full">
+                                    <Link to="/farmer/profile" className="flex flex-row items-center justify-start gap-3 pt-2 px-2 w-full">
+                                        <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-gradient-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                                            {profileInitials}
+                                        </div>
+                                        <p className="text-xl font-semibold text-darkgreen">Profile</p>
                                     </Link>
-                                    <button onClick={() => { logout() }} className="group flex flex-row items-center justify-start gap-2 p-2 bg-red-300 rounded-xl cursor-pointer w-full">
-                                        <ArrowLeftEndOnRectangleIcon className="size-8 stroke-red-600" />
-                                        <p className="text-red-600">Logout</p>
-                                    </button>
                                     <button to={"/serviceprovider"} onClick={() => { changeRole() }} className="group flex flex-row items-center justify-start gap-2 p-2 text-gold rounded-xl border-gold border cursor-pointer hover:bg-gold hover:text-darkgreen bg-darkgreen transition-all ease-in duration-100 w-full">
                                         <ArrowsRightLeftIcon className="size-8 stroke-gold group-hover:stroke-darkgreen" />
                                         <p>Switch to Service Provider</p>
@@ -243,5 +204,5 @@ export default function SideNav() {
                 </div>
             }
         </>
-    )
+    );
 }

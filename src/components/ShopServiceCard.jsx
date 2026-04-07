@@ -1,7 +1,7 @@
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
-export default function ShopServiceCard({ item, onEdit, onDelete }) {
+export default function ShopServiceCard({ item, onEdit, onDelete, hideSubtitle = false }) {
   const [hovered, setHovered] = useState(false);
   const subtitle = item.brand || item.seller || item.location || "Listing";
   const secondaryValue = item.stock || item.location || "Available";
@@ -62,7 +62,7 @@ export default function ShopServiceCard({ item, onEdit, onDelete }) {
       <div className="flex flex-1 flex-col gap-4 p-4">
         <div>
           <div className="mb-1 text-[15px] font-bold text-white">{item.name}</div>
-          <div className="text-xs text-white/60">{subtitle}</div>
+          {!hideSubtitle && <div className="text-xs text-white/60">{subtitle}</div>}
         </div>
 
         <div className="grid grid-cols-2 gap-2">

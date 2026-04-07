@@ -8,6 +8,28 @@ import {
     XCircleIcon,
 } from "@heroicons/react/24/outline";
 
+const normalizeContract = (contract = {}) => ({
+    ...contract,
+    crop: contract.crop || "Contract Crop",
+    variety: contract.variety || "",
+    company: contract.company || "Kisan Connect Partner",
+    companyType: contract.companyType || "Agri Partner",
+    region: contract.region || "Region not specified",
+    minLand: Number(contract.minLand || 0),
+    totalLand: Number(contract.totalLand || 0),
+    acceptedLand: Number(contract.acceptedLand || 0),
+    farmersNeeded: Number(contract.farmersNeeded || 0),
+    paymentTerms: contract.paymentTerms || "To be discussed",
+    inputSupport: Boolean(contract.inputSupport),
+    status: contract.status || "Active",
+    priceMin: Number(contract.priceMin || 0),
+    priceMax: Number(contract.priceMax || 0),
+    duration: contract.duration || "Flexible",
+    season: contract.season || "Current season",
+    qualityStd: contract.qualityStd || "",
+    notes: contract.notes || "",
+});
+
 // ─── My Application Row ───────────────────────────────────────────────────────
 function MyApplicationRow({ app }) {
     const contract = app.contract;
@@ -45,7 +67,7 @@ function ContractFarmingCard({ contract, applied, onApply }) {
         : 0;
 
     return (
-        <div className="flex h-full flex-col overflow-hidden rounded-[18px] border bg-black font-montserrat transition-all duration-200 hover:-translate-y-1"
+        <div className="flex h-full flex-col overflow-hidden rounded-[18px] border bg-black font-montserrat"
             style={{ borderColor: "#d4af37", boxShadow: "0 0 0 1px rgba(212, 175, 55, 0.26), 0 12px 28px rgba(0, 0, 0, 0.42)" }}>
             {/* Image area */}
             <div className="bg-darkgreen rounded-t-xl flex items-center justify-center h-40 relative border-b border-gold/20">
@@ -112,9 +134,9 @@ function ContractFarmingCard({ contract, applied, onApply }) {
 
                 {/* Show more */}
                 <button onClick={() => setShowDetails(d => !d)}
-                    className="flex flex-row items-center gap-1 text-xs text-gold hover:text-gold/70 transition-all">
+                    className="flex flex-row items-center gap-1 text-xs text-gold hover:text-gold/70">
                     {showDetails ? "Hide details" : "View full details"}
-                    <ChevronDownIcon className={`size-4 transition-transform duration-200 ${showDetails ? "rotate-180" : ""}`} />
+                    <ChevronDownIcon className={`size-4 ${showDetails ? "rotate-180" : ""}`} />
                 </button>
 
                 {showDetails && (
@@ -150,7 +172,7 @@ function ContractFarmingCard({ contract, applied, onApply }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ContractFarming() {
-    const { isOpen, setIsOpen, axios } = UseAppContext();
+    const { isOpen, setIsOpen, axios, addBooking } = UseAppContext();
     const applyRef = useRef(null);
 
     const [contracts, setContracts] = useState([]);
@@ -179,12 +201,12 @@ export default function ContractFarming() {
             const { data } = await axios.get("/api/contractfarming/all");
             if (data.success) {
                 // Compute accepted land for each contract
-                setContracts(data.contracts.map(c => ({ ...c, acceptedLand: 0 })));
+                setContracts((data.contracts || []).map(c => normalizeContract({ ...c, acceptedLand: 0 })));
             } else {
-                alert(data.message);
+                setContracts([]);
             }
         } catch (error) {
-            alert(error.message);
+            setContracts([]);
         }
     };
 
@@ -234,6 +256,16 @@ export default function ContractFarming() {
             });
             if (data.success) {
                 setApplied(true);
+                addBooking({
+                    module: "Contract Farming",
+                    itemName: targetContract.crop,
+                    providerName: targetContract.company,
+                    image: "/contractdoc.svg",
+                    priceLabel: `₹${targetContract.priceMin.toLocaleString()} - ₹${targetContract.priceMax.toLocaleString()} / quintal`,
+                    summary: `${fLand} acres • ${fDistrict || fState || "Region shared"} • ${targetContract.season}`,
+                    notificationTitle: "Contract interest message",
+                    notificationDetail: `Applied for ${targetContract.crop} contract with ${fLand} acres in ${fDistrict || fState || "the selected region"}.`,
+                });
                 // Add to local applications list with populated contract
                 setMyApplications(prev => [{
                     ...data.application,
@@ -254,9 +286,9 @@ export default function ContractFarming() {
         let list = [...contracts];
         if (search)
             list = list.filter(c =>
-                c.crop.toLowerCase().includes(search.toLowerCase()) ||
-                c.company.toLowerCase().includes(search.toLowerCase()) ||
-                c.region.toLowerCase().includes(search.toLowerCase())
+                (c.crop || "").toLowerCase().includes(search.toLowerCase()) ||
+                (c.company || "").toLowerCase().includes(search.toLowerCase()) ||
+                (c.region || "").toLowerCase().includes(search.toLowerCase())
             );
         return list;
     }, [contracts, search]);
@@ -265,8 +297,18 @@ export default function ContractFarming() {
         return (
             <>
                 <SideNav />
-                <div className={`flex items-center justify-center h-dvh ${isOpen ? "md:ml-52" : "md:ml-16"}`}>
-                    <p className="text-white font-montserrat font-bold text-lg animate-pulse">Loading contracts...</p>
+                <div className={`flex min-h-dvh flex-col bg-black ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
+                    <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
+                        <ModuleHeader
+                            title="Contract Farming"
+                            search={search}
+                            onSearchChange={setSearch}
+                            onOpenSidebar={() => setIsOpen(!isOpen)}
+                        />
+                        <div className="flex flex-1 items-center justify-center px-6">
+                            <p className="text-white font-montserrat font-bold text-lg">Loading contracts...</p>
+                        </div>
+                    </div>
                 </div>
             </>
         );
@@ -276,8 +318,8 @@ export default function ContractFarming() {
         <>
             <SideNav />
 
-            <div className={`flex min-h-dvh flex-col bg-darkgreen transition-all duration-300 ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
-                <div className="my-4 mr-2 ml-0 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mr-6 md:ml-2">
+            <div className={`flex min-h-dvh flex-col bg-black ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
+                <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
                     <ModuleHeader
                         title="Contract Farming"
                         search={search}
@@ -331,28 +373,28 @@ export default function ContractFarming() {
 
             {/* Apply dialog */}
             <dialog ref={applyRef} className="m-auto p-0 rounded-xl bg-transparent backdrop:backdrop-blur-sm w-full max-w-lg">
-                <div className="bg-darkgreen border-2 border-gold rounded-xl font-montserrat overflow-hidden">
+                <div className="overflow-hidden rounded-[22px] border border-gold/30 bg-black font-montserrat shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
                     {/* Header */}
-                    <div className="bg-gold px-6 py-4 flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between gap-3 border-b border-gold/20 bg-[#050505] px-6 py-4">
                         <div>
-                            <h2 className="text-darkgreen font-black text-lg">Apply for Contract</h2>
+                            <h2 className="text-gold font-black text-lg">Apply for Contract</h2>
                             {targetContract && (
-                                <p className="text-darkgreen/70 text-sm mt-0.5">
+                                <p className="mt-0.5 text-sm text-white/55">
                                     {targetContract.crop}{targetContract.variety ? ` — ${targetContract.variety}` : ""} · {targetContract.company}
                                 </p>
                             )}
                         </div>
                         <button type="button" onClick={() => applyRef.current.close()}>
-                            <XCircleIcon className="size-8 cursor-pointer hover:rotate-90 transition-all ease-in duration-200 text-darkgreen hover:text-red-600" />
+                            <XCircleIcon className="size-8 cursor-pointer text-white/80 transition-all ease-in duration-200 hover:rotate-90 hover:text-red-500" />
                         </button>
                     </div>
 
-                    <div className="p-6">
+                    <div className="bg-black p-6">
                         {!applied ? (
                             <>
                                 {/* Quick contract summary */}
                                 {targetContract && (
-                                    <div className="bg-black/30 border border-gold/30 rounded-lg px-4 py-3 mb-5 grid grid-cols-3 gap-3 text-center">
+                                    <div className="mb-5 grid grid-cols-3 gap-3 rounded-[18px] border border-gold/20 bg-[#050505] px-4 py-4 text-center">
                                         {[
                                             ["Price", `₹${targetContract.priceMin.toLocaleString()}-${targetContract.priceMax.toLocaleString()}`],
                                             ["Min Land", `${targetContract.minLand} acres`],
@@ -377,19 +419,19 @@ export default function ContractFarming() {
                                         ["Years of Experience *", fExperience, setFExperience, "number", "e.g. 8"],
                                         ["Current Crop Grown", fCrop, setFCrop, "text", "e.g. Paddy, Cotton..."],
                                     ].map(([label, val, setter, type, ph]) => (
-                                        <div key={label} className="flex flex-row gap-2 items-center">
-                                            <label className="text-gold font-bold text-sm w-36 shrink-0">{label}</label>
+                                        <div key={label} className="rounded-[16px] border border-gold/15 bg-[#050505] px-4 py-3">
+                                            <label className="mb-2 block text-sm font-bold text-gold">{label}</label>
                                             <input type={type} placeholder={ph} value={val}
                                                 onChange={e => setter(e.target.value)}
-                                                className="flex-1 border-b-2 border-b-gold/40 focus:border-b-gold focus:outline-none bg-transparent text-white text-sm py-1 transition-all" />
+                                                className="w-full rounded-[12px] border border-gold/15 bg-black px-3 py-3 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:border-gold/45" />
                                         </div>
                                     ))}
 
-                                    <div className="flex flex-row gap-2 items-start">
-                                        <label className="text-gold font-bold text-sm w-36 shrink-0 pt-1">Message to Company</label>
+                                    <div className="rounded-[16px] border border-gold/15 bg-[#050505] px-4 py-3">
+                                        <label className="mb-2 block text-sm font-bold text-gold">Message to Company</label>
                                         <textarea rows={2} value={fMessage} onChange={e => setFMessage(e.target.value)}
                                             placeholder="Why are you a good fit for this contract?"
-                                            className="flex-1 border-b-2 border-b-gold/40 focus:border-b-gold focus:outline-none bg-transparent text-white text-sm py-1 resize-none transition-all" />
+                                            className="min-h-[88px] w-full resize-none rounded-[12px] border border-gold/15 bg-black px-3 py-3 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:border-gold/45" />
                                     </div>
 
                                     {targetContract && fLand && Number(fLand) < targetContract.minLand && (

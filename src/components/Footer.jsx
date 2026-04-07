@@ -1,7 +1,6 @@
 import { NavLink } from "react-router"
-import { MapPinIcon, EnvelopeIcon, PhoneIcon, UserIcon } from "@heroicons/react/16/solid"
+import { MapPinIcon, EnvelopeIcon, PhoneIcon } from "@heroicons/react/16/solid"
 import { useState } from "react"
-import GoUp from "./GoUp";
 
 export default function Footer() {
 

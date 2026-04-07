@@ -237,7 +237,7 @@ export default function ServiceProviderStorageContent({
           style={{
             flex: 1,
             padding: "24px",
-            background: "#081D0C",
+            background: "#000000",
           }}
         >
           {storages.length === 0 ? (

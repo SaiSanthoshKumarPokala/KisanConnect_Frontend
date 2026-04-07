@@ -1,6 +1,5 @@
 import NavBar from "../components/NavBar";
 import Yield from "/yield.svg"
-import Tick from "/tick.svg"
 import Prize from "/prize.svg"
 import Disease from "/disease.svg"
 import Best from "/best.svg"
@@ -8,16 +7,10 @@ import Contract from "/contract.svg";
 import Fertilizers from "/fertilizers.svg";
 import Transport from "/transport.svg";
 import Rentals from "/rentals.svg";
-import Forward from "/Forward.svg";
-import React from "react";
-import { useState, useRef } from "react";
-import Authentication from "./Authentication";
+import { useState } from "react";
 import Footer from "../components/Footer";
-import { ChevronRightIcon, ArrowLongRightIcon, CheckIcon, CheckBadgeIcon, ChevronLeftIcon } from "@heroicons/react/24/solid";
+import { ChevronRightIcon, CheckIcon, CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { Link } from "react-router";
-import { Bars3Icon } from "@heroicons/react/16/solid";
-import SideNav from "../components/SideNav";
-import GoUp from "../components/GoUp";
 
 export default function Landing() {
 
@@ -39,9 +32,6 @@ export default function Landing() {
 
     return (
         <>
-            {/* <Authentication/> */}
-            {/* <img src="/hero.png" alt="" className="absolute h-dvh w-[2000px] object-cover md:object-cover md:w-dvw md:h-lvh bg-black" /> */}
-            {/* For medium and large screens */}
             <div className="hidden md:block relative font-montserrat bg-[url(/hero.png)] bg-cover bg-center bg-darkgreen">
                 <NavBar />
                 <div>

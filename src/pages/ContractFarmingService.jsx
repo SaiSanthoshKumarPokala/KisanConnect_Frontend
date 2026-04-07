@@ -58,6 +58,26 @@ const SAMPLE_CONTRACTS = [
     },
 ];
 
+const normalizeServiceContract = (contract = {}) => ({
+    ...contract,
+    _id: contract._id || `contract-${Date.now()}`,
+    crop: contract.crop || "Contract Crop",
+    variety: contract.variety || "",
+    company: contract.company || "Kisan Connect Partner",
+    region: contract.region || "Region not specified",
+    season: contract.season || "Current season",
+    minLand: Number(contract.minLand || 0),
+    totalLand: Number(contract.totalLand || 0),
+    farmersNeeded: Number(contract.farmersNeeded || 0),
+    duration: contract.duration || "Flexible",
+    priceMin: Number(contract.priceMin || 0),
+    priceMax: Number(contract.priceMax || 0),
+    paymentTerms: contract.paymentTerms || "To be discussed",
+    inputSupport: Boolean(contract.inputSupport),
+    status: contract.status || "Active",
+    applications: Array.isArray(contract.applications) ? contract.applications : [],
+});
+
 // ─── Farmer Application Row ───────────────────────────────────────────────────
 function ApplicationRow({ app, onDecision }) {
     const statusStyle = {
@@ -103,7 +123,7 @@ function ContractFarmingServiceCard({ contract, onDecision, onClose }) {
     const accepted = contract.applications.filter(a => a.status === "Accepted").length;
 
     return (
-        <div className="flex h-full flex-col overflow-hidden rounded-[18px] border bg-black font-montserrat transition-all duration-200 hover:-translate-y-1"
+        <div className="flex h-full flex-col overflow-hidden rounded-[18px] border bg-black font-montserrat"
             style={{ borderColor: "#d4af37", boxShadow: "0 0 0 1px rgba(212, 175, 55, 0.26), 0 12px 28px rgba(0, 0, 0, 0.42)" }}>
             {/* Image area */}
             <div className="bg-darkgreen rounded-t-xl flex items-center justify-center h-40 relative border-b border-gold/20">
@@ -177,9 +197,9 @@ function ContractFarmingServiceCard({ contract, onDecision, onClose }) {
                 {/* View applications */}
                 {contract.applications.length > 0 ? (
                     <button onClick={() => setShowApps(s => !s)}
-                        className="flex flex-row items-center justify-center gap-2 bg-gold hover:bg-linear-to-r hover:from-gold hover:to-yellow-200 text-darkgreen font-bold py-2 px-2 cursor-pointer w-full rounded-lg transition-all ease-in duration-150">
+                        className="flex flex-row items-center justify-center gap-2 bg-gold hover:bg-linear-to-r hover:from-gold hover:to-yellow-200 text-darkgreen font-bold py-2 px-2 cursor-pointer w-full rounded-lg">
                         {showApps ? "Hide" : "View"} Farmer Applications
-                        <ChevronDownIcon className={`size-4 transition-transform duration-200 ${showApps ? "rotate-180" : ""}`} />
+                        <ChevronDownIcon className={`size-4 ${showApps ? "rotate-180" : ""}`} />
                     </button>
                 ) : (
                     <div className="w-full text-center py-2 text-white/30 text-xs border border-white/10 rounded-lg">
@@ -242,15 +262,15 @@ export default function ContractFarmingService() {
         try {
             const { data } = await axios.get("/api/contractfarming/mycontracts");
             if (data.success) {
-                const nextContracts = data.contracts.length > 0 ? data.contracts : SAMPLE_CONTRACTS;
+                const nextContracts = (data.contracts?.length > 0 ? data.contracts : SAMPLE_CONTRACTS).map(normalizeServiceContract);
                 setContracts(nextContracts);
                 setIsEmpty(nextContracts.length === 0);
             } else {
-                setContracts(SAMPLE_CONTRACTS);
+                setContracts(SAMPLE_CONTRACTS.map(normalizeServiceContract));
                 setIsEmpty(false);
             }
         } catch (error) {
-            setContracts(SAMPLE_CONTRACTS);
+            setContracts(SAMPLE_CONTRACTS.map(normalizeServiceContract));
             setIsEmpty(false);
         } finally {
             setLoading(false);
@@ -330,68 +350,58 @@ export default function ContractFarmingService() {
         }
     };
 
-    if (loading) {
-        return (
-            <>
-                <SideNav />
-                <div className={`flex items-center justify-center h-dvh ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
-                    <p className="text-white font-montserrat font-bold text-lg animate-pulse">Loading contracts...</p>
-                </div>
-            </>
-        );
-    }
-
     return (
         <>
             <SideNav />
+            <div className={`min-h-dvh bg-black ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
+                <div className="mx-2 my-4 flex min-h-[calc(100dvh-2rem)] flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black font-montserrat shadow-2xl md:mx-6">
+                    <ModuleHeader
+                        title="Contract Management"
+                        search=""
+                        onSearchChange={() => {}}
+                        onOpenSidebar={() => setIsOpen(!isOpen)}
+                    />
 
-            {isEmpty ? (
-                /* Empty state */
-                <div className={`min-h-dvh bg-darkgreen ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
-                    <div className="mx-2 my-4 flex min-h-[calc(100dvh-2rem)] flex-col items-center justify-center gap-6 rounded-[26px] border border-gold/30 bg-black p-10 text-center shadow-2xl md:mx-6">
-                    <p className="font-bold text-xl text-white font-montserrat text-wrap">
-                        You haven't posted any contracts yet. Get started by adding one.
-                    </p>
-                    <div className="w-full max-w-[320px]">
-                        <AddModuleCard
-                            onAdd={() => setShowFormModal(true)}
-                            title="Add Contract Farming"
-                            subtitle="Create your first contract listing"
-                            minHeight={320}
-                        />
-                    </div>
-                    </div>
+                    {loading ? (
+                        <div className="flex flex-1 items-center justify-center px-6">
+                            <p className="text-white font-montserrat font-bold text-lg">Loading contracts...</p>
+                        </div>
+                    ) : isEmpty ? (
+                        <div className="flex flex-1 flex-col items-center justify-center gap-6 p-10 text-center">
+                            <p className="font-bold text-xl text-white font-montserrat text-wrap">
+                                You haven't posted any contracts yet. Get started by adding one.
+                            </p>
+                            <div className="w-full max-w-[320px]">
+                                <AddModuleCard
+                                    onAdd={() => setShowFormModal(true)}
+                                    title="Add Contract Farming"
+                                    subtitle="Create your first contract listing"
+                                    minHeight={320}
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bg-black p-6">
+                            <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px]">
+                                {contracts.map(c => (
+                                    <ContractFarmingServiceCard
+                                        key={c._id}
+                                        contract={c}
+                                        onDecision={handleDecision}
+                                        onClose={handleClose}
+                                    />
+                                ))}
+                                <AddModuleCard
+                                    onAdd={() => setShowFormModal(true)}
+                                    title="Add Contract Farming"
+                                    subtitle="Create one more contract listing"
+                                    minHeight={360}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
-            ) : (
-                <div className={`min-h-dvh bg-darkgreen ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
-                    <div className="mx-2 my-4 overflow-hidden rounded-[26px] border border-gold/30 bg-darkgreen font-montserrat shadow-2xl md:mx-6">
-                        <ModuleHeader
-                            title="Contract Management"
-                            search=""
-                            onSearchChange={() => {}}
-                            onOpenSidebar={() => setIsOpen(!isOpen)}
-                        />
-                    <div className="bg-[#081D0C] p-6">
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px]">
-                        {contracts.map(c => (
-                            <ContractFarmingServiceCard
-                                key={c._id}
-                                contract={c}
-                                onDecision={handleDecision}
-                                onClose={handleClose}
-                            />
-                        ))}
-                        <AddModuleCard
-                            onAdd={() => setShowFormModal(true)}
-                            title="Add Contract Farming"
-                            subtitle="Create one more contract listing"
-                            minHeight={360}
-                        />
-                    </div>
-                    </div>
-                    </div>
-                </div>
-            )}
+            </div>
 
             {showFormModal && (
             <div
@@ -433,7 +443,7 @@ export default function ContractFarmingService() {
                 </div>
                 </div>
 
-                <div className="bg-[#081D0C] p-6">
+                <div className="bg-black p-6">
                 <div className="mx-auto max-w-4xl rounded-[18px] border border-gold/20 bg-black/20 p-6">
                 <div className="mb-5 text-sm text-white/60">
                     Fill the basic details for your contract listing so farmers can understand crop, pricing, land requirements, and payment terms at a glance.

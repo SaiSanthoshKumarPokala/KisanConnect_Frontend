@@ -103,10 +103,10 @@ export default function RentalsService() {
   };
 
   return (
-    <div className="bg-darkgreen min-h-dvh">
+    <div className="bg-black min-h-dvh">
       <SideNav />
       <div className={`flex min-h-dvh flex-col transition-all duration-300 ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
-        <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-darkgreen font-montserrat shadow-2xl md:mx-6">
+        <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black font-montserrat shadow-2xl md:mx-6">
           <ModuleHeader
             title="My Rentals"
             search={search}
@@ -115,7 +115,7 @@ export default function RentalsService() {
           />
 
           {rentals.length === 0 ? (
-            <div className="flex min-h-[calc(100dvh-9rem)] flex-1 flex-col items-center justify-center gap-6 bg-[#081D0C] p-10 text-center">
+            <div className="flex min-h-[calc(100dvh-9rem)] flex-1 flex-col items-center justify-center gap-6 bg-black p-10 text-center">
               <p className="max-w-xl text-xl font-bold text-white">
                 You do not provide any rental service yet. Add your first machine to start receiving requests.
               </p>
@@ -129,14 +129,14 @@ export default function RentalsService() {
               </div>
             </div>
           ) : filteredRentals.length === 0 ? (
-            <div className="flex min-h-[calc(100dvh-9rem)] flex-1 flex-col items-center justify-center gap-3 bg-[#081D0C] p-10 text-center">
+            <div className="flex min-h-[calc(100dvh-9rem)] flex-1 flex-col items-center justify-center gap-3 bg-black p-10 text-center">
               <p className="text-xl font-bold text-white">No rental cards match your search.</p>
               <button onClick={() => setSearch("")} className="text-sm font-bold text-gold underline underline-offset-4">
                 Clear Search
               </button>
             </div>
           ) : (
-            <div className="flex-1 bg-[#081D0C] p-6">
+            <div className="flex-1 bg-black p-6">
             <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px]">
               {filteredRentals.map((item) => (
                 <RentalsServiceCard key={item.id} item={item} onEdit={handleEdit} onDelete={handleDelete} />

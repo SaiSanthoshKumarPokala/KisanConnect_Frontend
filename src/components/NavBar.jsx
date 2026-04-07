@@ -1,20 +1,13 @@
-import { useRef, useState, useEffect, useContext } from "react"
-import { NavLink, Link, Navigate, useNavigate } from "react-router"
-import { Bars3Icon, XMarkIcon, UserCircleIcon, ChevronLeftIcon, ChevronRightIcon, XCircleIcon } from '@heroicons/react/24/solid'
-import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
-import SideNav from "./SideNav";
-import { LinkIcon } from "@heroicons/react/16/solid";
-import { RoleContext } from "../context/Contexts";
+import { useState } from "react"
+import { NavLink, Link } from "react-router"
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid'
 import { UseAppContext } from "../context/AppContext";
 
 export default function NavBar() {
 
 
-    const { role, setRole, user, navigate, token, logout } = UseAppContext();
+    const { role, navigate, token, logout } = UseAppContext();
     const [open, setOpen] = useState(false);
-
-
-
     return (
         <>
             {/* For medium and large screens */}
@@ -37,14 +30,6 @@ export default function NavBar() {
                         </div>
                         :
                         <Link to="/auth" className="px-5 py-1.5 text-white text-xl rounded-xl border-gold border hover:cursor-pointer hover:bg-gold hover:text-darkgreen bg-darkgreen transition-all ease-in duration-100">Login</Link>}
-
-                    {/* <div id="google_translate_element"></div> */}
-                    {/* {
-                        role == "serviceprovider" ?
-                            <Link to={"/farmer"} onClick={() => { roles.setRole("farmer") }} className="flex items-center gap-2 px-5 py-1.5 text-white text-xl rounded-xl border-gold border hover:cursor-pointer hover:bg-gold hover:text-darkgreen hover:font-bold bg-darkgreen transition-all ease-in duration-100"><ArrowsRightLeftIcon className="size-6" /> <p>Switch to Farmer</p></Link> :
-                            <Link to={"/serviceprovider"} onClick={() => { roles.setRole("serviceprovider") }} className="flex items-center gap-2 px-5 py-1.5 text-white text-xl rounded-xl border-gold border hover:cursor-pointer hover:bg-gold hover:text-darkgreen bg-darkgreen transition-all ease-in duration-100"><ArrowsRightLeftIcon className="size-6" /> <p>Switch to Service Provider</p></Link>
-                    } */}
-
                 </div>
             </nav>
 
@@ -75,27 +60,6 @@ export default function NavBar() {
                     </div>}
             </nav>
 
-            {/* <div className="group p-2 rounded-tr-2xl rounded-br-2xl bg-gradient-to-bl from-gold to-yellow-200 relative top-6 text-white font-bold left-0 flex flex-row items-center w-fit cursor-pointer"
-                onClick={() => { dial.current.show(); setIsOpen(true) }} >
-                <p className="text-darkgreen">Dashboard</p>
-                <ChevronRightIcon className="size-8 p-2 rounded-tr-2xl rounded-br-2xl fill-darkgreen group-hover:fill-white group-hover:translate-x-2 transition-all ease-in duration-300" />
-            </div>
-
-
-            <dialog ref={dial} closedby="any" className="w-fit h-dvh absolute p-6 bg-gradient-to-br from-gold to-yellow-200 left-0 -top-0 rounded-r-xl text-white font-bold">
-                <div className="flex flex-row justify-between items-center gap-8">
-                    <Link to="/dashboard" className="text-2xl hover:underline hover:underline-offset-2">Dashboard</Link>
-                    <XCircleIcon className="size-8 cursor-pointer hover:rotate-90 hover:fill-darkgreen transition-all ease-in duration-300" onClick={() => { dial.current.close(); setIsOpen(false) }} />
-                </div>
-                <div className="flex flex-col items-start justify-evenly my-4 gap-4 text-darkgreen">
-                    <Link to="/aitoolkit" className="mx-2 hover:underline hover:underline-offset-4">AI Toolkit</Link>
-                    <Link to="/rentals" className="mx-2 hover:underline hover:underline-offset-4">Rentals</Link>
-                    <Link to="/shop" className="mx-2 hover:underline hover:underline-offset-4">Shop</Link>
-                    <Link to="/transport" className="mx-2 hover:underline hover:underline-offset-4">Transport</Link>
-                    <Link to="/coldstorage" className="mx-2 hover:underline hover:underline-offset-4">Cold Storage</Link>
-                    <Link to="/contractfarming" className="mx-2 hover:underline hover:underline-offset-4">Contract Farming</Link>
-                </div>
-            </dialog> */}
         </>
     )
 }
