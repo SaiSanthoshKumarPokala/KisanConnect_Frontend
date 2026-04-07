@@ -28,6 +28,8 @@ import ContractFarmingService from './pages/ContractFarmingService';
 import FarmerStorageListing from './pages/FarmerStorageListing';
 import ServiceProviderStorageListing from './pages/ServiceProviderStorageListing';
 import NotificationPanel from './components/NotificationPanel';
+import Cart from './pages/Cart';
+import Marketplace from './pages/Marketplace';
 
 
 const Wrapper = ({ children }) => {
@@ -60,9 +62,11 @@ export default function App() {
 						<Route path='/farmer'>
 							<Route index element={<Dashboard />} />
 							<Route path='/farmer/shop' element={<Shop />} />
+							<Route path='/farmer/marketplace' element={<Marketplace />} />
 							<Route path='/farmer/rentals' element={<Rentals />} />
 							<Route path='/farmer/transport' element={<Transport />} />
 							<Route path='/farmer/coldstorage' element={<FarmerStorageListing />} />
+							<Route path='/farmer/cart' element={<Cart />} />
 							<Route path='/farmer/profile' element={<FProfile />} />
 							<Route path='/farmer/contract' element={<ContractFarming />} />
 						</Route>
@@ -71,7 +75,9 @@ export default function App() {
 							<Route path='/serviceprovider/transport' element={<TransportService />} />
 							<Route path='/serviceprovider/rentals' element={<RentalsService />} />
 							<Route path='/serviceprovider/shop' element={<ShopService />} />
+							<Route path='/serviceprovider/marketplace' element={<Marketplace />} />
 							<Route path='/serviceprovider/coldstorage' element={<ServiceProviderStorageListing />} />
+							<Route path='/serviceprovider/cart' element={<Cart />} />
 							<Route path='/serviceprovider/profile' element={<SPProfile />} />
 							<Route path='/serviceprovider/contract' element={<ContractFarmingService/>} />
 						</Route>

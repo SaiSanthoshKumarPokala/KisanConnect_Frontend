@@ -1,10 +1,37 @@
 import { useMemo, useState } from "react";
-import ProductCard from "../components/ProductCard";
+import { useLocation } from "react-router";
 import SideNav from "../components/SideNav";
 import ModuleHeader from "../components/ModuleHeader";
 import ModuleFilters from "../components/ModuleFilters";
+import ProductCard from "../components/ProductCard";
+import ShopServiceCard from "../components/ShopServiceCard";
+import ServiceProviderCatalogForm from "../components/ServiceProviderCatalogForm";
 import { UseAppContext } from "../context/AppContext";
-import { useLocation } from "react-router";
+
+const DEFAULT_MARKET_IMAGE = "/shop.avif";
+
+const marketplaceFields = [
+  { key: "name", label: "Item Name", placeholder: "Enter crop or produce name", required: true },
+  { key: "category", label: "Category", type: "select", options: ["Vegetables", "Fruits", "Crops", "Spices", "Dairy", "Other"], required: true },
+  { key: "price", label: "Price Per Unit", type: "number", placeholder: "Enter price", required: true },
+  { key: "stock", label: "Available Quantity", placeholder: "Eg: 500 kg or 2 tonnes", required: true },
+  { key: "location", label: "Farm Location", placeholder: "Enter location", required: true },
+  { key: "availability", label: "Status", type: "select", options: ["Available", "Booked", "Out of Stock"], required: true },
+  { key: "description", label: "Description", type: "textarea", placeholder: "Share quality, harvest timing, or handling details", required: true },
+];
+
+const initialForm = {
+  name: "",
+  seller: "",
+  price: "",
+  rating: 4.5,
+  category: "Vegetables",
+  stock: "",
+  location: "",
+  image: DEFAULT_MARKET_IMAGE,
+  description: "",
+  availability: "Available",
+};
 
 const inputStyle = {
   width: "100%",
@@ -18,93 +45,24 @@ const inputStyle = {
   fontFamily: "'Montserrat', sans-serif",
 };
 
-const SHOP_UI_DATA = [
-  {
-    _id: "ui-1",
-    name: "Premium Urea",
-    seller: "GreenLeaf Agro Store",
-    price: 500,
-    rating: 4.6,
-    category: "Fertilizers",
-    state: "telangana",
-    image: "/urea.png",
-    description: "Balanced nitrogen support for strong vegetative crop growth.",
-    availability: "Available",
-  },
-  {
-    _id: "ui-2",
-    name: "Hybrid Paddy Seeds",
-    seller: "Kisan Seed House",
-    price: 820,
-    rating: 4.8,
-    category: "Seeds",
-    state: "andhra pradesh",
-    image: "/seeds.webp",
-    description: "High-yield seed variety suited for strong germination rates.",
-    availability: "Available",
-  },
-  {
-    _id: "ui-3",
-    name: "Crop Shield Pesticide",
-    seller: "Agri Protect",
-    price: 680,
-    rating: 4.4,
-    category: "Pesticides",
-    state: "maharashtra",
-    image: "/fertilizers.png",
-    description: "Protective treatment for common seasonal pest pressure.",
-    availability: "Out of Stock",
-  },
-  {
-    _id: "ui-4",
-    name: "Power Sprayer Kit",
-    seller: "Field Tools Hub",
-    price: 2450,
-    rating: 4.5,
-    category: "Equipment",
-    state: "karnataka",
-    image: "/shop.avif",
-    description: "Durable spraying setup for field care and quick application cycles.",
-    availability: "Available",
-  },
-  {
-    _id: "ui-5",
-    name: "Organic Soil Booster",
-    seller: "Nature Root Supplies",
-    price: 740,
-    rating: 4.7,
-    category: "Fertilizers",
-    state: "kerala",
-    image: "/fertilizers.svg",
-    description: "Organic nutrient blend for healthier soil structure and recovery.",
-    availability: "Booked",
-  },
-  {
-    _id: "ui-6",
-    name: "Vegetable Seed Pack",
-    seller: "FreshGrow Traders",
-    price: 360,
-    rating: 4.3,
-    category: "Seeds",
-    state: "telangana",
-    image: "/seeds.webp",
-    description: "Mixed seed pack for kitchen-garden and market crop planting.",
-    availability: "Available",
-  },
-];
-
-export default function Shop() {
+export default function Marketplace() {
   const location = useLocation();
-  const { isOpen, setIsOpen } = UseAppContext();
+  const isFarmerRoute = location.pathname.startsWith("/farmer");
+  const {
+    isOpen,
+    setIsOpen,
+    user,
+    marketplaceListings,
+    addMarketplaceListing,
+    updateMarketplaceListing,
+    deleteMarketplaceListing,
+  } = UseAppContext();
+
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   const [showBooked, setShowBooked] = useState(false);
-  const [products] = useState([]);
-  const filters = ["All", "Fertilizers", "Seeds", "Pesticides", "Equipment"];
-  const isFarmerRoute = location.pathname.startsWith("/farmer");
-  const pageTitle = isFarmerRoute ? "Agri Marketplace" : "Shop Marketplace";
-  const cartEnabled = location.pathname.startsWith("/farmer") || location.pathname.startsWith("/serviceprovider");
-
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [editingListing, setEditingListing] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [activeDetailTab, setActiveDetailTab] = useState("about");
   const [bookingForm, setBookingForm] = useState({
@@ -113,6 +71,24 @@ export default function Shop() {
     contactNumber: "",
     notes: "",
   });
+
+  const filters = ["All", "Vegetables", "Fruits", "Crops", "Spices", "Dairy", "Other"];
+
+  const filteredListings = useMemo(() => {
+    return marketplaceListings.filter((item) => {
+      const query = search.trim().toLowerCase();
+      const matchesSearch =
+        !query ||
+        item.name.toLowerCase().includes(query) ||
+        item.seller.toLowerCase().includes(query) ||
+        item.location.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query);
+      const matchesCategory = activeFilter === "All" || item.category === activeFilter;
+      const isItemBooked = item.availability === "Booked" || item.availability === "Out of Stock";
+      const matchesBooked = showBooked ? isItemBooked : true;
+      return matchesSearch && matchesCategory && matchesBooked;
+    });
+  }, [activeFilter, marketplaceListings, search, showBooked]);
 
   const resetBookingForm = () => {
     setBookingForm({
@@ -145,28 +121,44 @@ export default function Shop() {
     setSelectedItem(null);
   };
 
-  const displayProducts = products.length > 0 ? products : SHOP_UI_DATA;
+  const handleOpenForm = () => {
+    setEditingListing(null);
+    setShowFormModal(true);
+  };
 
-  const filteredProducts = useMemo(() => {
-    return displayProducts.filter((item) => {
-      const query = search.trim().toLowerCase();
-      const matchesSearch =
-        !query ||
-        item.name.toLowerCase().includes(query) ||
-        item.seller.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query);
-      const matchesCategory = activeFilter === "All" || item.category === activeFilter;
-      
-      const isItemBooked = item.availability === "Booked" || item.availability === "Out of Stock";
-      const matchesBooked = showBooked ? isItemBooked : true;
+  const handleEdit = (item) => {
+    setEditingListing(item);
+    setShowFormModal(true);
+  };
 
-      return matchesSearch && matchesCategory && matchesBooked;
-    });
-  }, [displayProducts, activeFilter, search, showBooked]);
+  const handleCloseForm = () => {
+    setEditingListing(null);
+    setShowFormModal(false);
+  };
 
+  const handleSaveListing = (formData) => {
+    const payload = {
+      ...formData,
+      seller: editingListing?.seller || user?.name || "Farmer Market",
+      rating: editingListing?.rating || 4.6,
+      image: formData.image || DEFAULT_MARKET_IMAGE,
+      price: Number(formData.price),
+    };
+
+    if (editingListing) {
+      updateMarketplaceListing(editingListing.id, payload);
+    } else {
+      addMarketplaceListing(payload);
+    }
+
+    handleCloseForm();
+  };
+
+  const pageTitle = isFarmerRoute ? "Marketplace Listings" : "Farm Marketplace";
   const resultLabel =
-    activeFilter === "All" ? "showing all products" : `showing ${activeFilter.toLowerCase()}`;
-  const bookedLabel = showBooked ? "(Out of Stock/Booked)" : "";
+    activeFilter === "All" ? "showing all marketplace goods" : `showing ${activeFilter.toLowerCase()}`;
+  const bookedLabel = showBooked ? "(Booked / Out of Stock)" : "";
+  const addButtonLabel = isFarmerRoute ? "Add Marketplace" : "";
 
   return (
     <>
@@ -175,7 +167,6 @@ export default function Shop() {
         textarea::placeholder { color: rgba(255, 255, 255, 0.58) !important; }
         .kc-search-input::placeholder { color: rgba(17, 17, 17, 0.55) !important; }
         select option { background: #050505; color: #ffffff; }
-        
         .kc-modal-overlay {
           position: fixed;
           inset: 0;
@@ -203,75 +194,145 @@ export default function Shop() {
           .kc-booking-grid { grid-template-columns: 1fr; }
         }
       `}</style>
+
       <div className="min-h-dvh bg-darkgreen">
         <SideNav />
-        <div
-        className={`flex min-h-dvh flex-col transition-all duration-300 ${
-          isOpen ? "md:ml-[250px]" : "md:ml-[80px]"
-        }`}
-      >
-        <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
-          <ModuleHeader
-            title={pageTitle}
-            search={search}
-            onSearchChange={setSearch}
-            onOpenSidebar={() => setIsOpen(!isOpen)}
-          />
-          <ModuleFilters
-            filters={filters}
-            activeFilter={activeFilter}
-            setActiveFilter={setActiveFilter}
-            showBooked={showBooked}
-            setShowBooked={setShowBooked}
-          />
+        <div className={`flex min-h-dvh flex-col transition-all duration-300 ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
+          <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
+            <ModuleHeader
+              title={pageTitle}
+              search={search}
+              onSearchChange={setSearch}
+              onOpenSidebar={() => setIsOpen(!isOpen)}
+            />
 
-          <div className="flex flex-wrap items-center gap-2 px-6 pt-4">
-            <span className="font-montserrat text-sm font-bold text-white">
-              {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""} found
-            </span>
-            <span className="font-montserrat text-xs text-white/60">
-              . {resultLabel} {bookedLabel}
-            </span>
-            {search.trim() && (
-              <span className="font-montserrat text-xs text-[#FFF085]">
-                . matching "{search.trim()}"
-              </span>
+            <ModuleFilters
+              filters={filters}
+              activeFilter={activeFilter}
+              setActiveFilter={setActiveFilter}
+              {...(!isFarmerRoute ? { showBooked, setShowBooked } : {})}
+            />
+
+            {isFarmerRoute ? (
+              <>
+                <div className="flex flex-wrap items-center justify-between gap-3 px-6 pt-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-montserrat text-sm font-bold text-white">
+                      {filteredListings.length} listing{filteredListings.length !== 1 ? "s" : ""} live
+                    </span>
+                    <span className="font-montserrat text-xs text-white/60">
+                      . {resultLabel}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleOpenForm}
+                    className="rounded-[12px] bg-[#D4AF37] px-4 py-2 text-[12px] font-black uppercase tracking-[0.45px] text-[#0a1a0c] transition hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
+                  >
+                    {addButtonLabel}
+                  </button>
+                </div>
+
+                <div className="flex-1 bg-[#081D0C] p-6">
+                  {filteredListings.length === 0 ? (
+                    <div className="flex min-h-[calc(100dvh-14rem)] flex-col items-center justify-center gap-6 text-center">
+                      <p className="max-w-xl text-xl font-bold text-white">
+                        Start showcasing your crops and farm goods in the marketplace.
+                      </p>
+                      <button
+                        onClick={handleOpenForm}
+                        className="rounded-[12px] bg-[#D4AF37] px-6 py-3 text-[13px] font-black uppercase tracking-[0.45px] text-[#0a1a0c] transition hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
+                      >
+                        {addButtonLabel}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px]">
+                      {filteredListings.map((item) => (
+                        <ShopServiceCard key={item.id} item={item} onEdit={handleEdit} onDelete={deleteMarketplaceListing} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-center gap-2 px-6 pt-4">
+                  <span className="font-montserrat text-sm font-bold text-white">
+                    {filteredListings.length} item{filteredListings.length !== 1 ? "s" : ""} found
+                  </span>
+                  <span className="font-montserrat text-xs text-white/60">
+                    . {resultLabel} {bookedLabel}
+                  </span>
+                </div>
+
+                {filteredListings.length === 0 ? (
+                  <div className="px-6 py-10 font-montserrat text-sm text-white/70">
+                    No marketplace listings match your current search and filters.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px] p-6">
+                    {filteredListings.map((item) => (
+                      <ProductCard
+                        key={item.id}
+                        name={item.name}
+                        seller={item.seller}
+                        price={item.price}
+                        rating={item.rating}
+                        category={item.category}
+                        image={item.image}
+                        description={item.description}
+                        availability={item.availability}
+                        showAddToCart={true}
+                        cartModule="Marketplace"
+                        onViewDetails={(selected) => {
+                          setSelectedItem(selected);
+                          setActiveDetailTab("about");
+                          resetBookingForm();
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
-
-          {filteredProducts.length === 0 ? (
-            <div className="px-6 py-10 font-montserrat text-sm text-white/70">
-              No products match your current search and filters.
-            </div>
-          ) : (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px] p-6">
-              {filteredProducts.map((item) => (
-                <ProductCard
-                  key={item._id}
-                  name={item.name}
-                  seller={item.seller}
-                  price={item.price}
-                  rating={item.rating}
-                  category={item.category}
-                  image={item.image}
-                  description={item.description}
-                  availability={item.availability}
-                  showAddToCart={cartEnabled}
-                  cartModule="Shop"
-                  onViewDetails={(selected) => {
-                    setSelectedItem(selected);
-                    setActiveDetailTab("about");
-                    resetBookingForm();
-                  }}
-                />
-              ))}
-            </div>
-          )}
         </div>
       </div>
-    </div>
 
-      {selectedItem && (
+      {showFormModal && (
+        <div
+          className="kc-modal-overlay"
+          onClick={handleCloseForm}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(860px, 100%)",
+              maxHeight: "min(88vh, 920px)",
+              overflow: "auto",
+              background: "#000000",
+              border: "1px solid rgba(212, 175, 55, 0.32)",
+              borderRadius: "22px",
+              boxShadow: "0 24px 60px rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <ServiceProviderCatalogForm
+              title={editingListing ? "Edit Marketplace Listing" : "Add Marketplace Listing"}
+              introText="List your produce, crop lots, or farm goods so buyers can review the quality, quantity, and location at a glance."
+              imageLabel="Upload listing image"
+              uploadText="Click to upload marketplace image"
+              submitText={editingListing ? "Save Listing" : "Save Listing"}
+              initialData={editingListing || { ...initialForm, seller: user?.name || "Farmer Market" }}
+              fields={marketplaceFields}
+              onBack={handleCloseForm}
+              onSave={handleSaveListing}
+              isModal={true}
+            />
+          </div>
+        </div>
+      )}
+
+      {!isFarmerRoute && selectedItem && (
         <div className="kc-modal-overlay" onClick={() => setSelectedItem(null)}>
           <div className="kc-modal-panel font-montserrat" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 14px 0 14px", gap: 12 }}>
@@ -291,7 +352,7 @@ export default function Shop() {
                   }}
                 >
                   {[
-                    { id: "about", label: "About Product" },
+                    { id: "about", label: "About Listing" },
                     { id: "book", label: "Buy Now" },
                   ].map((tab) => (
                     <button
@@ -334,12 +395,7 @@ export default function Shop() {
               </button>
             </div>
 
-            <div
-              className="kc-modal-grid"
-              style={{
-                gridTemplateColumns: activeDetailTab === "book" ? "1fr" : undefined,
-              }}
-            >
+            <div className="kc-modal-grid" style={{ gridTemplateColumns: activeDetailTab === "book" ? "1fr" : undefined }}>
               {activeDetailTab === "about" && (
                 <div style={{ padding: 20, paddingTop: 8, borderRight: "1px solid rgba(212, 175, 55, 0.18)" }}>
                   <div
@@ -348,7 +404,7 @@ export default function Shop() {
                       height: 290,
                       borderRadius: 18,
                       overflow: "hidden",
-                      backgroundImage: `url(${selectedItem.image || "/urea.png"})`,
+                      backgroundImage: `url(${selectedItem.image || DEFAULT_MARKET_IMAGE})`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                       marginBottom: 14,
@@ -356,17 +412,9 @@ export default function Shop() {
                   >
                     <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.45) 100%)" }} />
                   </div>
-                  <div
-                    style={{
-                      marginTop: 16,
-                      background: "#081D0C",
-                      border: "1px solid rgba(212, 175, 55, 0.18)",
-                      borderRadius: 16,
-                      padding: 16,
-                    }}
-                  >
+                  <div style={{ marginTop: 16, background: "#081D0C", border: "1px solid rgba(212, 175, 55, 0.18)", borderRadius: 16, padding: 16 }}>
                     <div style={{ color: "#E7C957", fontWeight: 700, fontSize: 16, marginBottom: 8 }}>
-                      About This Product
+                      About This Listing
                     </div>
                     <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, lineHeight: 1.7 }}>
                       {selectedItem.description}
@@ -397,55 +445,12 @@ export default function Shop() {
                       </div>
                     </div>
 
-                    <div
-                      style={{
-                        background: "#081D0C",
-                        border: "1px solid rgba(212, 175, 55, 0.18)",
-                        borderRadius: 16,
-                        padding: 16,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 12,
-                          paddingBottom: 14,
-                          marginBottom: 14,
-                          borderBottom: "1px solid rgba(212, 175, 55, 0.12)",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: 46,
-                            height: 46,
-                            borderRadius: "50%",
-                            background: "linear-gradient(135deg, #FFF085 0%, #D4AF37 100%)",
-                            color: "#111111",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: 18,
-                            fontWeight: 800,
-                            flexShrink: 0,
-                          }}
-                        >
-                          {selectedItem.seller?.charAt(0)}
-                        </div>
-                        <div>
-                          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: 0.6 }}>
-                            Seller
-                          </div>
-                          <div style={{ color: "#ffffff", fontSize: 16, fontWeight: 700, marginTop: 2 }}>
-                            {selectedItem.seller}
-                          </div>
-                        </div>
-                      </div>
-
+                    <div style={{ background: "#081D0C", border: "1px solid rgba(212, 175, 55, 0.18)", borderRadius: 16, padding: 16 }}>
                       {[
                         { label: "Price", value: `Rs.${selectedItem.price} per unit` },
                         { label: "Category", value: selectedItem.category },
-                        { label: "Rating", value: `${selectedItem.rating} out of 5` },
+                        { label: "Stock", value: selectedItem.stock },
+                        { label: "Location", value: selectedItem.location },
                       ].map((item, index, arr) => (
                         <div
                           key={item.label}
@@ -487,17 +492,17 @@ export default function Shop() {
                     >
                       <div>
                         <div style={{ color: "#FFF085", fontSize: 18, fontWeight: 800 }}>
-                          Purchase Details
+                          Marketplace Purchase
                         </div>
                         <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 4 }}>
-                          Define quantity and delivery address to purchase this product.
+                          Define quantity and delivery details to buy from this farmer listing.
                         </div>
                       </div>
 
                       <div className="kc-booking-grid">
                         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                           <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Quantity</span>
-                          <input type="number" min="1" placeholder="Eg: 5 packets/units" value={bookingForm.quantity} onChange={(e) => handleBookingInput("quantity", e.target.value)} style={inputStyle} />
+                          <input type="text" placeholder="Eg: 50 kg" value={bookingForm.quantity} onChange={(e) => handleBookingInput("quantity", e.target.value)} style={inputStyle} />
                         </label>
                         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                           <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Contact Number</span>
@@ -512,7 +517,7 @@ export default function Shop() {
 
                       <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                         <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Additional Instructions</span>
-                        <textarea rows={3} placeholder="Any delivery instructions..." value={bookingForm.notes} onChange={(e) => handleBookingInput("notes", e.target.value)} style={{ ...inputStyle, resize: "vertical", minHeight: 64 }} />
+                        <textarea rows={3} placeholder="Any packaging or delivery instructions..." value={bookingForm.notes} onChange={(e) => handleBookingInput("notes", e.target.value)} style={{ ...inputStyle, resize: "vertical", minHeight: 64 }} />
                       </label>
 
                       <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 4 }}>
@@ -547,7 +552,7 @@ export default function Shop() {
                             cursor: "pointer",
                           }}
                         >
-                          Confirm Order
+                          Confirm Purchase
                         </button>
                       </div>
                     </div>

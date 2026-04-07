@@ -3,12 +3,12 @@ import SideNav from "../components/SideNav";
 import { UseAppContext } from "../context/AppContext";
 import ModuleHeader from "../components/ModuleHeader";
 import {
-    PlusCircleIcon,
     ChevronDownIcon,
     CheckCircleIcon,
     XCircleIcon,
 } from "@heroicons/react/24/outline";
 import { XMarkIcon } from "@heroicons/react/24/solid";
+import AddModuleCard from "../components/AddModuleCard";
 
 const CROP_OPTIONS     = ["Rice / Paddy","Wheat","Cotton","Maize","Sugarcane","Soybean","Groundnut","Turmeric","Chilli","Tomato","Onion","Banana","Mango","Other"];
 const SEASON_OPTIONS   = ["Kharif 2025","Rabi 2025-26","Zaid 2026","Kharif 2026"];
@@ -352,11 +352,14 @@ export default function ContractFarmingService() {
                     <p className="font-bold text-xl text-white font-montserrat text-wrap">
                         You haven't posted any contracts yet. Get started by adding one.
                     </p>
-                    <button onClick={() => setShowFormModal(true)}
-                        className="group flex h-80 w-56 cursor-pointer flex-col items-center justify-center rounded-[18px] border border-dashed border-gold/60 bg-[#050505] text-gold transition hover:-translate-y-1 hover:border-gold hover:bg-[#111111]">
-                        <PlusCircleIcon className="size-10 text-gold" />
-                        <p className="mt-3 font-bold text-gold text-2xl">Add</p>
-                    </button>
+                    <div className="w-full max-w-[320px]">
+                        <AddModuleCard
+                            onAdd={() => setShowFormModal(true)}
+                            title="Add Contract Farming"
+                            subtitle="Create your first contract listing"
+                            minHeight={320}
+                        />
+                    </div>
                     </div>
                 </div>
             ) : (
@@ -378,11 +381,12 @@ export default function ContractFarmingService() {
                                 onClose={handleClose}
                             />
                         ))}
-                        <button onClick={() => setShowFormModal(true)}
-                            className="flex min-h-[360px] cursor-pointer flex-col items-center justify-center rounded-[18px] border border-dashed border-gold/60 bg-[#050505] transition hover:-translate-y-1 hover:border-gold hover:bg-[#111111]">
-                            <PlusCircleIcon className="size-10 text-gold" />
-                            <p className="font-bold text-gold text-xl font-montserrat">Post a Contract</p>
-                        </button>
+                        <AddModuleCard
+                            onAdd={() => setShowFormModal(true)}
+                            title="Add Contract Farming"
+                            subtitle="Create one more contract listing"
+                            minHeight={360}
+                        />
                     </div>
                     </div>
                     </div>

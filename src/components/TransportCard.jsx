@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 function VehicleBadge({ vehicleType }) {
   return (
     <span
@@ -25,7 +27,8 @@ function RatingStars({ rating }) {
   );
 }
 
-export default function TransportCard({ vehicle }) {
+export default function TransportCard({ vehicle, onViewDetails }) {
+  const [btnHover, setBtnHover] = useState(false);
   const ownerInitial = vehicle?.owner?.charAt(0)?.toUpperCase() || "O";
 
   return (
@@ -85,29 +88,44 @@ export default function TransportCard({ vehicle }) {
           </div>
         </div>
 
-        <p className="text-[13px] leading-5 text-white/80">{vehicle.description}</p>
-
-        <div className="mt-auto flex items-end justify-between gap-3">
-          <div>
-            <RatingStars rating={vehicle.rating} />
-            <div className="mt-1 text-[11px] text-white/50">{vehicle.rating} out of 5 rating</div>
+        <div className="mt-auto flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <RatingStars rating={vehicle.rating} />
+              <div className="mt-1 text-[11px] text-white/50">{vehicle.rating} out of 5 rating</div>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">Status: </span>
+              <span className={`text-[12px] font-black ${vehicle.availability === "Booked" ? "text-red-400" : "text-green-400"}`}>
+                {vehicle.availability}
+              </span>
+            </div>
           </div>
 
           <div className="flex gap-2">
             <button
-              type="button"
-              className="cursor-pointer rounded-lg border border-gold/30 bg-transparent px-3 py-2 text-xs font-bold text-[#FFF085] transition hover:border-gold hover:bg-gold/10"
-            >
-              Add to Cart
-            </button>
-            <button
-              type="button"
-              className="cursor-pointer rounded-lg px-3 py-2 text-xs font-bold text-[#0a1a0c] transition hover:-translate-y-[1px]"
+              onMouseEnter={() => setBtnHover(true)}
+              onMouseLeave={() => setBtnHover(false)}
+              onClick={() => onViewDetails && onViewDetails(vehicle)}
+              disabled={vehicle.availability === "Booked"}
               style={{
-                background: "linear-gradient(135deg, #FFF085 0%, #D4AF37 100%)",
+                flex: 1,
+                background: vehicle.availability === "Booked" ? "transparent" : btnHover ? "#ffffff" : "#D4AF37",
+                color: vehicle.availability === "Booked" ? "rgba(255,255,255,0.5)" : "#0a1a0c",
+                border: vehicle.availability === "Booked" ? `1px solid rgba(212, 175, 55, 0.28)` : "none",
+                padding: "9px 0",
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: vehicle.availability === "Booked" ? "not-allowed" : "pointer",
+                transition: "background 0.18s, transform 0.18s ease, box-shadow 0.18s ease",
+                letterSpacing: 0.2,
+                whiteSpace: "nowrap",
+                transform: btnHover ? "translateY(-1px)" : "translateY(0)",
+                boxShadow: btnHover ? "0 10px 20px rgba(255, 240, 133, 0.18)" : "none",
               }}
             >
-              Book Now
+              {vehicle.availability === "Booked" ? "Booked" : "Book Now"}
             </button>
           </div>
         </div>

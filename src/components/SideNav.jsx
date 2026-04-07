@@ -6,6 +6,7 @@ import Shopping from "/shops.svg"
 import Sparkles from "/sparkles.svg"
 import Document from "/document.svg"
 import Building from "/coldstorages.svg"
+import Market from "/shops.svg"
 import { useState, useRef, useContext, useEffect } from "react"
 import { NavLink, Link, useLocation } from "react-router"
 import { UseAppContext } from "../context/AppContext"
@@ -48,10 +49,11 @@ export default function SideNav() {
         { path: `/${role}/`, icon: Dashboard, name: "Dashboard", index: 1 },
         { path: `/${role}/rentals`, icon: Truck, name: "Rentals", index: 2 },
         { path: `/${role}/shop`, icon: Shopping, name: "Shop", index: 3 },
-        { path: `/${role}/transport`, icon: Truck, name: "Transport", index: 4 },
-        { path: `/${role}/contract`, icon: Document, name: "Contract Farming", index: 5 },
-        { path: `/${role}/coldstorage`, icon: Building, name: "Cold Storage", index: 6 },
-        { path: `/${role}/aitoolkit`, icon: Sparkles, name: "AI Tool Kit", index: 7 }
+        { path: `/${role}/marketplace`, icon: Market, name: "Marketplace", index: 4 },
+        { path: `/${role}/transport`, icon: Truck, name: "Transport", index: 5 },
+        { path: `/${role}/contract`, icon: Document, name: "Contract Farming", index: 6 },
+        { path: `/${role}/coldstorage`, icon: Building, name: "Cold Storage", index: 7 },
+        { path: `/${role}/aitoolkit`, icon: Sparkles, name: "AI Tool Kit", index: 8 }
     ]
 
     // const ServideProviderMenu = [

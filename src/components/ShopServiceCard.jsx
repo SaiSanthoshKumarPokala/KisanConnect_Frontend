@@ -3,6 +3,9 @@ import { useState } from "react";
 
 export default function ShopServiceCard({ item, onEdit, onDelete }) {
   const [hovered, setHovered] = useState(false);
+  const subtitle = item.brand || item.seller || item.location || "Listing";
+  const secondaryValue = item.stock || item.location || "Available";
+  const secondaryLabel = item.stock ? "Stock" : "Location";
 
   return (
     <div
@@ -59,7 +62,7 @@ export default function ShopServiceCard({ item, onEdit, onDelete }) {
       <div className="flex flex-1 flex-col gap-4 p-4">
         <div>
           <div className="mb-1 text-[15px] font-bold text-white">{item.name}</div>
-          <div className="text-xs text-white/60">{item.brand}</div>
+          <div className="text-xs text-white/60">{subtitle}</div>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -70,9 +73,9 @@ export default function ShopServiceCard({ item, onEdit, onDelete }) {
             </div>
           </div>
           <div className="rounded-lg border border-gold/20 bg-[#050505] px-2 py-3 text-center">
-            <div className="text-sm font-bold text-white">{item.stock}</div>
+            <div className="text-sm font-bold text-white">{secondaryValue}</div>
             <div className="mt-1 text-[9px] uppercase tracking-[0.5px] text-white/50">
-              Stock
+              {secondaryLabel}
             </div>
           </div>
         </div>

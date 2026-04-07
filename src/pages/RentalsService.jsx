@@ -4,7 +4,7 @@ import RentalsServiceCard from "../components/RentalsServiceCard";
 import ServiceProviderCatalogForm from "../components/ServiceProviderCatalogForm";
 import SideNav from "../components/SideNav";
 import { UseAppContext } from "../context/AppContext";
-import { PlusCircleIcon } from "@heroicons/react/24/outline";
+import AddModuleCard from "../components/AddModuleCard";
 
 const DEFAULT_RENTAL_IMAGE = "/harvester.png";
 
@@ -119,13 +119,14 @@ export default function RentalsService() {
               <p className="max-w-xl text-xl font-bold text-white">
                 You do not provide any rental service yet. Add your first machine to start receiving requests.
               </p>
-              <button
-                onClick={handleOpenForm}
-                className="group flex h-80 w-56 cursor-pointer flex-col items-center justify-center rounded-[18px] border border-dashed border-gold/60 bg-[#050505] text-gold transition hover:-translate-y-1 hover:border-gold hover:bg-[#111111]"
-              >
-                <PlusCircleIcon className="size-10 text-gold" />
-                <p className="mt-3 text-2xl font-bold text-gold">Add Rental</p>
-              </button>
+              <div className="w-full max-w-[320px]">
+                <AddModuleCard
+                  onAdd={handleOpenForm}
+                  title="Add Rental"
+                  subtitle="Create your first rental listing"
+                  minHeight={320}
+                />
+              </div>
             </div>
           ) : filteredRentals.length === 0 ? (
             <div className="flex min-h-[calc(100dvh-9rem)] flex-1 flex-col items-center justify-center gap-3 bg-[#081D0C] p-10 text-center">
@@ -141,13 +142,12 @@ export default function RentalsService() {
                 <RentalsServiceCard key={item.id} item={item} onEdit={handleEdit} onDelete={handleDelete} />
               ))}
 
-              <button
-                onClick={handleOpenForm}
-                className="flex min-h-[360px] cursor-pointer flex-col items-center justify-center rounded-[18px] border border-dashed border-gold/60 bg-[#050505] transition hover:-translate-y-1 hover:border-gold hover:bg-[#111111]"
-              >
-                <PlusCircleIcon className="size-10 text-gold" />
-                <p className="mt-3 text-2xl font-bold text-gold">Add Rental</p>
-              </button>
+              <AddModuleCard
+                onAdd={handleOpenForm}
+                title="Add Rental"
+                subtitle="Create one more rental listing"
+                minHeight={360}
+              />
             </div>
             </div>
           )}

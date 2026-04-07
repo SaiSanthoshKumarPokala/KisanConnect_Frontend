@@ -1,19 +1,65 @@
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { AppContext } from "./Contexts";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 export const AppProvider = ({ children }) => {
 
     const navigate = useNavigate();
+    const location = useLocation();
     const [token, setToken] = useState(null);
     const [user, setUser] = useState(null);
     const [role, setRole] = useState("");
     const [rentals, setRentals] = useState([]);
+    const [cartsByRole, setCartsByRole] = useState({
+        farmer: [],
+        serviceprovider: [],
+    });
     const [isOpen, setIsOpen] = useState(false);
     const [notificationsOpen, setNotificationsOpen] = useState(false);
+    const [marketplaceListings, setMarketplaceListings] = useState([
+        {
+            id: 7001,
+            name: "Fresh Tomatoes",
+            seller: "Rishi Farms",
+            price: 32,
+            rating: 4.7,
+            category: "Vegetables",
+            stock: "450 kg",
+            location: "Medchal, Telangana",
+            image: "/seeds.webp",
+            description: "Freshly harvested tomatoes sorted for mandi supply and direct bulk purchase.",
+            availability: "Available",
+        },
+        {
+            id: 7002,
+            name: "Premium Turmeric",
+            seller: "Lakshmi Agro",
+            price: 96,
+            rating: 4.8,
+            category: "Spices",
+            stock: "220 kg",
+            location: "Erode, Tamil Nadu",
+            image: "/fertilizers.png",
+            description: "Cleaned and dried turmeric lots ready for processing and wholesale buyers.",
+            availability: "Available",
+        },
+        {
+            id: 7003,
+            name: "Groundnut Crop Lot",
+            seller: "Sai Harvest Group",
+            price: 71,
+            rating: 4.4,
+            category: "Crops",
+            stock: "1.2 tonnes",
+            location: "Anantapur, Andhra Pradesh",
+            image: "/shop.avif",
+            description: "Bulk groundnut stock from this season suitable for traders and processing units.",
+            availability: "Booked",
+        },
+    ]);
     const [serviceProviderNotifications, setServiceProviderNotifications] = useState([
         {
             id: 1,
@@ -66,6 +112,14 @@ export const AppProvider = ({ children }) => {
             detail: "Your reefer van request from Hyderabad to Guntur was rejected due to limited availability.",
         },
     ]);
+
+    const routeRole = location.pathname.startsWith("/serviceprovider")
+        ? "serviceprovider"
+        : location.pathname.startsWith("/farmer")
+            ? "farmer"
+            : "";
+    const effectiveRole = routeRole || role || "farmer";
+    const cart = cartsByRole[effectiveRole] || [];
 
 
 
@@ -142,28 +196,59 @@ export const AppProvider = ({ children }) => {
         setServiceProviderNotifications((prev) => prev.filter((item) => item.id !== id));
     };
 
+    const setCart = (updater) => {
+        setCartsByRole((prev) => {
+            const currentCart = prev[effectiveRole] || [];
+            const nextCart = typeof updater === "function" ? updater(currentCart) : updater;
+            return {
+                ...prev,
+                [effectiveRole]: nextCart,
+            };
+        });
+    };
+
+    const addToCart = (module, item) => {
+        setCartsByRole(prev => {
+            const currentCart = prev[effectiveRole] || [];
+            const isAlreadyInCart = currentCart.some(cartItem => (cartItem.id || cartItem._id) === (item.id || item._id) && cartItem.cartModule === module);
+            if (isAlreadyInCart) {
+                window.alert(`${item.name || item.vehicleType || 'Item'} is already in your cart.`);
+                return prev;
+            }
+            window.alert(`${item.name || item.vehicleType || 'Item'} added to cart!`);
+            return {
+                ...prev,
+                [effectiveRole]: [...currentCart, { ...item, cartModule: module }],
+            };
+        });
+    };
+
+    const addMarketplaceListing = (listing) => {
+        setMarketplaceListings((prev) => [{ ...listing, id: Date.now() }, ...prev]);
+    };
+
+    const updateMarketplaceListing = (id, listing) => {
+        setMarketplaceListings((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, ...listing, id } : item))
+        );
+    };
+
+    const deleteMarketplaceListing = (id) => {
+        setMarketplaceListings((prev) => prev.filter((item) => item.id !== id));
+    };
+
     useEffect(() => {
-        const role = localStorage.getItem('role');
-
-        const setrole = () => { setRole(role); }
-        setrole();
-    }, [role])
-
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        setToken(token);
-
-        // if (token) {
-        //     const role = localStorage.getItem('role');
-        //     setRole(role);
-        // }
-    }, [])
+        const roleStr = localStorage.getItem('role');
+        if (roleStr) setRole(roleStr);
+        const tokenStr = localStorage.getItem('token');
+        setToken(tokenStr);
+    }, []);
 
     useEffect(() => {
         if (token) {
-            axios.defaults.headers.common['Authorization'] = `${token}`
+            axios.defaults.headers.common['Authorization'] = `${token}`;
         }
-    }, [token])
+    }, [token]);
 
     const value = {
         navigate,
@@ -187,17 +272,24 @@ export const AppProvider = ({ children }) => {
         farmerNotifications,
         setFarmerNotifications,
         handleProviderNotificationAction,
+        cart,
+        setCart,
+        addToCart,
+        marketplaceListings,
+        setMarketplaceListings,
+        addMarketplaceListing,
+        updateMarketplaceListing,
+        deleteMarketplaceListing,
         axios
-    }
+    };
 
     return (
         <AppContext.Provider value={value}>
             {children}
         </AppContext.Provider>
-    )
-}
+    );
+};
 
 export const UseAppContext = () => {
     return useContext(AppContext);
 }
-

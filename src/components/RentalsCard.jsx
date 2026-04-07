@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 function CategoryBadge({ category }) {
   return (
     <span
@@ -25,7 +27,8 @@ function RatingStars({ rating }) {
   );
 }
 
-export default function RentalsCard({ item }) {
+export default function RentalsCard({ item, onViewDetails }) {
+  const [btnHover, setBtnHover] = useState(false);
   const ownerInitial = item?.owner?.charAt(0)?.toUpperCase() || "O";
 
   return (
@@ -85,29 +88,44 @@ export default function RentalsCard({ item }) {
           </div>
         </div>
 
-        <p className="text-[13px] leading-5 text-white/80">{item.description}</p>
-
-        <div className="mt-auto flex items-end justify-between gap-3">
-          <div>
-            <RatingStars rating={item.rating} />
-            <div className="mt-1 text-[11px] text-white/50">{item.rating} out of 5 rating</div>
+        <div className="mt-auto flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <RatingStars rating={item.rating} />
+              <div className="mt-1 text-[11px] text-white/50">{item.rating} out of 5 rating</div>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">Status: </span>
+              <span className={`text-[12px] font-black ${item.availability === "Booked" ? "text-red-400" : "text-green-400"}`}>
+                {item.availability}
+              </span>
+            </div>
           </div>
 
           <div className="flex gap-2">
             <button
-              type="button"
-              className="cursor-pointer rounded-lg border border-gold/30 bg-transparent px-3 py-2 text-xs font-bold text-[#FFF085] transition hover:border-gold hover:bg-gold/10"
-            >
-              Add to Cart
-            </button>
-            <button
-              type="button"
-              className="cursor-pointer rounded-lg px-3 py-2 text-xs font-bold text-[#0a1a0c] transition hover:-translate-y-[1px]"
+              onMouseEnter={() => setBtnHover(true)}
+              onMouseLeave={() => setBtnHover(false)}
+              onClick={() => onViewDetails && onViewDetails(item)}
+              disabled={item.availability === "Booked"}
               style={{
-                background: "linear-gradient(135deg, #FFF085 0%, #D4AF37 100%)",
+                flex: 1,
+                background: item.availability === "Booked" ? "transparent" : btnHover ? "#ffffff" : "#D4AF37",
+                color: item.availability === "Booked" ? "rgba(255,255,255,0.5)" : "#0a1a0c",
+                border: item.availability === "Booked" ? `1px solid rgba(212, 175, 55, 0.28)` : "none",
+                padding: "9px 0",
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: item.availability === "Booked" ? "not-allowed" : "pointer",
+                transition: "background 0.18s, transform 0.18s ease, box-shadow 0.18s ease",
+                letterSpacing: 0.2,
+                whiteSpace: "nowrap",
+                transform: btnHover ? "translateY(-1px)" : "translateY(0)",
+                boxShadow: btnHover ? "0 10px 20px rgba(255, 240, 133, 0.18)" : "none",
               }}
             >
-              Rent Now
+              {item.availability === "Booked" ? "Booked" : "Rent Now"}
             </button>
           </div>
         </div>

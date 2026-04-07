@@ -1,6 +1,6 @@
-import { MapPinIcon } from "@heroicons/react/24/outline";
+export default function ModuleFilters({ filters, activeFilter, setActiveFilter, showBooked, setShowBooked }) {
+  const bookedToggleVisible = typeof showBooked === "boolean" && typeof setShowBooked === "function";
 
-export default function ModuleFilters({ filters, activeFilter, setActiveFilter, state, setState, hideStateDropdown = false }) {
   return (
     <div
       className="kc-filters-pad w-full"
@@ -11,53 +11,71 @@ export default function ModuleFilters({ filters, activeFilter, setActiveFilter, 
         padding: "11px 24px",
         display: "flex",
         alignItems: "center",
-        gap: 7,
+        justifyContent: "space-between",
+        gap: 16,
         overflowX: "auto",
         flexShrink: 0,
       }}
     >
-      {filters && filters.map((f) => (
-        <button
-          key={f}
-          onClick={() => setActiveFilter(f)}
-          style={{
-            padding: "6px 15px",
-            border: "none",
-            background: "transparent",
-            color: activeFilter === f ? "#D4AF37" : "#ffffff",
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-            fontFamily: "'Montserrat', sans-serif",
-            transition: "all 0.15s",
-            borderBottom: "2px solid transparent",
-            borderRadius: 0,
-            flexShrink: 0,
-          }}
-        >
-          {f}
-        </button>
-      ))}
+      <div
+        style={{
+          width: "fit-content",
+          borderRadius: 999,
+          background: "rgba(255,255,255,0.08)",
+          border: "1px solid rgba(255,255,255,0.18)",
+          padding: 4,
+          display: "flex",
+          gap: 4,
+          backdropFilter: "blur(12px)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
+          flexShrink: 0,
+        }}
+      >
+        {filters && filters.map((f) => (
+          <button
+            key={f}
+            onClick={() => setActiveFilter(f)}
+            style={{
+              border: "none",
+              borderRadius: 999,
+              padding: "8px 16px",
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: "'Montserrat', sans-serif",
+              color: activeFilter === f ? "#111111" : "#FFF085",
+              background: activeFilter === f
+                ? "linear-gradient(135deg, #D4AF37 0%, #FFF085 100%)"
+                : "transparent",
+              transition: "all 0.18s ease",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
 
-      {!hideStateDropdown && (
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          <div className="flex flex-row gap-2 items-center bg-[#050505] border border-gold/40 w-auto px-3 py-1 rounded-xl text-white font-montserrat">
-            <MapPinIcon className="size-4 stroke-2 stroke-gold" />
-            <select
-              name="state"
-              className="focus:outline-0 w-full font-bold bg-transparent text-white text-xs cursor-pointer"
-              value={state}
-              onChange={(e) => setState && setState(e.target.value)}
-            >
-              <option value="select">State</option>
-              <option value="telangana" className="bg-[#050505] text-white">Telangana</option>
-              <option value="andhra pradesh" className="bg-[#050505] text-white">Andhra Pradesh</option>
-              <option value="maharashtra" className="bg-[#050505] text-white">Maharashtra</option>
-              <option value="karnataka" className="bg-[#050505] text-white">Karnataka</option>
-              <option value="kerala" className="bg-[#050505] text-white">Kerala</option>
-            </select>
-          </div>
+      {bookedToggleVisible && (
+        <div style={{ flexShrink: 0 }}>
+          <button
+            onClick={() => setShowBooked(!showBooked)}
+            style={{
+              border: showBooked ? "1px solid #D4AF37" : "1px solid rgba(212, 175, 55, 0.3)",
+              borderRadius: 999,
+              padding: "8px 20px",
+              background: showBooked ? "rgba(212, 175, 55, 0.15)" : "rgba(255,255,255,0.05)",
+              color: showBooked ? "#FFF085" : "#ffffff",
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: "'Montserrat', sans-serif",
+              cursor: "pointer",
+              transition: "all 0.18s ease",
+              boxShadow: showBooked ? "0 0 12px rgba(212, 175, 55, 0.2) inset" : "none",
+            }}
+          >
+            {showBooked ? "Show All" : "Booked"}
+          </button>
         </div>
       )}
     </div>
