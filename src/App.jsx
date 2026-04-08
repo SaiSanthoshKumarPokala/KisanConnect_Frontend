@@ -41,11 +41,6 @@ const Wrapper = ({ children }) => {
 	return children;
 };
 
-const AIToolkitRedirect = () => {
-	const { role } = UseAppContext();
-	const fallbackRole = role || localStorage.getItem('role') || 'farmer';
-	return <Navigate to={`/${fallbackRole}/aitoolkit`} replace />;
-};
 
 export default function App() {
 	return (
@@ -57,7 +52,6 @@ export default function App() {
 						<Route path='/auth' element={<Authentication />} />
 						<Route path='/role' element={<Role />} />
 						<Route path='/userinfo' element={<UserInfo />} />
-						<Route path='/aitoolkit' element={<AIToolkitRedirect />} />
 						<Route path='/services' element={<Services />} />
 						<Route path='/filters' element={<Filters />} />
 						<Route path='/farmer'>
@@ -84,7 +78,6 @@ export default function App() {
 							<Route path='/serviceprovider/bookings' element={<Bookings />} />
 							<Route path='/serviceprovider/profile' element={<SPProfile />} />
 							<Route path='/serviceprovider/contract' element={<ContractFarmingService/>} />
-							<Route path='/serviceprovider/aitoolkit' element={<AIToolkit />} />
 						</Route>
 						<Route path='*' element={<NotFound />} />
 					</Routes>

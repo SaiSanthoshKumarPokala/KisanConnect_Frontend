@@ -128,7 +128,7 @@ export default function UserInfo() {
                     </div>
 
                     <div className="grid gap-8 xl:grid-cols-[1.2fr_1fr]">
-                        <div className="rounded-[24px] border border-gold/18 bg-[#050505] p-5 md:p-6">
+                        <div className="rounded-3xl border border-gold/18 bg-[#050505] p-5 md:p-6">
                             <div className="mb-5">
                                 <h2 className="text-xl font-extrabold text-[#FFF085]">Basic Details</h2>
                                 <p className="mt-1 text-sm font-normal text-white/55">
@@ -209,7 +209,7 @@ export default function UserInfo() {
                             </div>
                         </div>
 
-                        <div className="rounded-[24px] border border-gold/18 bg-[#050505] p-5 md:p-6">
+                        <div className="rounded-3xl border border-gold/18 bg-[#050505] p-5 md:p-6">
                             <div className="mb-5">
                                 <h2 className="text-xl font-extrabold text-[#FFF085]">
                                     {normalizedRole === "serviceprovider" ? "Service Details" : "Farm Details"}

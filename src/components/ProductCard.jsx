@@ -55,7 +55,7 @@ export default function ProductCard({
           borderColor: "rgba(201, 168, 76, 0.2)",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/55" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/20 to-black/55" />
         <div className="absolute left-3 top-3 z-10">
           <CategoryBadge category={category || "Product"} />
         </div>
@@ -75,8 +75,8 @@ export default function ProductCard({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 rounded-[12px] border border-gold/20 bg-[#050505] px-3 py-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#FFF085] to-[#D4AF37] text-[12px] font-extrabold text-black">
+        <div className="flex items-center gap-3 rounded-xl border border-gold/20 bg-[#050505] px-3 py-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-[#FFF085] to-gold text-[12px] font-extrabold text-black">
             {ownerInitial}
           </div>
           <div>

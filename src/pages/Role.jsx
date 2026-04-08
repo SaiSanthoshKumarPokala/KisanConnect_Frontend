@@ -60,7 +60,7 @@ export default function Role() {
                         <button
                             key={option.id}
                             type="button"
-                            className={`flex w-full cursor-pointer flex-col items-center justify-between rounded-[24px] border p-6 text-center transition-all duration-200 md:min-h-[360px] md:w-[360px] ${
+                            className={`flex w-full cursor-pointer flex-col items-center justify-between rounded-3xl border p-6 text-center transition-all duration-200 md:min-h-90 md:w-90 ${
                                 active === option.value
                                     ? "border-gold bg-black shadow-[0_16px_38px_rgba(212,175,55,0.18)]"
                                     : "border-white/20 bg-black/45 hover:border-gold/40 hover:bg-black/55"

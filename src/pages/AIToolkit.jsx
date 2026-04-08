@@ -80,7 +80,7 @@ function FormField({ field, value, onChange }) {
         value={value}
         onChange={(event) => onChange(field.key, event.target.value)}
         placeholder={field.placeholder}
-        className="kc-ai-input w-full rounded-[12px] border border-white/18 bg-black px-4 py-3 font-montserrat text-base text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition-all placeholder:text-white/40 focus:border-gold/45 md:text-lg"
+        className="kc-ai-input w-full rounded-xl border border-white/18 bg-black px-4 py-3 font-montserrat text-base text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition-all placeholder:text-white/40 focus:border-gold/45 md:text-lg"
       />
     </label>
   );
@@ -98,13 +98,13 @@ function ToolkitPanel({
 }) {
   if (tool.mode === "upload") {
     return (
-      <label className="flex h-full min-h-[260px] cursor-pointer flex-col items-center justify-center gap-6 rounded-[24px] border border-dashed border-white/20 bg-[#050505] px-6 py-10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition hover:border-gold/60 hover:bg-[#0b0b0b]">
+      <label className="flex h-full min-h-65 cursor-pointer flex-col items-center justify-center gap-6 rounded-3xl border border-dashed border-white/20 bg-[#050505] px-6 py-10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition hover:border-gold/60 hover:bg-[#0b0b0b]">
         <input type="file" accept="image/*" className="hidden" onChange={onUploadChange} />
         {uploadPreview ? (
           <img
             src={uploadPreview}
             alt="Uploaded crop"
-            className="max-h-[280px] w-auto cursor-pointer rounded-2xl object-contain shadow-[0_18px_48px_rgba(0,0,0,0.4)]"
+            className="max-h-70 w-auto cursor-pointer rounded-2xl object-contain shadow-[0_18px_48px_rgba(0,0,0,0.4)]"
           />
         ) : (
           <div className="cursor-pointer rounded-[28px] border border-white/14 bg-black px-10 py-10 shadow-[0_18px_48px_rgba(0,0,0,0.4)]">
@@ -123,7 +123,7 @@ function ToolkitPanel({
   const currentStepFields = tool.steps[formStep] || [];
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-auto rounded-[24px] border border-white/10 bg-[#050505] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6">
+    <div className="flex h-full min-h-0 flex-col overflow-auto rounded-3xl border border-white/10 bg-[#050505] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-6">
       <div className="mb-5 flex items-center justify-between gap-4">
         <div className="font-montserrat text-sm text-white/55 md:text-base">
           Step {formStep + 1} of {totalSteps}
@@ -154,7 +154,7 @@ function ToolkitPanel({
           type="button"
           onClick={onPrevStep}
           disabled={formStep === 0}
-          className="rounded-[12px] border border-white/14 bg-transparent px-5 py-3 font-montserrat text-sm font-bold text-[#FFF085] transition hover:border-gold/45 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-35"
+          className="rounded-xl border border-white/14 bg-transparent px-5 py-3 font-montserrat text-sm font-bold text-[#FFF085] transition hover:border-gold/45 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-35"
         >
           Previous
         </button>
@@ -162,7 +162,7 @@ function ToolkitPanel({
           type="button"
           onClick={onNextStep}
           disabled={formStep === totalSteps - 1}
-          className="rounded-[12px] border border-gold/30 bg-[#D4AF37] px-5 py-3 font-montserrat text-sm font-black text-[#0a1a0c] transition hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)] disabled:cursor-not-allowed disabled:opacity-45"
+          className="rounded-xl border border-gold/30 bg-gold px-5 py-3 font-montserrat text-sm font-black text-[#0a1a0c] transition hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)] disabled:cursor-not-allowed disabled:opacity-45"
         >
           Next
         </button>
@@ -263,30 +263,14 @@ export default function AIToolkit() {
       `}</style>
       <SideNav />
       <div
-        className={`flex min-h-dvh flex-col bg-black ${
-          isOpen ? "md:ml-[250px]" : "md:ml-[80px]"
+        className={`flex min-h-dvh flex-col bg-darkgreen ${
+          isOpen ? "md:ml-62.5" : "md:ml-20"
         }`}
       >
         <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
           <div className="flex flex-1 flex-col px-4 py-5 md:px-8 md:py-6">
-            <div className="mb-8 flex items-center justify-between gap-3 md:hidden">
-              <button
-                type="button"
-                onClick={() => setIsOpen(!isOpen)}
-                className="rounded-full border border-gold/30 bg-[#050505] px-4 py-2 text-sm font-semibold text-gold"
-              >
-                Menu
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate(`/${currentRole}`)}
-                className="rounded-full border border-gold/30 bg-[#050505] px-4 py-2 text-sm font-semibold text-white"
-              >
-                Dashboard
-              </button>
-            </div>
 
-            <div className="mb-5 rounded-[22px] border border-gold/20 bg-[#050505] px-6 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:mb-6 md:px-8">
+            <div className="mb-5 rounded-[22px] border border-gold/20 bg-darkgreen px-6 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:mb-6 md:px-8">
               <h1
                 className="text-center font-montserrat text-[32px] font-extrabold text-[#FFF085] md:text-[40px]"
                 style={{
@@ -299,7 +283,7 @@ export default function AIToolkit() {
             </div>
 
             <div className="grid flex-1 gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-              <div className="flex flex-col gap-3 rounded-[24px] border border-gold/20 bg-[#050505] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-4">
+              <div className="flex flex-col gap-3 rounded-3xl border border-gold/20 bg-darkgreen p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-4">
                 {TOOL_TABS.map((tool) => {
                   const isActive = tool.id === activeTool;
 
@@ -323,7 +307,7 @@ export default function AIToolkit() {
                 })}
               </div>
 
-              <div className="grid min-h-[420px] grid-rows-[auto_minmax(0,1fr)_auto] rounded-[24px] border border-gold/20 bg-[url(/ai_bg.png)] bg-cover bg-center bg-black px-6 py-6 shadow-[0_18px_48px_rgba(0,0,0,0.45)] md:min-h-[520px] md:px-10 md:py-8">
+              <div className="grid min-h-105 grid-rows-[auto_minmax(0,1fr)_auto] rounded-3xl border border-gold/20 bg-[url(/ai_bg.png)] bg-cover bg-center bg-black px-6 py-6 shadow-[0_18px_48px_rgba(0,0,0,0.45)] md:min-h-130 md:px-10 md:py-8">
                 <div className="mb-5 rounded-[18px] border border-white/10 bg-[#050505]/95 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                   <p className="mt-2 max-w-3xl font-montserrat text-sm leading-6 text-white/65 md:text-base">
                     {selectedTool.description}
@@ -344,7 +328,7 @@ export default function AIToolkit() {
                 <div className="flex justify-center pt-6">
                   <button
                     type="button"
-                    className="min-w-[220px] cursor-pointer rounded-lg border border-gold/30 bg-gold px-[18px] py-[9px] font-montserrat text-xl font-bold tracking-[0.2px] text-[#0a1a0c] transition-all duration-200 ease-in hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
+                    className="min-w-55 cursor-pointer rounded-lg border border-gold/30 bg-gold px-4.5 py-2.25 font-montserrat text-xl font-bold tracking-[0.2px] text-[#0a1a0c] transition-all duration-200 ease-in hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
                   >
                     Generate
                   </button>

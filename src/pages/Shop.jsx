@@ -219,14 +219,14 @@ export default function Shop() {
           .kc-booking-grid { grid-template-columns: 1fr; }
         }
       `}</style>
-      <div className="min-h-dvh bg-black">
+      <div className="min-h-dvh bg-darkgreen">
         <SideNav />
         <div
         className={`flex min-h-dvh flex-col transition-all duration-300 ${
-          isOpen ? "md:ml-[250px]" : "md:ml-[80px]"
+          isOpen ? "md:ml-62.5" : "md:ml-20"
         }`}
       >
-        <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
+        <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-darkgreen shadow-2xl md:mx-6">
           <ModuleHeader
             title={pageTitle}
             search={search}
@@ -258,7 +258,7 @@ export default function Shop() {
               No products match your current search and filters.
             </div>
           ) : (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px] p-6">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-4.5 p-6">
               {filteredProducts.map((item) => (
                 <ProductCard
                   key={item._id}

@@ -17,7 +17,7 @@ const moduleDescriptions = {
 
 function CartMetric({ label, value, accent = "text-[#FFF085]" }) {
   return (
-    <div className="rounded-[18px] border border-gold/20 bg-[#050505] p-4 shadow-[0_12px_24px_rgba(0,0,0,0.24)]">
+    <div className="rounded-[18px] border border-gold/20 bg-darkgreen p-4 shadow-[0_12px_24px_rgba(0,0,0,0.24)]">
       <div className={`text-[22px] font-black ${accent}`}>{value}</div>
       <div className="mt-1 text-[11px] uppercase tracking-[0.4px] text-white/45">{label}</div>
     </div>
@@ -49,7 +49,7 @@ function CartItemCard({ item, onRemove }) {
           backgroundColor: "#0d0d0d",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/20 to-black/60" />
         <div className="absolute left-3 top-3 rounded-full border border-gold/30 bg-black/70 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.5px] text-[#FFF085]">
           {item.cartModule || "Saved"}
         </div>
@@ -150,11 +150,11 @@ export default function Cart() {
   };
 
   return (
-    <div className="min-h-dvh bg-black">
+    <div className="min-h-dvh bg-darkgreen">
       <SideNav />
       <div
         className={`flex min-h-dvh flex-col transition-all duration-300 ${
-          isOpen ? "md:ml-[250px]" : "md:ml-[80px]"
+          isOpen ? "md:ml-62.5" : "md:ml-20"
         }`}
       >
         <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
@@ -167,18 +167,18 @@ export default function Cart() {
 
             <div className="flex-1 overflow-y-auto p-6 kc-scrollbar md:p-7">
             {totalItems === 0 ? (
-              <div className="flex min-h-[calc(100dvh-190px)] flex-col justify-center rounded-[24px] border border-dashed border-gold/25 bg-[radial-gradient(circle_at_top,rgba(255,240,133,0.12),rgba(0,0,0,0.92)_55%)] px-6 py-14 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <div className="flex min-h-[calc(100dvh-190px)] flex-col justify-center rounded-3xl border border-dashed border-gold/25 bg-[radial-gradient(circle_at_top,rgba(255,240,133,0.12),rgba(0,0,0,0.92)_55%)] px-6 py-14 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                 <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-full border border-gold/20 bg-black/60 text-[#FFF085]">
                   <svg width="34" height="34" fill="none" viewBox="0 0 24 24">
                     <path d="M3 3h2l3.6 7.6L7 14h12M7 14l1.5-6h11l-2.5 6H7zm2 5a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
                 <h2 className="mt-6 text-[30px] font-black tracking-tight text-[#FFF085]">Your cart is empty</h2>
-                <p className="mx-auto mt-3 max-w-[560px] text-[14px] leading-7 text-white/65">
+                <p className="mx-auto mt-3 max-w-140 text-[14px] leading-7 text-white/65">
                   Explore rentals, transport, shop, and cold storage modules to save the items you want to revisit later.
                 </p>
 
-                <div className="mx-auto mt-8 grid w-full max-w-[760px] gap-4 md:grid-cols-3">
+                <div className="mx-auto mt-8 grid w-full max-w-190 gap-4 md:grid-cols-3">
                   <CartMetric label="Saved Items" value="0" />
                   <CartMetric label="Active Modules" value="0" accent="text-white" />
                   <CartMetric label="Next Step" value="Explore" accent="text-green-400" />
@@ -187,13 +187,13 @@ export default function Cart() {
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                   <button
                     onClick={() => navigate(`${baseRolePath}/shop`)}
-                    className="rounded-[12px] bg-[#D4AF37] px-6 py-3 text-[13px] font-black text-[#0a1a0c] transition hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
+                    className="rounded-xl bg-gold px-6 py-3 text-[13px] font-black text-[#0a1a0c] transition hover:-translate-y-px hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
                   >
                     Browse Modules
                   </button>
                   <button
                     onClick={() => navigate(baseRolePath)}
-                    className="rounded-[12px] border border-gold/25 bg-transparent px-6 py-3 text-[13px] font-bold text-[#FFF085] transition hover:border-gold/40 hover:bg-white/5"
+                    className="rounded-xl border border-gold/25 bg-transparent px-6 py-3 text-[13px] font-bold text-[#FFF085] transition hover:border-gold/40 hover:bg-white/5"
                   >
                     Back to Dashboard
                   </button>
@@ -211,7 +211,7 @@ export default function Cart() {
                   />
                 </div>
 
-                <div className="rounded-[22px] border border-gold/18 bg-[#071209] px-5 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.28)]">
+                <div className="rounded-[22px] border border-gold/18 bg-darkgreen px-5 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.28)]">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <div className="text-[18px] font-black text-[#FFF085]">Review Your Saved Selections</div>
@@ -230,7 +230,7 @@ export default function Cart() {
                   return (
                     <section
                       key={moduleName}
-                      className="rounded-[24px] border border-gold/22 bg-[#040404] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.35)] md:p-6"
+                      className="rounded-3xl border border-gold/22 bg-darkgreen md:p-6"
                     >
                       <div className="mb-5 flex flex-wrap items-start justify-between gap-4 border-b border-gold/15 pb-5">
                         <div>
@@ -240,7 +240,7 @@ export default function Cart() {
                               {items.length} item{items.length !== 1 ? "s" : ""}
                             </span>
                           </div>
-                          <p className="mt-2 max-w-[720px] text-[13px] leading-6 text-white/58">
+                          <p className="mt-2 max-w-180 text-[13px] leading-6 text-white/58">
                             {moduleDescriptions[moduleName] || moduleDescriptions.Other}
                           </p>
                         </div>
@@ -248,20 +248,20 @@ export default function Cart() {
                         <div className="flex flex-wrap gap-3">
                           <button
                             onClick={() => navigate(moduleRoutes[moduleName] || "/farmer")}
-                            className="rounded-[12px] border border-gold/24 bg-transparent px-5 py-3 text-[12px] font-bold uppercase tracking-[0.45px] text-[#FFF085] transition hover:border-gold/45 hover:bg-white/5"
+                            className="rounded-xl border border-gold/24 bg-transparent px-5 py-3 text-[12px] font-bold uppercase tracking-[0.45px] text-[#FFF085] transition hover:border-gold/45 hover:bg-white/5"
                           >
                             Open Module
                           </button>
                           <button
                             onClick={() => handleBuyNow(moduleName)}
-                            className="rounded-[12px] bg-[#D4AF37] px-5 py-3 text-[12px] font-black uppercase tracking-[0.45px] text-[#0a1a0c] transition hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
+                            className="rounded-xl bg-gold px-5 py-3 text-[12px] font-black uppercase tracking-[0.45px] text-[#0a1a0c] transition hover:-translate-y-px hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
                           >
                             Continue
                           </button>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px]">
+                      <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-4.5">
                         {items.map((item, index) => (
                           <CartItemCard
                             key={item.id || item._id || `${moduleName}-${index}`}

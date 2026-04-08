@@ -50,8 +50,8 @@ export default function RentalsServiceCard({ item, onEdit, onDelete }) {
           borderColor: "rgba(201, 168, 76, 0.2)",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60" />
-        <div className="absolute left-3 top-3 z-[1] rounded-full border border-[#FFF085]/35 bg-black/60 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.5px] text-[#FFF085]">
+        <div className="absolute inset-0 bg-linear-to-b from-black/20 to-black/60" />
+        <div className="absolute left-3 top-3 z-1 rounded-full border border-[#FFF085]/35 bg-black/60 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.5px] text-[#FFF085]">
           {item.category}
         </div>
       </div>

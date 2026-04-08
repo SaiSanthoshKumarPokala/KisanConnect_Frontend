@@ -18,24 +18,24 @@ export default function Dashboard() {
 
     return (
         <>
-            <div className="bg-black min-h-dvh">
+            <div className="bg-darkgreen min-h-dvh">
                 <SideNav />
-                <div className={`min-h-dvh ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
-                    <div className="mx-2 my-4 overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
-                    <div className="flex flex-row flex-wrap items-center justify-center gap-8 p-6 font-montserrat md:p-8">
-                        {Services.map((item) => (
-                            <Link to={`/${role}/${item.link}`} key={item.id} className="group hover:shadow-[10px_10px_1px_1px] shadow-gold rounded-xl flex flex-col items-start justify-evenly bg-black text-white p-6 border-2 border-gold gap-2 transition-all ease-in duration-300 w-90">
-                                <img src={item.image} alt="" className="size-20 mb-2" />
-                                <h1 className="font-bold text-2xl">{item.title}</h1>
-                                <p className="font-semibold text-sm">{item.point}</p>
-                                <div className="bg-white text-black rounded-xl p-4 hover:bg-gold w-full cursor-pointer flex flex-row items-center justify-between m-auto mt-6 transition-all ease-in duration-300">
-                                    <p className="font-semibold text-xl">Get Started</p>
-                                    <ArrowRightIcon className="fill-black size-6" />
-                                </div>
-                            </Link>
-                        ))
-                        }
-                    </div>
+                <div className={`min-h-dvh ${isOpen ? "md:ml-62.5" : "md:ml-20"} py-4`}>
+                    <div className="mx-2 m-auto overflow-hidden rounded-3xl border border-gold/30 bg-darkgreen shadow-2xl md:mx-6">
+                        <div className="flex flex-row flex-wrap items-center justify-center gap-8 p-6 font-montserrat md:p-8">
+                            {Services.map((item) => (
+                                <Link to={`/${role}/${item.link}`} key={item.id} className="group hover:shadow-[10px_10px_1px_1px] shadow-gold rounded-xl flex flex-col items-start justify-evenly bg-black text-white p-6 border-2 border-gold gap-2 transition-all ease-in duration-300 w-90">
+                                    <img src={item.image} alt="" className="size-20 mb-2" />
+                                    <h1 className="font-bold text-2xl">{item.title}</h1>
+                                    <p className="font-semibold text-sm">{item.point}</p>
+                                    <div className="bg-white text-black rounded-xl p-4 hover:bg-gold w-full cursor-pointer flex flex-row items-center justify-between m-auto mt-6 transition-all ease-in duration-300">
+                                        <p className="font-semibold text-xl">Get Started</p>
+                                        <ArrowRightIcon className="fill-black size-6" />
+                                    </div>
+                                </Link>
+                            ))
+                            }
+                        </div>
                     </div>
                 </div>
             </div>

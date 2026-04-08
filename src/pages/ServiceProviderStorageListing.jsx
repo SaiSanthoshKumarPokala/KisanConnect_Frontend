@@ -74,10 +74,10 @@ export default function ServiceProviderStorageListing() {
   };
 
   return (
-    <div className="bg-black min-h-dvh">
+    <div className="bg-darkgreen min-h-dvh">
       <SideNav />
-      <div className={`flex flex-col min-h-dvh transition-all duration-300 ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
-        <div className="flex flex-col mx-2 md:mx-6 my-4 border border-gold/30 rounded-2xl shadow-2xl bg-black font-montserrat flex-1 overflow-hidden">
+      <div className={`flex flex-col min-h-dvh transition-all duration-300 ${isOpen ? "md:ml-62.5" : "md:ml-20"}`}>
+        <div className="flex flex-col mx-2 md:mx-6 my-4 border border-gold/30 rounded-2xl shadow-2xl bg-darkgreen font-montserrat flex-1 overflow-hidden">
           <ServiceProviderStorageContent
             storages={storages}
             onOpenForm={handleOpenForm}

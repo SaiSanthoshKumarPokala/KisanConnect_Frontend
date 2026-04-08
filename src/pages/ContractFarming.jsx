@@ -67,7 +67,7 @@ function ContractFarmingCard({ contract, applied, onApply }) {
         : 0;
 
     return (
-        <div className="flex h-full flex-col overflow-hidden rounded-[18px] border bg-black font-montserrat"
+        <div className="flex h-full flex-col overflow-hidden rounded-[18px] border bg-darkgreen font-montserrat"
             style={{ borderColor: "#d4af37", boxShadow: "0 0 0 1px rgba(212, 175, 55, 0.26), 0 12px 28px rgba(0, 0, 0, 0.42)" }}>
             {/* Image area */}
             <div className="bg-darkgreen rounded-t-xl flex items-center justify-center h-40 relative border-b border-gold/20">
@@ -104,10 +104,10 @@ function ContractFarmingCard({ contract, applied, onApply }) {
                 {/* Details */}
                 <div className="w-full text-sm space-y-1">
                     {[
-                        ["📍 Region", contract.region],
-                        ["🌾 Min Land", `${contract.minLand} acres / farmer`],
-                        ["👥 Farmers Needed", contract.farmersNeeded],
-                        ["💳 Payment", contract.paymentTerms],
+                        ["Region", contract.region],
+                        ["Min Land", `${contract.minLand} acres / farmer`],
+                        ["Farmers Needed", contract.farmersNeeded],
+                        ["Payment", contract.paymentTerms],
                     ].map(([k, v]) => (
                         <div key={k} className="flex justify-between text-white/80">
                             <span>{k}</span>
@@ -281,7 +281,7 @@ export default function ContractFarming() {
         }
     };
 
-    // ── Filter contracts ──────────────────────────────────────────────────────
+    // Filter contracts
     const filtered = useMemo(() => {
         let list = [...contracts];
         if (search)
@@ -297,8 +297,8 @@ export default function ContractFarming() {
         return (
             <>
                 <SideNav />
-                <div className={`flex min-h-dvh flex-col bg-black ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
-                    <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
+                <div className={`flex min-h-dvh flex-col bg-darkgreen ${isOpen ? "md:ml-62.5" : "md:ml-20"}`}>
+                    <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-darkgreen shadow-2xl md:mx-6">
                         <ModuleHeader
                             title="Contract Farming"
                             search={search}
@@ -318,8 +318,8 @@ export default function ContractFarming() {
         <>
             <SideNav />
 
-            <div className={`flex min-h-dvh flex-col bg-black ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
-                <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
+            <div className={`flex min-h-dvh flex-col bg-darkgreen ${isOpen ? "md:ml-62.5":"md:ml-20"}`}>
+                <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-darkgreen shadow-2xl md:mx-6">
                     <ModuleHeader
                         title="Contract Farming"
                         search={search}
@@ -346,7 +346,7 @@ export default function ContractFarming() {
 
                     {/* Contracts grid */}
                     {filtered.length > 0 ? (
-                        <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px] p-6">
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-4.5 p-6">
                         {filtered.map(c => (
                             <ContractFarmingCard
                                 key={c._id}
@@ -419,19 +419,19 @@ export default function ContractFarming() {
                                         ["Years of Experience *", fExperience, setFExperience, "number", "e.g. 8"],
                                         ["Current Crop Grown", fCrop, setFCrop, "text", "e.g. Paddy, Cotton..."],
                                     ].map(([label, val, setter, type, ph]) => (
-                                        <div key={label} className="rounded-[16px] border border-gold/15 bg-[#050505] px-4 py-3">
+                                        <div key={label} className="rounded-2xl border border-gold/15 bg-[#050505] px-4 py-3">
                                             <label className="mb-2 block text-sm font-bold text-gold">{label}</label>
                                             <input type={type} placeholder={ph} value={val}
                                                 onChange={e => setter(e.target.value)}
-                                                className="w-full rounded-[12px] border border-gold/15 bg-black px-3 py-3 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:border-gold/45" />
+                                                className="w-full rounded-xl border border-gold/15 bg-black px-3 py-3 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:border-gold/45" />
                                         </div>
                                     ))}
 
-                                    <div className="rounded-[16px] border border-gold/15 bg-[#050505] px-4 py-3">
+                                    <div className="rounded-2xl border border-gold/15 bg-[#050505] px-4 py-3">
                                         <label className="mb-2 block text-sm font-bold text-gold">Message to Company</label>
                                         <textarea rows={2} value={fMessage} onChange={e => setFMessage(e.target.value)}
                                             placeholder="Why are you a good fit for this contract?"
-                                            className="min-h-[88px] w-full resize-none rounded-[12px] border border-gold/15 bg-black px-3 py-3 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:border-gold/45" />
+                                            className="min-h-22 w-full resize-none rounded-xl border border-gold/15 bg-black px-3 py-3 text-sm text-white outline-none transition-all placeholder:text-white/40 focus:border-gold/45" />
                                     </div>
 
                                     {targetContract && fLand && Number(fLand) < targetContract.minLand && (

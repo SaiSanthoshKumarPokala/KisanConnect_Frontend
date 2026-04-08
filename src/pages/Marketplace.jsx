@@ -202,10 +202,10 @@ export default function Marketplace() {
         }
       `}</style>
 
-      <div className="min-h-dvh bg-black">
+      <div className="min-h-dvh bg-darkgreen">
         <SideNav />
-        <div className={`flex min-h-dvh flex-col transition-all duration-300 ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
-          <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
+        <div className={`flex min-h-dvh flex-col transition-all duration-300 ${isOpen ? "md:ml-62.5" : "md:ml-20"}`}>
+          <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-darkgreen shadow-2xl md:mx-6">
             <ModuleHeader
               title={pageTitle}
               search={search}
@@ -232,13 +232,13 @@ export default function Marketplace() {
                   </div>
                   <button
                     onClick={handleOpenForm}
-                    className="rounded-[12px] bg-[#D4AF37] px-4 py-2 text-[12px] font-black uppercase tracking-[0.45px] text-[#0a1a0c] transition hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
+                    className="rounded-xl bg-gold px-4 py-2 text-[12px] font-black uppercase tracking-[0.45px] text-[#0a1a0c] transition hover:-translate-y-px hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
                   >
                     {addButtonLabel}
                   </button>
                 </div>
 
-                <div className="flex-1 bg-black p-6">
+                <div className="flex-1 bg-darkgreen p-6">
                   {filteredListings.length === 0 ? (
                     <div className="flex min-h-[calc(100dvh-14rem)] flex-col items-center justify-center gap-6 text-center">
                       <p className="max-w-xl text-xl font-bold text-white">
@@ -246,13 +246,13 @@ export default function Marketplace() {
                       </p>
                       <button
                         onClick={handleOpenForm}
-                        className="rounded-[12px] bg-[#D4AF37] px-6 py-3 text-[13px] font-black uppercase tracking-[0.45px] text-[#0a1a0c] transition hover:-translate-y-[1px] hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
+                        className="rounded-xl bg-gold px-6 py-3 text-[13px] font-black uppercase tracking-[0.45px] text-[#0a1a0c] transition hover:-translate-y-px hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
                       >
                         {addButtonLabel}
                       </button>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px]">
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-4.5">
                       {filteredListings.map((item) => (
                         <ShopServiceCard
                           key={item.id}
@@ -282,7 +282,7 @@ export default function Marketplace() {
                     No marketplace listings match your current search and filters.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px] p-6">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-4.5 p-6">
                     {filteredListings.map((item) => (
                       <ProductCard
                         key={item.id}

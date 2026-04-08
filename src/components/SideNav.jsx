@@ -101,7 +101,7 @@ export default function SideNav() {
                             ))}
                             <div className="flex flex-col items-start justify-center gap-3 border-t border-darkgreen/60 pt-4 my-auto fixed bottom-4">
                                 <Link to="/serviceprovider/profile" className="flex flex-row items-center justify-start gap-3 pt-2 px-2">
-                                    <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-gradient-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                                    <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-linear-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
                                         {profileInitials}
                                     </div>
                                     <p className="text-xl font-semibold text-darkgreen">Profile</p>
@@ -121,7 +121,7 @@ export default function SideNav() {
                             ))}
                             <div className="flex flex-col items-start justify-center gap-3 border-t border-darkgreen/60 pt-4 my-auto fixed bottom-4">
                                 <Link to="/farmer/profile" className="flex flex-row items-center justify-start gap-3 pt-2 px-2">
-                                    <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-gradient-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                                    <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-linear-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
                                         {profileInitials}
                                     </div>
                                     <p className="text-xl font-semibold text-darkgreen">Profile</p>
@@ -169,7 +169,7 @@ export default function SideNav() {
                                 ))}
                                 <div className="flex flex-col items-start justify-start gap-3 border-t border-darkgreen/60 pt-4 w-full">
                                     <Link to="/serviceprovider/profile" className="flex flex-row items-center justify-start gap-3 pt-2 px-2 w-full">
-                                        <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-gradient-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                                        <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-linear-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
                                             {profileInitials}
                                         </div>
                                         <p className="text-xl font-semibold text-darkgreen">Profile</p>
@@ -189,7 +189,7 @@ export default function SideNav() {
                                 ))}
                                 <div className="flex flex-col items-start justify-center gap-3 border-t border-darkgreen/60 pt-4 w-full">
                                     <Link to="/farmer/profile" className="flex flex-row items-center justify-start gap-3 pt-2 px-2 w-full">
-                                        <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-gradient-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                                        <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-linear-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
                                             {profileInitials}
                                         </div>
                                         <p className="text-xl font-semibold text-darkgreen">Profile</p>
