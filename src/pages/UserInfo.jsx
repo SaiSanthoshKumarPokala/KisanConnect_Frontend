@@ -11,7 +11,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { UseAppContext } from "../context/AppContext";
 
-const states = ["telangana", "andhra pradesh", "maharashtra", "karnataka", "kerala"];
+const states = ["Telangana", "Andhra Pradesh", "Maharashtra", "Karnataka", "Kerala"];
 
 const inputWrapClass = "flex flex-col items-start gap-1.5";
 const inputShellClass = "flex w-full items-center gap-2 rounded-[14px] border border-gold/20 bg-white px-4 py-3";

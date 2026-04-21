@@ -50,15 +50,25 @@ export default function SideNav() {
         }
     };
 
-    const Menu = [
-        { path: `/${effectiveRole}/`,           icon: Dashboard, labelKey: "nav_dashboard", index: 1 },
-        { path: `/${effectiveRole}/rentals`,     icon: Truck,     labelKey: "nav_rentals",   index: 2 },
-        { path: `/${effectiveRole}/shop`,        icon: Shopping,  labelKey: "nav_shop",      index: 3 },
-        { path: `/${effectiveRole}/marketplace`, icon: Market,    labelKey: "nav_marketplace",index: 4 },
-        { path: `/${effectiveRole}/transport`,   icon: Truck,     labelKey: "nav_transport", index: 5 },
-        { path: `/${effectiveRole}/contract`,    icon: Document,  labelKey: "nav_contract",  index: 6 },
-        { path: `/${effectiveRole}/coldstorage`, icon: Building,  labelKey: "nav_coldstorage",index: 7 },
-        { path: `/${effectiveRole}/aitoolkit`,   icon: Sparkles,  labelKey: "nav_aitoolkit", index: 8 },
+    const FarmerMenu = [
+        { path: `/farmer/`, icon: Dashboard, labelKey: "nav_dashboard", index: 1 },
+        { path: `/farmer/rentals`, icon: Truck, labelKey: "nav_rentals", index: 2 },
+        { path: `/farmer/shop`, icon: Shopping, labelKey: "nav_shop", index: 3 },
+        { path: `/farmer/marketplace`, icon: Market, labelKey: "nav_marketplace", index: 4 },
+        { path: `/farmer/transport`, icon: Truck, labelKey: "nav_transport", index: 5 },
+        { path: `/farmer/contract`, icon: Document, labelKey: "nav_contract", index: 6 },
+        { path: `/farmer/coldstorage`, icon: Building, labelKey: "nav_coldstorage", index: 7 },
+        { path: `/farmer/aitoolkit`, icon: Sparkles, labelKey: "nav_aitoolkit", index: 8 },
+    ];
+
+    const ServiceProviderMenu = [
+        { path: `/serviceprovider/`, icon: Dashboard, labelKey: "nav_dashboard", index: 1 },
+        { path: `/serviceprovider/rentals`, icon: Truck, labelKey: "nav_rentals", index: 2 },
+        { path: `/serviceprovider/shop`, icon: Shopping, labelKey: "nav_shop", index: 3 },
+        { path: `/serviceprovider/marketplace`, icon: Market, labelKey: "nav_marketplace", index: 4 },
+        { path: `/serviceprovider/transport`, icon: Truck, labelKey: "nav_transport", index: 5 },
+        { path: `/serviceprovider/contract`, icon: Document, labelKey: "nav_contract", index: 6 },
+        { path: `/serviceprovider/coldstorage`, icon: Building, labelKey: "nav_coldstorage", index: 7 },
     ];
 
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -82,26 +92,42 @@ export default function SideNav() {
                                     <p className="font-bold text-darkgreen">CONNECT</p>
                                 </div>
                             </Link>
-                            <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-xl hover:bg-darkgreen/10 cursor-pointer transition-colors" aria-label="Close sidebar">
+                            <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-xl hover:bg-darkgreen/10 cursor-pointer transition-normal" aria-label="Close sidebar">
                                 <XMarkIcon className="size-6 text-darkgreen" />
                             </button>
                         </div>
 
-                        <div className="flex flex-col items-start justify-evenly my-4 gap-2 text-darkgreen flex-1">
-                            {Menu.map((options) => (
-                                <NavLink
-                                    key={options.index}
-                                    to={options.path}
-                                    aria-label={t(options.labelKey)}
-                                    className={({ isActive }) =>
-                                        `flex flex-row items-center gap-2 w-full ${isActive ? "p-2 bg-darkgreen/40 rounded-xl" : "p-2 hover:bg-darkgreen/40 hover:rounded-xl"}`
-                                    }
-                                    end
-                                >
-                                    <img src={options.icon} alt="" className="size-8" />
-                                    <p className="font-semibold">{t(options.labelKey)}</p>
-                                </NavLink>
-                            ))}
+                        <div className="flex flex-col items-start justify-start my-4 gap-2 text-darkgreen flex-1">
+                            {effectiveRole == "farmer" ? (
+                                FarmerMenu.map((options) => (
+                                    <NavLink
+                                        key={options.index}
+                                        to={options.path}
+                                        aria-label={t(options.labelKey)}
+                                        className={({ isActive }) =>
+                                            `flex flex-row items-center gap-2 w-full ${isActive ? "p-2 bg-darkgreen/40 rounded-xl" : "p-2 hover:bg-darkgreen/40 hover:rounded-xl"}`
+                                        }
+                                        end
+                                    >
+                                        <img src={options.icon} alt="" className="size-8" />
+                                        <p className="font-semibold">{t(options.labelKey)}</p>
+                                    </NavLink>
+                                ))) : (
+                                ServiceProviderMenu.map((options) => (
+                                    <NavLink
+                                        key={options.index}
+                                        to={options.path}
+                                        aria-label={t(options.labelKey)}
+                                        className={({ isActive }) =>
+                                            `flex flex-row items-center gap-2 w-full ${isActive ? "p-2 bg-darkgreen/40 rounded-xl" : "p-2 hover:bg-darkgreen/40 hover:rounded-xl"}`
+                                        }
+                                        end
+                                    >
+                                        <img src={options.icon} alt="" className="size-8" />
+                                        <p className="font-semibold">{t(options.labelKey)}</p>
+                                    </NavLink>
+                                ))
+                            )}
                         </div>
 
                         {/* Language Switcher */}
@@ -135,7 +161,7 @@ export default function SideNav() {
                 ) : (
                     /* ── COLLAPSED ── */
                     <>
-                        <button onClick={() => setIsOpen(true)} className="p-2 rounded-xl hover:bg-darkgreen/10 cursor-pointer transition-colors mb-4" aria-label="Open sidebar">
+                        <button onClick={() => setIsOpen(true)} className="p-2 rounded-xl hover:bg-darkgreen/10 cursor-pointer transition-normal mb-4" aria-label="Open sidebar">
                             <Bars3Icon className="size-7 text-darkgreen" />
                         </button>
 
@@ -144,19 +170,35 @@ export default function SideNav() {
                         </Link>
 
                         <div className="flex flex-col items-center gap-1 flex-1">
-                            {Menu.map((options) => (
-                                <NavLink
-                                    key={options.index}
-                                    to={options.path}
-                                    aria-label={t(options.labelKey)}
-                                    className={({ isActive }) =>
-                                        `flex items-center justify-center p-2 w-full rounded-xl ${isActive ? "bg-darkgreen/40" : "hover:bg-darkgreen/20"}`
-                                    }
-                                    end
-                                >
-                                    <img src={options.icon} alt={t(options.labelKey)} className="size-7" />
-                                </NavLink>
-                            ))}
+                            {effectiveRole == "farmer" ?
+                                (FarmerMenu.map((options) => (
+                                    <NavLink
+                                        key={options.index}
+                                        to={options.path}
+                                        aria-label={t(options.labelKey)}
+                                        className={({ isActive }) =>
+                                            `flex items-center justify-center p-2 w-full rounded-xl ${isActive ? "bg-darkgreen/40" : "hover:bg-darkgreen/20"}`
+                                        }
+                                        end
+                                    >
+                                        <img src={options.icon} alt={t(options.labelKey)} className="size-7" />
+                                    </NavLink>
+                                ))) : (
+                                    ServiceProviderMenu.map((options) => (
+                                        <NavLink
+                                            key={options.index}
+                                            to={options.path}
+                                            aria-label={t(options.labelKey)}
+                                            className={({ isActive }) =>
+                                                `flex items-center justify-center p-2 w-full rounded-xl ${isActive ? "bg-darkgreen/40" : "hover:bg-darkgreen/20"}`
+                                            }
+                                            end
+                                        >
+                                            <img src={options.icon} alt={t(options.labelKey)} className="size-7" />
+                                        </NavLink>
+                                    ))
+                                )
+                            }
                         </div>
 
                         {/* Collapsed Language Switcher */}
@@ -180,7 +222,7 @@ export default function SideNav() {
 
             {/* ── Mobile Sidebar ── */}
             {!mobileOpen && (
-                <div className="w-full flex flex-col md:hidden sticky top-0 items-center p-4 font-montserrat z-100 text-darkgreen bg-gold">
+                <div className="w-full flex flex-col md:hidden sticky top-0 items-center p-4 font-montserrat z-100 text-darkgreen bg-linear-to-b from-gold to-yellow-200">
                     <div className="flex w-full flex-row items-center justify-between">
                         <Link to="/"><img src="/Kisan Connect Logo 1.png" className="size-14 rounded-full" alt="Logo" /></Link>
                         <button className="p-2 cursor-pointer" onClick={() => setMobileOpen(true)}>
@@ -199,21 +241,38 @@ export default function SideNav() {
                     </div>
                     <div className="flex flex-col gap-2 items-start justify-start w-full h-full pb-4 overflow-y-auto">
                         <div className="flex flex-col items-start justify-evenly my-2 gap-2 w-full">
-                            {Menu.map((options) => (
-                                <NavLink
-                                    key={options.index}
-                                    to={options.path}
-                                    aria-label={t(options.labelKey)}
-                                    className={({ isActive }) =>
-                                        `flex flex-row items-center gap-2 w-full ${isActive ? "p-2 bg-white/40 rounded-xl" : "p-2 hover:bg-white/40 hover:rounded-xl"}`
-                                    }
-                                    end
-                                    onClick={() => setMobileOpen(false)}
-                                >
-                                    <img src={options.icon} alt="" className="size-8" />
-                                    <p className="font-semibold">{t(options.labelKey)}</p>
-                                </NavLink>
-                            ))}
+                            {effectiveRole == "farmer" ?
+                                (FarmerMenu.map((options) => (
+                                    <NavLink
+                                        key={options.index}
+                                        to={options.path}
+                                        aria-label={t(options.labelKey)}
+                                        className={({ isActive }) =>
+                                            `flex flex-row items-center gap-2 w-full ${isActive ? "p-2 bg-white/40 rounded-xl" : "p-2 hover:bg-white/40 hover:rounded-xl"}`
+                                        }
+                                        end
+                                        onClick={() => setMobileOpen(false)}
+                                    >
+                                        <img src={options.icon} alt="" className="size-8" />
+                                        <p className="font-semibold">{t(options.labelKey)}</p>
+                                    </NavLink>
+                                ))) :
+                                (ServiceProviderMenu.map((options) => (
+                                    <NavLink
+                                        key={options.index}
+                                        to={options.path}
+                                        aria-label={t(options.labelKey)}
+                                        className={({ isActive }) =>
+                                            `flex flex-row items-center gap-2 w-full ${isActive ? "p-2 bg-white/40 rounded-xl" : "p-2 hover:bg-white/40 hover:rounded-xl"}`
+                                        }
+                                        end
+                                        onClick={() => setMobileOpen(false)}
+                                    >
+                                        <img src={options.icon} alt="" className="size-8" />
+                                        <p className="font-semibold">{t(options.labelKey)}</p>
+                                    </NavLink>
+                                )))
+                            }
 
                             {/* Mobile Language Switcher */}
                             <div className="w-full mt-2">

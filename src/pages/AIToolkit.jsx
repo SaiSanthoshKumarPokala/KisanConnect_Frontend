@@ -1,7 +1,19 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import SideNav from "../components/SideNav";
 import { UseAppContext } from "../context/AppContext";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+
+const PROXY_SOIL_MAP = {
+  Alluvial: { n: 60, p: 45, k: 45, ph: 7.0 },
+  Black: { n: 40, p: 50, k: 50, ph: 7.5 },
+  Clay: { n: 30, p: 40, k: 45, ph: 7.2 },
+  Laterite: { n: 15, p: 10, k: 10, ph: 5.0 },
+  Loamy: { n: 50, p: 40, k: 40, ph: 6.5 },
+  Red: { n: 20, p: 20, k: 20, ph: 6.0 },
+  Sandy: { n: 10, p: 15, k: 15, ph: 5.5 },
+};
 
 const TOOL_TABS = [
   {
@@ -9,6 +21,7 @@ const TOOL_TABS = [
     label: "Crop Price Prediction",
     icon: "/prize.svg",
     mode: "form",
+    endpoint: "/api/price-prediction",
     description:
       "Enter the latest market and crop details to estimate likely pricing outcomes for the selected commodity.",
     steps: [
@@ -24,9 +37,7 @@ const TOOL_TABS = [
         { key: "year", label: "Year", placeholder: "E.g. 2026", type: "number" },
         { key: "month", label: "Month", placeholder: "E.g. 2", type: "number" },
       ],
-      [
-        { key: "dayOfWeek", label: "Day of Week", placeholder: "E.g. 5", type: "number" },
-      ],
+      [{ key: "dayOfWeek", label: "Day of Week", placeholder: "0 = Monday, 6 = Sunday", type: "number" }],
     ],
   },
   {
@@ -34,6 +45,7 @@ const TOOL_TABS = [
     label: "Crop Yield Prediction",
     icon: "/yield.svg",
     mode: "form",
+    endpoint: "/api/yield-prediction",
     description:
       "Share your crop, season, and cultivation area so the toolkit can prepare a projected yield estimate.",
     steps: [
@@ -55,18 +67,67 @@ const TOOL_TABS = [
     label: "Crop Disease Prediction",
     icon: "/disease.svg",
     mode: "upload",
+    endpoint: "/api/disease-prediction",
     description:
       "Upload a clear crop image so the toolkit can inspect visible symptoms and prepare a disease prediction.",
   },
   {
     id: "recommendation",
-    label: "Crop Recomendation",
+    label: "Crop Recommendation",
     icon: "/best.svg",
     mode: "upload",
+    endpoint: "/api/crop-recommendation",
     description:
-      "Upload a crop image to receive smart recommendations that can guide the next farming decision.",
+      "Upload a soil image, capture GPS latitude and longitude, fetch live OpenWeather conditions, derive proxy NPK and pH from the classified soil type, and generate a crop recommendation.",
   },
 ];
+
+const INITIAL_TOOL_FORM_STEPS = {
+  price: 0,
+  yield: 0,
+};
+
+const INITIAL_TOOL_FORMS = {
+  price: {
+    stateCode: "",
+    districtCode: "",
+    marketCode: "",
+    commodity: "",
+    variety: "",
+    arrivalsTonnes: "",
+    year: "",
+    month: "",
+    dayOfWeek: "",
+  },
+  yield: {
+    stateName: "",
+    districtName: "",
+    season: "",
+    cropName: "",
+    cropType: "",
+    startYear: "",
+    area: "",
+  },
+};
+
+const INITIAL_RESULTS = {
+  price: null,
+  yield: null,
+  disease: null,
+  recommendation: null,
+};
+
+const NUMERIC_FIELDS = new Set([
+  "stateCode",
+  "districtCode",
+  "marketCode",
+  "arrivalsTonnes",
+  "year",
+  "month",
+  "dayOfWeek",
+  "startYear",
+  "area",
+]);
 
 function FormField({ field, value, onChange }) {
   return (
@@ -76,13 +137,209 @@ function FormField({ field, value, onChange }) {
       </span>
       <input
         type={field.type || "text"}
-        inputMode={field.type === "number" ? "numeric" : undefined}
+        required
+        inputMode={field.type === "number" ? "decimal" : undefined}
         value={value}
         onChange={(event) => onChange(field.key, event.target.value)}
         placeholder={field.placeholder}
         className="kc-ai-input w-full rounded-[12px] border border-white/18 bg-black px-4 py-3 font-montserrat text-base text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition-all placeholder:text-white/40 focus:border-gold/45 md:text-lg"
       />
     </label>
+  );
+}
+
+function ResultCard({ result, isSubmitting, error, mode }) {
+  const recommendationProxy =
+    mode === "recommendation"
+      ? result?.proxyMap || PROXY_SOIL_MAP[result?.soilType] || null
+      : null;
+
+  return (
+    <div className="rounded-[18px] border border-white/10 bg-[#050505]/95 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="rounded-full border border-gold/25 bg-black px-3 py-1 font-montserrat text-xs font-bold uppercase tracking-[0.24em] text-gold/85">
+          Model response
+        </span>
+        {isSubmitting ? (
+          <span className="font-montserrat text-sm text-white/55">Running inference...</span>
+        ) : null}
+      </div>
+
+      {error ? (
+        <p className="mt-3 font-montserrat text-sm leading-6 text-[#ff9d9d]">{error}</p>
+      ) : null}
+
+      {!error && !result && !isSubmitting ? (
+        <p className="mt-3 font-montserrat text-sm leading-6 text-white/55">
+          Submit the current tool to see the prediction here.
+        </p>
+      ) : null}
+
+      {result ? (
+        <div className="mt-4 space-y-4">
+          <div>
+            <p className="font-montserrat text-sm uppercase tracking-[0.24em] text-white/45">
+              Primary result
+            </p>
+            <p className="mt-2 font-montserrat text-2xl font-black capitalize text-[#FFF085] md:text-3xl">
+              {typeof result.prediction === "number"
+                ? `${result.prediction} ${result.unit || ""}`.trim()
+                : result.prediction}
+            </p>
+            {result.confidence !== null && result.confidence !== undefined ? (
+              <p className="mt-1 font-montserrat text-sm text-white/60">
+                Confidence: {result.confidence}%
+              </p>
+            ) : null}
+            {result.message ? (
+              <p className="mt-2 font-montserrat text-sm leading-6 text-white/70">{result.message}</p>
+            ) : null}
+          </div>
+
+          {mode === "recommendation" && result.soilType ? (
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-[14px] border border-white/10 bg-black px-4 py-3">
+                <p className="font-montserrat text-sm uppercase tracking-[0.2em] text-white/45">
+                  Soil classifier
+                </p>
+                <p className="mt-2 font-montserrat text-lg font-bold text-white">{result.soilType}</p>
+                <p className="mt-1 font-montserrat text-sm text-gold/85">
+                  Confidence: {result.soilConfidence}%
+                </p>
+              </div>
+              <div className="rounded-[14px] border border-white/10 bg-black px-4 py-3">
+                <p className="font-montserrat text-sm uppercase tracking-[0.2em] text-white/45">
+                  GPS location
+                </p>
+                <p className="mt-2 font-montserrat text-sm text-white/75">
+                  Lat: {result.weather?.latitude}
+                </p>
+                <p className="mt-1 font-montserrat text-sm text-white/75">
+                  Lon: {result.weather?.longitude}
+                </p>
+                {result.weather?.city ? (
+                  <p className="mt-1 font-montserrat text-sm text-gold/85">{result.weather.city}</p>
+                ) : null}
+              </div>
+              <div className="rounded-[14px] border border-white/10 bg-black px-4 py-3">
+                <p className="font-montserrat text-sm uppercase tracking-[0.2em] text-white/45">
+                  OpenWeather
+                </p>
+                <p className="mt-2 font-montserrat text-sm text-white/75">
+                  Temp: {result.weather?.temperature} deg C
+                </p>
+                <p className="mt-1 font-montserrat text-sm text-white/75">
+                  Humidity: {result.weather?.humidity}%
+                </p>
+                <p className="mt-1 font-montserrat text-sm text-white/75">
+                  Rainfall: {result.weather?.rainfall} mm
+                </p>
+                {result.weather?.description ? (
+                  <p className="mt-1 font-montserrat text-sm capitalize text-gold/85">
+                    {result.weather.description}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
+          {mode === "recommendation" && recommendationProxy ? (
+            <div>
+              <p className="font-montserrat text-sm uppercase tracking-[0.24em] text-white/45">
+                Proxy soil map
+              </p>
+              <div className="mt-3 grid gap-3 md:grid-cols-4">
+                {[
+                  ["N", recommendationProxy.n],
+                  ["P", recommendationProxy.p],
+                  ["K", recommendationProxy.k],
+                  ["pH", recommendationProxy.ph],
+                ].map(([label, value]) => (
+                  <div
+                    key={`${mode}-${label}`}
+                    className="rounded-[14px] border border-white/10 bg-black px-4 py-3"
+                  >
+                    <p className="font-montserrat text-sm text-white/50">{label}</p>
+                    <p className="mt-1 font-montserrat text-base font-bold text-white">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {mode === "recommendation" && result.inferredFeatures ? (
+            <div>
+              <p className="font-montserrat text-sm uppercase tracking-[0.24em] text-white/45">
+                Model inputs
+              </p>
+              <div className="mt-3 grid gap-3 md:grid-cols-4">
+                {[
+                  ["N", result.inferredFeatures.nitrogen],
+                  ["P", result.inferredFeatures.phosphorus],
+                  ["K", result.inferredFeatures.potassium],
+                  ["pH", result.inferredFeatures.ph],
+                ].map(([label, value]) => (
+                  <div
+                    key={`${mode}-feature-${label}`}
+                    className="rounded-[14px] border border-white/10 bg-black px-4 py-3"
+                  >
+                    <p className="font-montserrat text-sm text-white/50">{label}</p>
+                    <p className="mt-1 font-montserrat text-base font-bold text-white">{value}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 grid gap-3 md:grid-cols-3">
+                {[
+                  ["Temperature", result.inferredFeatures.temperature],
+                  ["Humidity", result.inferredFeatures.humidity],
+                  ["Rainfall", result.inferredFeatures.rainfall],
+                ].map(([label, value]) => (
+                  <div
+                    key={`${mode}-weather-feature-${label}`}
+                    className="rounded-[14px] border border-white/10 bg-black px-4 py-3"
+                  >
+                    <p className="font-montserrat text-sm text-white/50">{label}</p>
+                    <p className="mt-1 font-montserrat text-base font-bold text-white">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {mode === "recommendation" && Array.isArray(result.featureArray) ? (
+            <div>
+              <p className="font-montserrat text-sm uppercase tracking-[0.24em] text-white/45">
+                7-feature array
+              </p>
+              <div className="mt-3 rounded-[14px] border border-white/10 bg-black px-4 py-3">
+                <p className="font-mono text-sm text-gold/90">[{result.featureArray.join(", ")}]</p>
+              </div>
+            </div>
+          ) : null}
+
+          {Array.isArray(result.topMatches) && result.topMatches.length > 0 ? (
+            <div>
+              <p className="font-montserrat text-sm uppercase tracking-[0.24em] text-white/45">
+                Top matches
+              </p>
+              <div className="mt-3 grid gap-3 md:grid-cols-3">
+                {result.topMatches.map((match) => (
+                  <div
+                    key={`${mode}-${match.classId}`}
+                    className="rounded-[14px] border border-white/10 bg-black px-4 py-3"
+                  >
+                    <p className="font-montserrat text-base font-bold capitalize text-white">
+                      {match.label}
+                    </p>
+                    <p className="mt-1 font-montserrat text-sm text-gold/85">{match.confidence}%</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -95,15 +352,16 @@ function ToolkitPanel({
   formStep,
   onNextStep,
   onPrevStep,
+  selectedFileName,
 }) {
   if (tool.mode === "upload") {
     return (
       <label className="flex h-full min-h-[260px] cursor-pointer flex-col items-center justify-center gap-6 rounded-[24px] border border-dashed border-white/20 bg-[#050505] px-6 py-10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition hover:border-gold/60 hover:bg-[#0b0b0b]">
-        <input type="file" accept="image/*" className="hidden" onChange={onUploadChange} />
+        <input type="file" accept="image/*" required className="hidden" onChange={onUploadChange} />
         {uploadPreview ? (
           <img
             src={uploadPreview}
-            alt="Uploaded crop"
+            alt={tool.id === "recommendation" ? "Uploaded soil" : "Uploaded crop"}
             className="max-h-[280px] w-auto cursor-pointer rounded-2xl object-contain shadow-[0_18px_48px_rgba(0,0,0,0.4)]"
           />
         ) : (
@@ -112,8 +370,12 @@ function ToolkitPanel({
           </div>
         )}
         <div className="text-center">
-          <p className="text-3xl font-medium tracking-wide md:text-4xl">Upload img</p>
-          <p className="mt-3 text-sm text-white/60">Choose an image from your device to continue</p>
+          <p className="text-3xl font-medium tracking-wide md:text-4xl">
+            {tool.id === "recommendation" ? "Upload soil image" : "Upload image"}
+          </p>
+          <p className="mt-3 text-sm text-white/60">
+            {selectedFileName || "Choose an image from your device to continue"}
+          </p>
         </div>
       </label>
     );
@@ -171,6 +433,64 @@ function ToolkitPanel({
   );
 }
 
+function buildPayload(values) {
+  return Object.fromEntries(
+    Object.entries(values).map(([key, value]) => [
+      key,
+      NUMERIC_FIELDS.has(key) ? Number(value) : value.trim(),
+    ])
+  );
+}
+
+async function runTool(tool, values, file) {
+  const endpoint = `${API_BASE_URL}${tool.endpoint}`;
+
+  if (tool.mode === "upload") {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (tool.id === "recommendation") {
+      formData.append("latitude", String(values.latitude));
+      formData.append("longitude", String(values.longitude));
+    }
+    const response = await fetch(endpoint, {
+      method: "POST",
+      body: formData,
+    });
+
+    return response;
+  }
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(buildPayload(values)),
+  });
+
+  return response;
+}
+
+function validateToolInput(tool, values, file) {
+  if (tool.mode === "upload") {
+    if (!file) {
+      throw new Error("Please upload an image before running this model.");
+    }
+    if (tool.id === "recommendation" && (!values.latitude || !values.longitude)) {
+      throw new Error("Capture your GPS latitude and longitude before generating a recommendation.");
+    }
+    return;
+  }
+
+  const emptyField = tool.steps
+    .flat()
+    .find((field) => `${values?.[field.key] ?? ""}`.trim() === "");
+
+  if (emptyField) {
+    throw new Error(`Please fill in ${emptyField.label} before running this model.`);
+  }
+}
+
 export default function AIToolkit() {
   const { isOpen, setIsOpen, role, navigate } = UseAppContext();
   const [activeTool, setActiveTool] = useState("price");
@@ -178,31 +498,20 @@ export default function AIToolkit() {
     disease: "",
     recommendation: "",
   });
-  const [toolFormSteps, setToolFormSteps] = useState({
-    price: 0,
-    yield: 0,
+  const [selectedFiles, setSelectedFiles] = useState({
+    disease: null,
+    recommendation: null,
   });
-  const [toolForms, setToolForms] = useState({
-    price: {
-      stateCode: "",
-      districtCode: "",
-      marketCode: "",
-      commodity: "",
-      variety: "",
-      arrivalsTonnes: "",
-      year: "",
-      month: "",
-      dayOfWeek: "",
-    },
-    yield: {
-      stateName: "",
-      districtName: "",
-      season: "",
-      cropName: "",
-      cropType: "",
-      startYear: "",
-      area: "",
-    },
+  const [toolFormSteps, setToolFormSteps] = useState(INITIAL_TOOL_FORM_STEPS);
+  const [toolForms, setToolForms] = useState(INITIAL_TOOL_FORMS);
+  const [toolResults, setToolResults] = useState(INITIAL_RESULTS);
+  const [toolErrors, setToolErrors] = useState(INITIAL_RESULTS);
+  const [submittingTool, setSubmittingTool] = useState("");
+  const [gpsLocation, setGpsLocation] = useState({
+    latitude: "",
+    longitude: "",
+    status: "GPS not captured yet.",
+    error: "",
   });
 
   const currentRole = role === "serviceprovider" ? "serviceprovider" : "farmer";
@@ -211,14 +520,37 @@ export default function AIToolkit() {
     [activeTool]
   );
 
+  useEffect(() => {
+    return () => {
+      Object.values(uploadPreviews).forEach((previewUrl) => {
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl);
+        }
+      });
+    };
+  }, [uploadPreviews]);
+
   const handleUploadChange = (toolId, event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const previewUrl = URL.createObjectURL(file);
-    setUploadPreviews((prev) => ({
+    setUploadPreviews((prev) => {
+      if (prev[toolId]) {
+        URL.revokeObjectURL(prev[toolId]);
+      }
+
+      return {
+        ...prev,
+        [toolId]: URL.createObjectURL(file),
+      };
+    });
+    setSelectedFiles((prev) => ({
       ...prev,
-      [toolId]: previewUrl,
+      [toolId]: file,
+    }));
+    setToolErrors((prev) => ({
+      ...prev,
+      [toolId]: null,
     }));
   };
 
@@ -246,6 +578,82 @@ export default function AIToolkit() {
         [toolId]: nextStep,
       };
     });
+  };
+
+  const handleGenerate = async (requestValues = toolForms[selectedTool.id] || {}) => {
+    setSubmittingTool(selectedTool.id);
+    setToolErrors((prev) => ({
+      ...prev,
+      [selectedTool.id]: null,
+    }));
+
+    try {
+      validateToolInput(selectedTool, requestValues, selectedFiles[selectedTool.id]);
+
+      const response = await runTool(
+        selectedTool,
+        requestValues,
+        selectedFiles[selectedTool.id]
+      );
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.detail || "The model request failed.");
+      }
+
+      setToolResults((prev) => ({
+        ...prev,
+        [selectedTool.id]: payload,
+      }));
+    } catch (error) {
+      setToolErrors((prev) => ({
+        ...prev,
+        [selectedTool.id]:
+          error.message ||
+          "Unable to connect to the FastAPI service. Start the backend and try again.",
+      }));
+    } finally {
+      setSubmittingTool("");
+    }
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setGpsLocation((prev) => ({
+        ...prev,
+        error: "Geolocation is not supported in this browser.",
+        status: "Unable to read GPS.",
+      }));
+      return;
+    }
+
+    setGpsLocation((prev) => ({
+      ...prev,
+      error: "",
+      status: "Capturing current location...",
+    }));
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setGpsLocation({
+          latitude: position.coords.latitude.toFixed(6),
+          longitude: position.coords.longitude.toFixed(6),
+          status: "GPS location captured.",
+          error: "",
+        });
+      },
+      (error) => {
+        setGpsLocation((prev) => ({
+          ...prev,
+          error: error.message || "Unable to access location.",
+          status: "Unable to read GPS.",
+        }));
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+      }
+    );
   };
 
   return (
@@ -323,7 +731,7 @@ export default function AIToolkit() {
                 })}
               </div>
 
-              <div className="grid min-h-[420px] grid-rows-[auto_minmax(0,1fr)_auto] rounded-[24px] border border-gold/20 bg-[url(/ai_bg.png)] bg-cover bg-center bg-black px-6 py-6 shadow-[0_18px_48px_rgba(0,0,0,0.45)] md:min-h-[520px] md:px-10 md:py-8">
+              <div className="grid min-h-[420px] grid-rows-[auto_minmax(0,1fr)_auto_auto] rounded-[24px] border border-gold/20 bg-[url(/ai_bg.png)] bg-cover bg-center bg-black px-6 py-6 shadow-[0_18px_48px_rgba(0,0,0,0.45)] md:min-h-[520px] md:px-10 md:py-8">
                 <div className="mb-5 rounded-[18px] border border-white/10 bg-[#050505]/95 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                   <p className="mt-2 max-w-3xl font-montserrat text-sm leading-6 text-white/65 md:text-base">
                     {selectedTool.description}
@@ -339,14 +747,72 @@ export default function AIToolkit() {
                     formStep={toolFormSteps[selectedTool.id] || 0}
                     onNextStep={() => handleToolStepChange(selectedTool.id, "next")}
                     onPrevStep={() => handleToolStepChange(selectedTool.id, "prev")}
+                    selectedFileName={selectedFiles[selectedTool.id]?.name}
+                  />
+                </div>
+                {selectedTool.id === "recommendation" ? (
+                  <div className="rounded-[18px] border border-white/10 bg-[#050505]/95 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <p className="font-montserrat text-sm uppercase tracking-[0.24em] text-white/45">
+                          GPS Weather Input
+                        </p>
+                        <p className="mt-2 font-montserrat text-sm text-white/70">{gpsLocation.status}</p>
+                        {gpsLocation.latitude && gpsLocation.longitude ? (
+                          <p className="mt-1 font-montserrat text-sm text-gold/85">
+                            {gpsLocation.latitude}, {gpsLocation.longitude}
+                          </p>
+                        ) : null}
+                        {gpsLocation.error ? (
+                          <p className="mt-1 font-montserrat text-sm text-[#ff9d9d]">{gpsLocation.error}</p>
+                        ) : null}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleUseCurrentLocation}
+                        className="rounded-[12px] border border-gold/30 bg-black px-5 py-3 font-montserrat text-sm font-bold text-[#FFF085] transition hover:border-gold/60 hover:bg-white/5"
+                      >
+                        Use Current Location
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+                <div className="pt-6">
+                  <ResultCard
+                    result={toolResults[selectedTool.id]}
+                    error={toolErrors[selectedTool.id]}
+                    isSubmitting={submittingTool === selectedTool.id}
+                    mode={selectedTool.id}
                   />
                 </div>
                 <div className="flex justify-center pt-6">
                   <button
                     type="button"
-                    className="min-w-[220px] cursor-pointer rounded-lg border border-gold/30 bg-gold px-[18px] py-[9px] font-montserrat text-xl font-bold tracking-[0.2px] text-[#0a1a0c] transition-all duration-200 ease-in hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
+                    onClick={() => {
+                      if (
+                        selectedTool.id === "recommendation" &&
+                        (!gpsLocation.latitude || !gpsLocation.longitude)
+                      ) {
+                        setToolErrors((prev) => ({
+                          ...prev,
+                          recommendation: "Capture your current GPS location before generating a recommendation.",
+                        }));
+                        return;
+                      }
+
+                      handleGenerate(
+                        selectedTool.id === "recommendation"
+                          ? {
+                              latitude: gpsLocation.latitude,
+                              longitude: gpsLocation.longitude,
+                            }
+                          : toolForms[selectedTool.id] || {}
+                      );
+                    }}
+                    disabled={submittingTool === selectedTool.id}
+                    className="min-w-[220px] cursor-pointer rounded-lg border border-gold/30 bg-gold px-[18px] py-[9px] font-montserrat text-xl font-bold tracking-[0.2px] text-[#0a1a0c] transition-all duration-200 ease-in hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Generate
+                    {submittingTool === selectedTool.id ? "Generating..." : "Generate"}
                   </button>
                 </div>
               </div>

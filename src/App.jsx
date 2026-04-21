@@ -30,6 +30,7 @@ import Cart from './pages/Cart';
 import Marketplace from './pages/Marketplace';
 import AIToolkit from './pages/AIToolkit';
 import Bookings from './pages/Bookings';
+import VoiceSupportWidget from './components/VoiceSupportWidget';
 
 const Wrapper = ({ children }) => {
 	const location = useLocation();
@@ -84,13 +85,14 @@ export default function App() {
 								<Route path='/serviceprovider/cart' element={<Cart />} />
 								<Route path='/serviceprovider/bookings' element={<Bookings />} />
 								<Route path='/serviceprovider/profile' element={<SPProfile />} />
-								<Route path='/serviceprovider/contract' element={<ContractFarmingService/>} />
+								<Route path='/serviceprovider/contract' element={<ContractFarmingService />} />
 								<Route path='/serviceprovider/aitoolkit' element={<AIToolkit />} />
 							</Route>
 							<Route path='*' element={<NotFound />} />
 						</Routes>
 						<GoUp />
 						<NotificationPanel />
+						<VoiceSupportWidget />
 					</AppProvider>
 				</LanguageProvider>
 			</Wrapper>

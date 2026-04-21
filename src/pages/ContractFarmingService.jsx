@@ -236,7 +236,7 @@ export default function ContractFarmingService() {
     const [contracts, setContracts] = useState([]);
     const [loading, setLoading]     = useState(true);
     const [posting, setPosting]     = useState(false);
-    const [isEmpty, setIsEmpty]     = useState(false);
+    const [isEmpty, setIsEmpty]     = useState(true);
     const [showFormModal, setShowFormModal] = useState(false);
 
     // Form state
@@ -262,16 +262,15 @@ export default function ContractFarmingService() {
         try {
             const { data } = await axios.get("/api/contractfarming/mycontracts");
             if (data.success) {
-                const nextContracts = (data.contracts?.length > 0 ? data.contracts : SAMPLE_CONTRACTS).map(normalizeServiceContract);
+                const nextContracts = data.contracts.map(normalizeServiceContract);
                 setContracts(nextContracts);
                 setIsEmpty(nextContracts.length === 0);
             } else {
-                setContracts(SAMPLE_CONTRACTS.map(normalizeServiceContract));
-                setIsEmpty(false);
+                setIsEmpty(true);
             }
         } catch (error) {
-            setContracts(SAMPLE_CONTRACTS.map(normalizeServiceContract));
-            setIsEmpty(false);
+            setIsEmpty(true);
+            window.alert(error)
         } finally {
             setLoading(false);
         }
