@@ -1,278 +1,292 @@
-import React, { useMemo, useState } from "react";
+import { useState } from "react";
 import { useLocation } from "react-router";
 import SideNav from "../components/SideNav";
 import ModuleHeader from "../components/ModuleHeader";
 import { UseAppContext } from "../context/AppContext";
 
-const MODULE_ORDER = ["Rentals", "Transport", "Shop", "Marketplace", "Cold Storage", "Other"];
-
-const moduleDescriptions = {
-  Rentals: "Ready-to-rent farm equipment collected for your next field task.",
-  Transport: "Transport options grouped together for easy trip planning.",
-  Shop: "Supplies and products you saved for a later purchase decision.",
-  Marketplace: "Farmer-listed goods and produce saved for purchase follow-up.",
-  "Cold Storage": "Storage requests and spaces you want to revisit before booking.",
-  Other: "Saved items from across the platform.",
+const inputStyle = {
+  width: "100%", background: "#050505",
+  border: "1px solid rgba(212,175,55,0.22)", borderRadius: 12,
+  padding: "12px 14px", color: "#ffffff", fontSize: 13,
+  outline: "none", fontFamily: "'Montserrat', sans-serif",
 };
 
-function CartMetric({ label, value, accent = "text-[#FFF085]" }) {
+// ─── Cart item row ─────────────────────────────────────────────────────────────
+function CartItemRow({ item, onIncrease, onDecrease, onRemove }) {
+  const subtotal = (item.price || 0) * (item.quantity || 1);
   return (
-    <div className="rounded-[18px] border border-gold/20 bg-darkgreen p-4 shadow-[0_12px_24px_rgba(0,0,0,0.24)]">
-      <div className={`text-[22px] font-black ${accent}`}>{value}</div>
-      <div className="mt-1 text-[11px] uppercase tracking-[0.4px] text-white/45">{label}</div>
+    <div className="flex flex-wrap items-center gap-3 rounded-[14px] border border-gold/20 bg-[#050505] p-4">
+      <div className="h-14 w-14 shrink-0 rounded-[10px] border border-gold/20 bg-cover bg-center"
+        style={{ backgroundImage: `url("${item.image || "/urea.png"}")`, backgroundColor: "#0d0d0d" }} />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold text-white truncate">{item.name}</p>
+        <p className="text-xs text-white/50 truncate">{item.seller || item.brand || item.category || "—"}</p>
+        <p className="text-xs font-bold text-gold mt-0.5">₹{item.price} / kg</p>
+      </div>
+      <div className="flex items-center rounded-[10px] border border-gold/30 overflow-hidden"
+        style={{ background: "rgba(212,175,55,0.06)" }}>
+        <button onClick={() => onDecrease(item._id || item.id)}
+          className="w-8 h-8 flex items-center justify-center text-gold font-black text-lg cursor-pointer hover:bg-gold/10 transition-colors">−</button>
+        <span className="w-10 text-center text-sm font-bold text-[#FFF085]">{item.quantity || 1} kg</span>
+        <button onClick={() => onIncrease(item._id || item.id)}
+          className="w-8 h-8 flex items-center justify-center text-gold font-black text-lg cursor-pointer hover:bg-gold/10 transition-colors">+</button>
+      </div>
+      <div className="text-right shrink-0 w-20">
+        <p className="text-sm font-black text-[#FFF085]">₹{subtotal.toLocaleString()}</p>
+        <p className="text-[10px] text-white/40">subtotal</p>
+      </div>
+      <button onClick={() => onRemove(item._id || item.id)}
+        className="text-red-400 hover:text-red-300 text-xs font-bold cursor-pointer transition-colors shrink-0">Remove</button>
     </div>
   );
 }
 
-function CartItemCard({ item, onRemove }) {
-  const [hovered, setHovered] = useState(false);
-  const title = item.name || item.vehicleType || item.crop || "Saved Item";
+// ─── Saved-for-later row ───────────────────────────────────────────────────────
+function SavedItemRow({ item, onRemove }) {
+  const title    = item.name || item.vehicleType || "Saved Item";
   const subtitle = item.seller || item.owner || item.location || "Kisan Connect";
-  const price =
-    item.priceLabel ||
-    (item.price ? `Rs. ${item.price}` : item.rate ? `Rs. ${item.rate}` : "Available");
+  const price    = item.priceLabel || (item.price ? `₹${item.price}` : "—");
+  return (
+    <div className="flex items-center gap-4 rounded-[14px] border border-gold/15 bg-[#050505] p-4">
+      <div className="h-12 w-12 shrink-0 rounded-[10px] border border-gold/15 bg-cover bg-center"
+        style={{ backgroundImage: `url("${item.image}")`, backgroundColor: "#0d0d0d" }} />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-gold/60 border border-gold/20 px-2 py-0.5 rounded-full">{item.cartModule}</span>
+        </div>
+        <p className="text-sm font-bold text-white truncate">{title}</p>
+        <p className="text-xs text-white/50">{subtitle} · {price}</p>
+      </div>
+      <button onClick={() => onRemove(item.id || item._id)}
+        className="text-red-400 hover:text-red-300 text-xs font-bold cursor-pointer transition-colors shrink-0">Remove</button>
+    </div>
+  );
+}
+
+// ─── Purchasable section with Razorpay ─────────────────────────────────────────
+function PurchasableSection({ title, subtitle, items, total, onIncrease, onDecrease, onRemove, onPay, moduleLabel }) {
+  const { axios } = UseAppContext();
+  const [paying, setPaying] = useState(false);
+
+  // Step 2: Open Razorpay checkout with the order from backend
+  const initPay = (order, items, total) => {
+    const options = {
+      key:         import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount:      order.amount,
+      currency:    order.currency || "INR",
+      name:        "KisanConnect",
+      description: `${moduleLabel} Purchase`,
+      order_id:    order.id,
+      handler:     async (response) => {
+        // Step 3: Verify payment on backend after Razorpay callback
+        try {
+          const { data } = await axios.post("/api/buy/verify", {
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+          });
+
+          if (data.success) {
+            // Payment verified — update local state (deducts stock, saves order)
+            onPay(items, total);
+            window.alert("Payment successful! Your order has been placed.");
+          } else {
+            window.alert("Payment verification failed: " + data.message);
+          }
+        } catch (error) {
+          window.alert("Verification error: " + error.message);
+        } finally {
+          setPaying(false);
+        }
+      },
+      prefill: { name: "", email: "", contact: "" },
+      theme:   { color: "#D4AF37" },
+      modal:   {
+        ondismiss: () => { setPaying(false); }
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
+
+  // Step 1: Create Razorpay order on backend with real cart data
+  const createOrder = async () => {
+    if (paying) return;
+    setPaying(true);
+
+    try {
+      const product = items.map((item) => ({
+        id:       item._id || item.id,
+        name:     item.name,
+        brand:    item.brand || item.seller || item.category || "",
+        price:    item.price,
+        quantity: item.quantity || 1,
+        owner:    item.owner || null,
+      }));
+
+      const { data } = await axios.post("/api/buy/order", {
+        product,
+        amount: total, // in rupees — backend converts to paise
+      });
+
+      if (data.success) {
+        initPay(data.order, items, total);
+      } else {
+        window.alert(data.message);
+        setPaying(false);
+      }
+    } catch (error) {
+      window.alert(error.message);
+      setPaying(false);
+    }
+  };
 
   return (
-    <div
-      className="flex h-full flex-col overflow-hidden rounded-[18px] border bg-black font-montserrat transition-all duration-200 hover:-translate-y-1"
-      style={{
-        borderColor: "#d4af37",
-        boxShadow:
-          "0 0 0 1px rgba(212, 175, 55, 0.24), 0 12px 28px rgba(0, 0, 0, 0.42)",
-      }}
-    >
-      <div
-        className="relative h-40 border-b bg-cover bg-center bg-no-repeat"
+    <section className="rounded-[22px] border border-gold/25 bg-[#040404] p-5 md:p-6">
+      <div className="flex items-center justify-between mb-5 border-b border-gold/15 pb-4">
+        <div>
+          <h2 className="text-xl font-black text-[#FFF085]">{title}</h2>
+          <p className="text-xs text-white/50 mt-1">{subtitle}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-2xl font-black text-[#FFF085]">₹{total.toLocaleString()}</p>
+          <p className="text-xs text-white/40">total</p>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3 mb-5">
+        {items.map((item) => (
+          <CartItemRow
+            key={item._id || item.id}
+            item={item}
+            onIncrease={onIncrease}
+            onDecrease={onDecrease}
+            onRemove={onRemove}
+          />
+        ))}
+      </div>
+
+      <button
+        onClick={createOrder}
+        disabled={paying}
+        className="w-full rounded-[14px] py-4 text-[15px] font-black text-[#0a1a0c] transition hover:-translate-y-px"
         style={{
-          backgroundImage: `url(${item.image})`,
-          borderColor: "rgba(201, 168, 76, 0.2)",
-          backgroundColor: "#0d0d0d",
+          background:  paying ? "rgba(212,175,55,0.4)" : "linear-gradient(135deg,#FFF085 0%,#D4AF37 100%)",
+          boxShadow:   "0 8px 24px rgba(212,175,55,0.3)",
+          cursor:      paying ? "not-allowed" : "pointer",
         }}
       >
-        <div className="absolute inset-0 bg-linear-to-b from-black/20 to-black/60" />
-        <div className="absolute left-3 top-3 rounded-full border border-gold/30 bg-black/70 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.5px] text-[#FFF085]">
-          {item.cartModule || "Saved"}
-        </div>
-        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <div className="truncate text-[15px] font-bold text-white">{title}</div>
-            <div className="truncate text-[12px] text-white/65">{subtitle}</div>
-          </div>
-          <div className="rounded-full border border-gold/25 bg-black/70 px-3 py-1 text-[11px] font-bold text-[#FFF085]">
-            {price}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-4 p-4">
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg border border-gold/20 bg-[#050505] px-3 py-3">
-            <div className="text-[9px] uppercase tracking-[0.45px] text-white/45">Owner</div>
-            <div className="mt-1 line-clamp-1 text-[13px] font-semibold text-white">
-              {item.owner || item.seller || "Available Provider"}
-            </div>
-          </div>
-          <div className="rounded-lg border border-gold/20 bg-[#050505] px-3 py-3">
-            <div className="text-[9px] uppercase tracking-[0.45px] text-white/45">Location</div>
-            <div className="mt-1 line-clamp-1 text-[13px] font-semibold text-white">
-              {item.location || item.city || "Shared across the region"}
-            </div>
-          </div>
-        </div>
-
-        {item.description && (
-          <p className="line-clamp-3 text-[12px] leading-6 text-white/65">{item.description}</p>
-        )}
-
-        <div className="mt-auto flex items-center justify-between gap-3">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.45px] text-white/40">
-              Saved For Later
-            </div>
-            <div className="mt-1 text-[12px] text-white/65">Review and continue from the module when needed.</div>
-          </div>
-          <button
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            onClick={() => onRemove(item.id || item._id)}
-            className="rounded-[10px] border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.5px] transition-all duration-200"
-            style={{
-              borderColor: hovered ? "rgba(248, 113, 113, 0.7)" : "rgba(248, 113, 113, 0.35)",
-              color: hovered ? "#ffffff" : "#f87171",
-              background: hovered ? "rgba(220, 38, 38, 0.9)" : "transparent",
-            }}
-          >
-            Remove
-          </button>
-        </div>
-      </div>
-    </div>
+        {paying ? "Opening Payment..." : `Pay Now — ₹${total.toLocaleString()}`}
+      </button>
+    </section>
   );
 }
 
+// ─── Main Cart ─────────────────────────────────────────────────────────────────
 export default function Cart() {
   const location = useLocation();
-  const { cart, setCart, isOpen, setIsOpen, navigate } = UseAppContext();
+  const {
+    cart, setCart, isOpen, setIsOpen, navigate,
+    updateShopQty, removeShopItem, placeShopOrder,
+    updateMarketplaceQty, removeMarketplaceItem, placeMarketplaceOrder,
+  } = UseAppContext();
+
   const baseRolePath = location.pathname.startsWith("/serviceprovider") ? "/serviceprovider" : "/farmer";
-  const moduleRoutes = {
-    Rentals: `${baseRolePath}/rentals`,
-    Transport: `${baseRolePath}/transport`,
-    Shop: `${baseRolePath}/shop`,
-    Marketplace: `${baseRolePath}/marketplace`,
-    "Cold Storage": `${baseRolePath}/coldstorage`,
-    Other: `${baseRolePath}`,
+
+  const shopItems  = cart.filter((item) => item.cartModule === "Shop");
+  const mktItems   = cart.filter((item) => item.cartModule === "Marketplace");
+  const otherItems = cart.filter((item) => item.cartModule !== "Shop" && item.cartModule !== "Marketplace");
+
+  const shopTotal = shopItems.reduce((sum, i) => sum + (i.price || 0) * (i.quantity || 1), 0);
+  const mktTotal  = mktItems.reduce((sum, i)  => sum + (i.price || 0) * (i.quantity || 1), 0);
+
+  // Shop handlers
+  const handleShopIncrease = (id) => updateShopQty(id, "Shop", 1);
+  const handleShopDecrease = (id) => updateShopQty(id, "Shop", -1);
+  const handleShopRemove   = (id) => removeShopItem(id, "Shop");
+  const handleShopPay = (items, total) => {
+    placeShopOrder(items, total);
+    setCart((prev) => prev.filter((item) => item.cartModule !== "Shop"));
   };
 
-  const groupedCart = useMemo(
-    () =>
-      cart.reduce((acc, item) => {
-        const moduleName = item.cartModule || "Other";
-        if (!acc[moduleName]) {
-          acc[moduleName] = [];
-        }
-        acc[moduleName].push(item);
-        return acc;
-      }, {}),
-    [cart]
-  );
-
-  const orderedModules = MODULE_ORDER.filter((moduleName) => groupedCart[moduleName]?.length);
-  const totalModules = orderedModules.length;
-  const totalItems = cart.length;
-
-  const handleBuyNow = (moduleName) => {
-    window.alert(`Successfully checked out ${groupedCart[moduleName].length} item(s) from ${moduleName}.`);
-    setCart((prev) => prev.filter((item) => (item.cartModule || "Other") !== moduleName));
+  // Marketplace handlers
+  const handleMktIncrease = (id) => updateMarketplaceQty(id, "Marketplace", 1);
+  const handleMktDecrease = (id) => updateMarketplaceQty(id, "Marketplace", -1);
+  const handleMktRemove   = (id) => removeMarketplaceItem(id, "Marketplace");
+  const handleMktPay = (items, total) => {
+    placeMarketplaceOrder(items, total);
+    setCart((prev) => prev.filter((item) => item.cartModule !== "Marketplace"));
   };
 
-  const handleRemove = (id) => {
-    setCart((prev) => prev.filter((item) => (item.id || item._id) !== id));
-  };
+  const handleRemoveOther = (id) => setCart((prev) => prev.filter((item) => (item.id || item._id) !== id));
 
   return (
-    <div className="min-h-dvh bg-darkgreen">
+    <div className="min-h-dvh bg-black">
       <SideNav />
-      <div
-        className={`flex min-h-dvh flex-col transition-all duration-300 ${
-          isOpen ? "md:ml-62.5" : "md:ml-20"
-        }`}
-      >
+      <div className={`flex min-h-dvh flex-col transition-all duration-300 ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
         <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
-          <ModuleHeader
-            title="Saved Cart"
-            search=""
-            onSearchChange={() => {}}
-            onOpenSidebar={() => setIsOpen(!isOpen)}
-          />
+          <ModuleHeader title="Cart" search="" onSearchChange={() => {}} onOpenSidebar={() => setIsOpen(!isOpen)} />
 
-            <div className="flex-1 overflow-y-auto p-6 kc-scrollbar md:p-7">
-            {totalItems === 0 ? (
-              <div className="flex min-h-[calc(100dvh-190px)] flex-col justify-center rounded-3xl border border-dashed border-gold/25 bg-[radial-gradient(circle_at_top,rgba(255,240,133,0.12),rgba(0,0,0,0.92)_55%)] px-6 py-14 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-                <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-full border border-gold/20 bg-black/60 text-[#FFF085]">
-                  <svg width="34" height="34" fill="none" viewBox="0 0 24 24">
+          <div className="flex-1 overflow-y-auto p-6 md:p-7">
+            {cart.length === 0 ? (
+              <div className="flex min-h-[calc(100dvh-190px)] flex-col justify-center rounded-[24px] border border-dashed border-gold/25 bg-[radial-gradient(circle_at_top,rgba(255,240,133,0.12),rgba(0,0,0,0.92)_55%)] px-6 py-14 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-gold/20 bg-black/60 text-[#FFF085]">
+                  <svg width="30" height="30" fill="none" viewBox="0 0 24 24">
                     <path d="M3 3h2l3.6 7.6L7 14h12M7 14l1.5-6h11l-2.5 6H7zm2 5a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
-                <h2 className="mt-6 text-[30px] font-black tracking-tight text-[#FFF085]">Your cart is empty</h2>
-                <p className="mx-auto mt-3 max-w-140 text-[14px] leading-7 text-white/65">
-                  Explore rentals, transport, shop, and cold storage modules to save the items you want to revisit later.
-                </p>
-
-                <div className="mx-auto mt-8 grid w-full max-w-190 gap-4 md:grid-cols-3">
-                  <CartMetric label="Saved Items" value="0" />
-                  <CartMetric label="Active Modules" value="0" accent="text-white" />
-                  <CartMetric label="Next Step" value="Explore" accent="text-green-400" />
-                </div>
-
+                <h2 className="mt-6 text-3xl font-black tracking-tight text-[#FFF085]">Your cart is empty</h2>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-white/60">Browse the shop or marketplace to add items.</p>
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    onClick={() => navigate(`${baseRolePath}/shop`)}
-                    className="rounded-xl bg-gold px-6 py-3 text-[13px] font-black text-[#0a1a0c] transition hover:-translate-y-px hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
-                  >
-                    Browse Modules
-                  </button>
-                  <button
-                    onClick={() => navigate(baseRolePath)}
-                    className="rounded-xl border border-gold/25 bg-transparent px-6 py-3 text-[13px] font-bold text-[#FFF085] transition hover:border-gold/40 hover:bg-white/5"
-                  >
-                    Back to Dashboard
-                  </button>
+                  <button onClick={() => navigate(`${baseRolePath}/shop`)}
+                    className="rounded-[12px] bg-[#D4AF37] px-6 py-3 text-sm font-black text-[#0a1a0c] transition hover:-translate-y-px hover:bg-white">Browse Shop</button>
+                  <button onClick={() => navigate(`${baseRolePath}/marketplace`)}
+                    className="rounded-[12px] border border-gold/25 px-6 py-3 text-sm font-bold text-[#FFF085] transition hover:border-gold/40 hover:bg-white/5">Browse Marketplace</button>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-6">
-                <div className="grid gap-4 md:grid-cols-3">
-                  <CartMetric label="Saved Items" value={String(totalItems).padStart(2, "0")} />
-                  <CartMetric label="Active Modules" value={String(totalModules).padStart(2, "0")} accent="text-white" />
-                  <CartMetric
-                    label="Quick Summary"
-                    value={orderedModules[0] || "Ready"}
-                    accent="text-green-400"
+              <div className="flex flex-col gap-8">
+                {shopItems.length > 0 && (
+                  <PurchasableSection
+                    title="Shop Items"
+                    subtitle={`${shopItems.length} item${shopItems.length !== 1 ? "s" : ""} from the shop`}
+                    items={shopItems}
+                    total={shopTotal}
+                    onIncrease={handleShopIncrease}
+                    onDecrease={handleShopDecrease}
+                    onRemove={handleShopRemove}
+                    onPay={handleShopPay}
+                    moduleLabel="Shop"
                   />
-                </div>
+                )}
 
-                <div className="rounded-[22px] border border-gold/18 bg-darkgreen px-5 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.28)]">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <div className="text-[18px] font-black text-[#FFF085]">Review Your Saved Selections</div>
-                      <div className="mt-1 text-[13px] text-white/58">
-                        Continue module-wise so your booking or purchase decisions stay organized.
-                      </div>
+                {mktItems.length > 0 && (
+                  <PurchasableSection
+                    title="Marketplace Items"
+                    subtitle={`${mktItems.length} item${mktItems.length !== 1 ? "s" : ""} from farmers`}
+                    items={mktItems}
+                    total={mktTotal}
+                    onIncrease={handleMktIncrease}
+                    onDecrease={handleMktDecrease}
+                    onRemove={handleMktRemove}
+                    onPay={handleMktPay}
+                    moduleLabel="Marketplace"
+                  />
+                )}
+
+                {otherItems.length > 0 && (
+                  <section className="rounded-[22px] border border-gold/15 bg-[#040404] p-5 md:p-6">
+                    <div className="mb-4 border-b border-gold/10 pb-3">
+                      <h2 className="text-lg font-black text-white/60">Saved for Later</h2>
+                      <p className="text-xs text-white/40 mt-1">Items from other modules — visit each module to proceed</p>
                     </div>
-                    <div className="rounded-full border border-gold/20 bg-black/50 px-4 py-2 text-[12px] font-semibold text-white/70">
-                      {totalItems} item{totalItems !== 1 ? "s" : ""} across {totalModules} module{totalModules !== 1 ? "s" : ""}
+                    <div className="flex flex-col gap-3">
+                      {otherItems.map((item, i) => (
+                        <SavedItemRow key={item.id || item._id || i} item={item} onRemove={handleRemoveOther} />
+                      ))}
                     </div>
-                  </div>
-                </div>
-
-                {orderedModules.map((moduleName) => {
-                  const items = groupedCart[moduleName];
-                  return (
-                    <section
-                      key={moduleName}
-                      className="rounded-3xl border border-gold/22 bg-darkgreen md:p-6"
-                    >
-                      <div className="mb-5 flex flex-wrap items-start justify-between gap-4 border-b border-gold/15 pb-5">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-3">
-                            <h2 className="text-[24px] font-black text-[#FFF085]">{moduleName}</h2>
-                            <span className="rounded-full border border-gold/20 bg-[#0a1a0c] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.5px] text-white/70">
-                              {items.length} item{items.length !== 1 ? "s" : ""}
-                            </span>
-                          </div>
-                          <p className="mt-2 max-w-180 text-[13px] leading-6 text-white/58">
-                            {moduleDescriptions[moduleName] || moduleDescriptions.Other}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap gap-3">
-                          <button
-                            onClick={() => navigate(moduleRoutes[moduleName] || "/farmer")}
-                            className="rounded-xl border border-gold/24 bg-transparent px-5 py-3 text-[12px] font-bold uppercase tracking-[0.45px] text-[#FFF085] transition hover:border-gold/45 hover:bg-white/5"
-                          >
-                            Open Module
-                          </button>
-                          <button
-                            onClick={() => handleBuyNow(moduleName)}
-                            className="rounded-xl bg-gold px-5 py-3 text-[12px] font-black uppercase tracking-[0.45px] text-[#0a1a0c] transition hover:-translate-y-px hover:bg-white hover:shadow-[0_10px_20px_rgba(255,240,133,0.18)]"
-                          >
-                            Continue
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-4.5">
-                        {items.map((item, index) => (
-                          <CartItemCard
-                            key={item.id || item._id || `${moduleName}-${index}`}
-                            item={item}
-                            onRemove={handleRemove}
-                          />
-                        ))}
-                      </div>
-                    </section>
-                  );
-                })}
+                  </section>
+                )}
               </div>
             )}
           </div>

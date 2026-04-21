@@ -10,10 +10,10 @@ import {
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import AddModuleCard from "../components/AddModuleCard";
 
-const CROP_OPTIONS = ["Rice / Paddy", "Wheat", "Cotton", "Maize", "Sugarcane", "Soybean", "Groundnut", "Turmeric", "Chilli", "Tomato", "Onion", "Banana", "Mango", "Other"];
-const SEASON_OPTIONS = ["Kharif 2025", "Rabi 2025-26", "Zaid 2026", "Kharif 2026"];
-const DURATION_OPTIONS = ["1 month", "2 months", "3 months", "4 months", "5 months", "6 months", "1 year", "2 years"];
-const PAYMENT_OPTIONS = ["On delivery", "Within 7 days", "Within 15 days", "Within 30 days", "50% advance + 50% on delivery"];
+const CROP_OPTIONS     = ["Rice / Paddy","Wheat","Cotton","Maize","Sugarcane","Soybean","Groundnut","Turmeric","Chilli","Tomato","Onion","Banana","Mango","Other"];
+const SEASON_OPTIONS   = ["Kharif 2025","Rabi 2025-26","Zaid 2026","Kharif 2026"];
+const DURATION_OPTIONS = ["1 month","2 months","3 months","4 months","5 months","6 months","1 year","2 years"];
+const PAYMENT_OPTIONS  = ["On delivery","Within 7 days","Within 15 days","Within 30 days","50% advance + 50% on delivery"];
 const SAMPLE_CONTRACTS = [
     {
         _id: "sample-1",
@@ -81,7 +81,7 @@ const normalizeServiceContract = (contract = {}) => ({
 // ─── Farmer Application Row ───────────────────────────────────────────────────
 function ApplicationRow({ app, onDecision }) {
     const statusStyle = {
-        Pending: "text-amber-400 border-amber-400 bg-amber-400/10",
+        Pending:  "text-amber-400 border-amber-400 bg-amber-400/10",
         Accepted: "text-green-400 border-green-400 bg-green-400/10",
         Rejected: "text-red-400  border-red-400  bg-red-400/10",
     };
@@ -118,8 +118,8 @@ function ApplicationRow({ app, onDecision }) {
 // ─── Contract Card ────────────────────────────────────────────────────────────
 function ContractFarmingServiceCard({ contract, onDecision, onClose }) {
     const [showApps, setShowApps] = useState(false);
-    const fillPct = contract.totalLand > 0 ? Math.min(100, Math.round((contract.applications.filter(a => a.status === "Accepted").reduce((s, a) => s + a.land, 0) / contract.totalLand) * 100)) : 0;
-    const pending = contract.applications.filter(a => a.status === "Pending").length;
+    const fillPct  = contract.totalLand > 0 ? Math.min(100, Math.round((contract.applications.filter(a => a.status === "Accepted").reduce((s, a) => s + a.land, 0) / contract.totalLand) * 100)) : 0;
+    const pending  = contract.applications.filter(a => a.status === "Pending").length;
     const accepted = contract.applications.filter(a => a.status === "Accepted").length;
 
     return (
@@ -234,28 +234,28 @@ export default function ContractFarmingService() {
     const { isOpen, setIsOpen, axios } = UseAppContext();
 
     const [contracts, setContracts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [posting, setPosting] = useState(false);
-    const [isEmpty, setIsEmpty] = useState(false);
+    const [loading, setLoading]     = useState(true);
+    const [posting, setPosting]     = useState(false);
+    const [isEmpty, setIsEmpty]     = useState(false);
     const [showFormModal, setShowFormModal] = useState(false);
 
     // Form state
-    const [fCompany, setFCompany] = useState("");
+    const [fCompany, setFCompany]         = useState("");
     const [fCompanyType, setFCompanyType] = useState("");
-    const [fCrop, setFCrop] = useState("");
-    const [fVariety, setFVariety] = useState("");
-    const [fRegion, setFRegion] = useState("");
-    const [fSeason, setFSeason] = useState("Kharif 2025");
-    const [fMinLand, setFMinLand] = useState("");
-    const [fTotalLand, setFTotalLand] = useState("");
-    const [fFarmers, setFFarmers] = useState("");
-    const [fDuration, setFDuration] = useState("6 months");
-    const [fPriceMin, setFPriceMin] = useState("");
-    const [fPriceMax, setFPriceMax] = useState("");
-    const [fQuality, setFQuality] = useState("");
-    const [fInput, setFInput] = useState("Yes");
-    const [fPayment, setFPayment] = useState("Within 15 days of delivery");
-    const [fNotes, setFNotes] = useState("");
+    const [fCrop, setFCrop]               = useState("");
+    const [fVariety, setFVariety]         = useState("");
+    const [fRegion, setFRegion]           = useState("");
+    const [fSeason, setFSeason]           = useState("Kharif 2025");
+    const [fMinLand, setFMinLand]         = useState("");
+    const [fTotalLand, setFTotalLand]     = useState("");
+    const [fFarmers, setFFarmers]         = useState("");
+    const [fDuration, setFDuration]       = useState("6 months");
+    const [fPriceMin, setFPriceMin]       = useState("");
+    const [fPriceMax, setFPriceMax]       = useState("");
+    const [fQuality, setFQuality]         = useState("");
+    const [fInput, setFInput]             = useState("Yes");
+    const [fPayment, setFPayment]         = useState("Within 15 days of delivery");
+    const [fNotes, setFNotes]             = useState("");
 
     // ── Fetch my contracts ────────────────────────────────────────────────────
     const fetchContracts = async () => {
@@ -353,12 +353,12 @@ export default function ContractFarmingService() {
     return (
         <>
             <SideNav />
-            <div className={`min-h-dvh bg-darkgreen ${isOpen ? "md:ml-62.5" : "md:ml-20"} py-4`}>
-                <div className="mx-2 flex min-h-[calc(100dvh-2rem)] flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-darkgreen font-montserrat shadow-2xl md:mx-6">
+            <div className={`min-h-dvh bg-black ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
+                <div className="mx-2 my-4 flex min-h-[calc(100dvh-2rem)] flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black font-montserrat shadow-2xl md:mx-6">
                     <ModuleHeader
                         title="Contract Management"
                         search=""
-                        onSearchChange={() => { }}
+                        onSearchChange={() => {}}
                         onOpenSidebar={() => setIsOpen(!isOpen)}
                     />
 
@@ -381,8 +381,8 @@ export default function ContractFarmingService() {
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-darkgreen p-6">
-                            <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-4.5">
+                        <div className="bg-black p-6">
+                            <div className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-[18px]">
                                 {contracts.map(c => (
                                     <ContractFarmingServiceCard
                                         key={c._id}
@@ -404,121 +404,121 @@ export default function ContractFarmingService() {
             </div>
 
             {showFormModal && (
-                <div
-                    style={{
-                        position: "fixed",
-                        inset: 0,
-                        background: "rgba(0, 0, 0, 0.76)",
-                        backdropFilter: "blur(6px)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: "20px",
-                        zIndex: 300,
-                    }}
-                    onClick={() => !posting && setShowFormModal(false)}
-                >
-                    <div
-                        onClick={(e) => e.stopPropagation()}
-                        style={{
-                            width: "min(860px, 100%)",
-                            maxHeight: "min(88vh, 920px)",
-                            overflow: "auto",
-                            background: "#000000",
-                            border: "1px solid rgba(212, 175, 55, 0.32)",
-                            borderRadius: "22px",
-                            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.5)",
-                            fontFamily: "'Montserrat', sans-serif",
-                        }}
-                    >
-                        <div style={{ background: "#000000", borderBottom: "1px solid rgba(212, 175, 55, 0.22)", padding: "14px 24px" }}>
-                            <div className="flex flex-row items-center justify-between gap-4">
-                                <div>
-                                    <h2 className="text-gold font-black text-lg">Post a New Contract</h2>
-                                    <p className="text-white/50 text-sm">Farmers will see and apply to this listing</p>
-                                </div>
-                                <button type="button" onClick={() => !posting && setShowFormModal(false)}>
-                                    <XCircleIcon className="size-8 cursor-pointer text-white hover:rotate-90 hover:text-red-500 transition-all ease-in duration-200" />
-                                </button>
-                            </div>
+            <div
+                style={{
+                    position: "fixed",
+                    inset: 0,
+                    background: "rgba(0, 0, 0, 0.76)",
+                    backdropFilter: "blur(6px)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "20px",
+                    zIndex: 300,
+                }}
+                onClick={() => !posting && setShowFormModal(false)}
+            >
+            <div
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                    width: "min(860px, 100%)",
+                    maxHeight: "min(88vh, 920px)",
+                    overflow: "auto",
+                    background: "#000000",
+                    border: "1px solid rgba(212, 175, 55, 0.32)",
+                    borderRadius: "22px",
+                    boxShadow: "0 24px 60px rgba(0, 0, 0, 0.5)",
+                    fontFamily: "'Montserrat', sans-serif",
+                }}
+            >
+                <div style={{ background: "#000000", borderBottom: "1px solid rgba(212, 175, 55, 0.22)", padding: "14px 24px" }}>
+                <div className="flex flex-row items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-gold font-black text-lg">Post a New Contract</h2>
+                        <p className="text-white/50 text-sm">Farmers will see and apply to this listing</p>
+                    </div>
+                    <button type="button" onClick={() => !posting && setShowFormModal(false)}>
+                        <XCircleIcon className="size-8 cursor-pointer text-white hover:rotate-90 hover:text-red-500 transition-all ease-in duration-200" />
+                    </button>
+                </div>
+                </div>
+
+                <div className="bg-black p-6">
+                <div className="mx-auto max-w-4xl rounded-[18px] border border-gold/20 bg-black/20 p-6">
+                <div className="mb-5 text-sm text-white/60">
+                    Fill the basic details for your contract listing so farmers can understand crop, pricing, land requirements, and payment terms at a glance.
+                </div>
+                <div className="flex flex-col gap-4">
+                    {[
+                        ["Company Name *", fCompany, setFCompany, "text", "e.g. AgroCorp India Pvt. Ltd."],
+                        ["Company Type", fCompanyType, setFCompanyType, "text", "e.g. Food Processing"],
+                        ["Variety / Specification", fVariety, setFVariety, "text", "e.g. Pusa 1121, Bt Cotton"],
+                        ["Region / State *", fRegion, setFRegion, "text", "e.g. Telangana, AP"],
+                        ["Min Land / Farmer (acres) *", fMinLand, setFMinLand, "number", "e.g. 5"],
+                        ["Total Land Required (acres) *", fTotalLand, setFTotalLand, "number", "e.g. 500"],
+                        ["Farmers Needed *", fFarmers, setFFarmers, "number", "e.g. 50"],
+                        ["Min Price (₹/quintal) *", fPriceMin, setFPriceMin, "number", "e.g. 2200"],
+                        ["Max Price (₹/quintal) *", fPriceMax, setFPriceMax, "number", "e.g. 2800"],
+                        ["Quality Standards", fQuality, setFQuality, "text", "e.g. Grade A, moisture < 14%"],
+                        ["Notes for Farmers", fNotes, setFNotes, "text", "Any additional instructions..."],
+                    ].map(([label, val, setter, type, ph]) => (
+                        <div key={label} className="flex flex-row gap-2 items-center">
+                            <label className="text-gold font-bold text-xs w-40 shrink-0">{label}</label>
+                            <input type={type} placeholder={ph} value={val}
+                                onChange={e => setter(e.target.value)}
+                                className="flex-1 border-b-2 border-b-gold/40 focus:border-b-gold focus:outline-none bg-transparent text-white text-sm py-1 transition-all" />
                         </div>
+                    ))}
 
-                        <div className="bg-black p-6">
-                            <div className="mx-auto max-w-4xl rounded-[18px] border border-gold/20 bg-black/20 p-6">
-                                <div className="mb-5 text-sm text-white/60">
-                                    Fill the basic details for your contract listing so farmers can understand crop, pricing, land requirements, and payment terms at a glance.
-                                </div>
-                                <div className="flex flex-col gap-4">
-                                    {[
-                                        ["Company Name *", fCompany, setFCompany, "text", "e.g. AgroCorp India Pvt. Ltd."],
-                                        ["Company Type", fCompanyType, setFCompanyType, "text", "e.g. Food Processing"],
-                                        ["Variety / Specification", fVariety, setFVariety, "text", "e.g. Pusa 1121, Bt Cotton"],
-                                        ["Region / State *", fRegion, setFRegion, "text", "e.g. Telangana, AP"],
-                                        ["Min Land / Farmer (acres) *", fMinLand, setFMinLand, "number", "e.g. 5"],
-                                        ["Total Land Required (acres) *", fTotalLand, setFTotalLand, "number", "e.g. 500"],
-                                        ["Farmers Needed *", fFarmers, setFFarmers, "number", "e.g. 50"],
-                                        ["Min Price (₹/quintal) *", fPriceMin, setFPriceMin, "number", "e.g. 2200"],
-                                        ["Max Price (₹/quintal) *", fPriceMax, setFPriceMax, "number", "e.g. 2800"],
-                                        ["Quality Standards", fQuality, setFQuality, "text", "e.g. Grade A, moisture < 14%"],
-                                        ["Notes for Farmers", fNotes, setFNotes, "text", "Any additional instructions..."],
-                                    ].map(([label, val, setter, type, ph]) => (
-                                        <div key={label} className="flex flex-row gap-2 items-center">
-                                            <label className="text-gold font-bold text-xs w-40 shrink-0">{label}</label>
-                                            <input type={type} placeholder={ph} value={val}
-                                                onChange={e => setter(e.target.value)}
-                                                className="flex-1 border-b-2 border-b-gold/40 focus:border-b-gold focus:outline-none bg-transparent text-white text-sm py-1 transition-all" />
-                                        </div>
-                                    ))}
+                    {/* Crop select */}
+                    <div className="flex flex-row gap-2 items-center">
+                        <label className="text-gold font-bold text-xs w-40 shrink-0">Crop Required *</label>
+                        <select value={fCrop} onChange={e => setFCrop(e.target.value)}
+                            className="flex-1 border-b-2 border-b-gold/40 focus:border-b-gold focus:outline-none bg-darkgreen text-white text-sm py-1">
+                            <option value="">Select crop</option>
+                            {CROP_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
 
-                                    {/* Crop select */}
-                                    <div className="flex flex-row gap-2 items-center">
-                                        <label className="text-gold font-bold text-xs w-40 shrink-0">Crop Required *</label>
-                                        <select value={fCrop} onChange={e => setFCrop(e.target.value)}
-                                            className="flex-1 border-b-2 border-b-gold/40 focus:border-b-gold focus:outline-none bg-darkgreen text-white text-sm py-1">
-                                            <option value="">Select crop</option>
-                                            {CROP_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                                        </select>
-                                    </div>
-
-                                    {[
-                                        ["Season", fSeason, setFSeason, SEASON_OPTIONS],
-                                        ["Duration", fDuration, setFDuration, DURATION_OPTIONS],
-                                        ["Payment Terms", fPayment, setFPayment, PAYMENT_OPTIONS],
-                                    ].map(([label, val, setter, opts]) => (
-                                        <div key={label} className="flex flex-row gap-2 items-center">
-                                            <label className="text-gold font-bold text-xs w-40 shrink-0">{label}</label>
-                                            <select value={val} onChange={e => setter(e.target.value)}
-                                                className="flex-1 border-b-2 border-b-gold/40 focus:border-b-gold focus:outline-none bg-darkgreen text-white text-sm py-1">
-                                                {opts.map(o => <option key={o} value={o}>{o}</option>)}
-                                            </select>
-                                        </div>
-                                    ))}
-
-                                    {/* Input Support */}
-                                    <div className="flex flex-row gap-2 items-center">
-                                        <label className="text-gold font-bold text-xs w-40 shrink-0">Input Support</label>
-                                        <select value={fInput} onChange={e => setFInput(e.target.value)}
-                                            className="flex-1 border-b-2 border-b-gold/40 focus:border-b-gold focus:outline-none bg-darkgreen text-white text-sm py-1">
-                                            <option value="Yes">Yes — Provided</option>
-                                            <option value="No">No</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="flex flex-row gap-3 mt-2 text-center">
-                                        <button type="button" onClick={() => setShowFormModal(false)}
-                                            className="flex-1 p-2 px-4 rounded-lg border-2 border-gold text-gold hover:bg-gold hover:text-darkgreen cursor-pointer font-bold transition-all ease-in duration-150">
-                                            Cancel
-                                        </button>
-                                        <button type="button" onClick={handlePost} disabled={posting}
-                                            className="flex-1 p-2 px-4 rounded-lg border-2 bg-gold hover:bg-linear-to-r hover:from-gold hover:to-yellow-200 text-darkgreen border-gold cursor-pointer font-bold transition-all ease-in duration-150 disabled:opacity-50">
-                                            {posting ? "Posting..." : "Post Contract"}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                    {[
+                        ["Season", fSeason, setFSeason, SEASON_OPTIONS],
+                        ["Duration", fDuration, setFDuration, DURATION_OPTIONS],
+                        ["Payment Terms", fPayment, setFPayment, PAYMENT_OPTIONS],
+                    ].map(([label, val, setter, opts]) => (
+                        <div key={label} className="flex flex-row gap-2 items-center">
+                            <label className="text-gold font-bold text-xs w-40 shrink-0">{label}</label>
+                            <select value={val} onChange={e => setter(e.target.value)}
+                                className="flex-1 border-b-2 border-b-gold/40 focus:border-b-gold focus:outline-none bg-darkgreen text-white text-sm py-1">
+                                {opts.map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
                         </div>
+                    ))}
+
+                    {/* Input Support */}
+                    <div className="flex flex-row gap-2 items-center">
+                        <label className="text-gold font-bold text-xs w-40 shrink-0">Input Support</label>
+                        <select value={fInput} onChange={e => setFInput(e.target.value)}
+                            className="flex-1 border-b-2 border-b-gold/40 focus:border-b-gold focus:outline-none bg-darkgreen text-white text-sm py-1">
+                            <option value="Yes">Yes — Provided</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <div className="flex flex-row gap-3 mt-2 text-center">
+                        <button type="button" onClick={() => setShowFormModal(false)}
+                            className="flex-1 p-2 px-4 rounded-lg border-2 border-gold text-gold hover:bg-gold hover:text-darkgreen cursor-pointer font-bold transition-all ease-in duration-150">
+                            Cancel
+                        </button>
+                        <button type="button" onClick={handlePost} disabled={posting}
+                            className="flex-1 p-2 px-4 rounded-lg border-2 bg-gold hover:bg-linear-to-r hover:from-gold hover:to-yellow-200 text-darkgreen border-gold cursor-pointer font-bold transition-all ease-in duration-150 disabled:opacity-50">
+                            {posting ? "Posting..." : "Post Contract"}
+                        </button>
                     </div>
                 </div>
+                </div>
+                </div>
+            </div>
+            </div>
             )}
         </>
     );

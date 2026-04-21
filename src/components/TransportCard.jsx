@@ -37,7 +37,7 @@ export default function TransportCard({ vehicle, onViewDetails }) {
           borderColor: "rgba(201, 168, 76, 0.2)",
         }}
       >
-        <div className="absolute inset-0 bg-linear-to-b from-black/20 to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60" />
         <div className="absolute left-3 top-3 z-10">
           <VehicleBadge vehicleType={vehicle.vehicleType} />
         </div>
@@ -55,8 +55,8 @@ export default function TransportCard({ vehicle, onViewDetails }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 rounded-xl border border-gold/20 bg-[#050505] px-3 py-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-[#FFF085] to-gold text-[12px] font-extrabold text-black">
+        <div className="flex items-center gap-3 rounded-[12px] border border-gold/20 bg-[#050505] px-3 py-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#FFF085] to-[#D4AF37] text-[12px] font-extrabold text-black">
             {ownerInitial}
           </div>
           <div>
@@ -65,7 +65,7 @@ export default function TransportCard({ vehicle, onViewDetails }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <div className="rounded-lg border border-gold/20 bg-[#050505] px-2 py-3 text-center">
             <div className="text-[16px] font-black leading-none text-[#FFF085]">
               {String(vehicle.price).replace("Rs. ", "₹")}
@@ -73,19 +73,10 @@ export default function TransportCard({ vehicle, onViewDetails }) {
             <div className="mt-1 text-[9px] text-white/45">per km</div>
           </div>
           <div className="rounded-lg border border-gold/20 bg-[#050505] px-2 py-3 text-center">
-            <div className="flex items-center justify-center gap-1 text-[16px] font-black leading-none text-white">
-              <span>{vehicle.rating}</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="#FFF085" aria-hidden="true">
-                <path d="M12 2.8l2.84 5.75 6.34.92-4.59 4.47 1.08 6.32L12 17.28l-5.67 2.98 1.08-6.32L2.82 9.47l6.34-.92L12 2.8z" />
-              </svg>
+            <div className="text-[15px] font-black leading-none text-white">
+              {vehicle.capacity || "—"}
             </div>
-            <div className="mt-1 text-[9px] text-white/45">{reviewCount} reviews</div>
-          </div>
-          <div className="rounded-lg border border-gold/20 bg-[#050505] px-2 py-3 text-center">
-            <div className={`text-[16px] font-black leading-none ${vehicle.availability === "Booked" ? "text-red-400" : "text-green-400"}`}>
-              {vehicle.availability}
-            </div>
-            <div className="mt-1 text-[9px] uppercase tracking-[0.5px] text-white/50">Status</div>
+            <div className="mt-1 text-[9px] uppercase tracking-[0.5px] text-white/50">Capacity</div>
           </div>
         </div>
 

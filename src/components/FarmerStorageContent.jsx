@@ -4,25 +4,33 @@ import ModuleHeader from "./ModuleHeader";
 import ModuleFilters from "./ModuleFilters";
 import { UseAppContext } from "../context/AppContext";
 
+const inputStyle = {
+  width: "100%",
+  background: "#050505",
+  border: "1px solid rgba(212, 175, 55, 0.22)",
+  borderRadius: 12,
+  padding: "12px 14px",
+  color: "#ffffff",
+  fontSize: 13,
+  outline: "none",
+  fontFamily: "'Montserrat', sans-serif",
+};
+
 function StatusBadge({ status }) {
   const cfg = {
-    available: { bg: C.availBg, color: C.availText, border: "#2a5a2a", label: "Available" },
-    limited: { bg: C.amberDim, color: C.gold, border: "#5a4a1a", label: "Limited Space" },
-    full: { bg: C.redDim, color: C.redText, border: "#5a2a2a", label: "Full" },
-  }[status];
+    available: { bg: C.availBg,  color: C.availText, border: "#2a5a2a", label: "Available" },
+    limited:   { bg: C.amberDim, color: C.gold,       border: "#5a4a1a", label: "Limited Space" },
+    full:      { bg: C.redDim,   color: C.redText,    border: "#5a2a2a", label: "Full" },
+  }[status] || { bg: C.availBg, color: C.availText, border: "#2a5a2a", label: status };
 
   return (
     <span
       style={{
-        background: cfg.bg,
-        color: cfg.color,
+        background: cfg.bg, color: cfg.color,
         border: `1px solid ${cfg.border}`,
-        fontSize: 10,
-        fontWeight: 600,
-        padding: "3px 8px",
-        borderRadius: 4,
-        letterSpacing: 0.6,
-        textTransform: "uppercase",
+        fontSize: 10, fontWeight: 600,
+        padding: "3px 8px", borderRadius: 4,
+        letterSpacing: 0.6, textTransform: "uppercase",
       }}
     >
       {cfg.label}
@@ -30,20 +38,21 @@ function StatusBadge({ status }) {
   );
 }
 
+// ─── Derive display status from capacity (no static status field) ─────────────
+function getDisplayStatus(storage, availableForDates) {
+  if (availableForDates !== null) {
+    if (availableForDates <= 0) return "full";
+    if (availableForDates < storage.capacity * 0.3) return "limited";
+    return "available";
+  }
+  return "available";
+}
+
 function StorageCard({ storage, onViewDetails }) {
   const [hovered, setHovered] = useState(false);
   const [btnHover, setBtnHover] = useState(false);
 
-  const fillPct = storage.capacity > 0
-    ? Math.round(((storage.capacity - storage.available) / storage.capacity) * 100)
-    : 100;
-
-  const barColor =
-    storage.status === "full"
-      ? C.redText
-      : storage.status === "limited"
-        ? C.gold
-        : C.greenLight;
+  const displayStatus = storage.status || "available";
 
   return (
     <div
@@ -52,39 +61,26 @@ function StorageCard({ storage, onViewDetails }) {
       style={{
         background: hovered ? C.bgCardHover : C.bgCard,
         border: `1px solid ${hovered ? "#f1d86a" : "#d4af37"}`,
-        borderRadius: 14,
-        overflow: "hidden",
+        borderRadius: 14, overflow: "hidden",
         boxShadow: hovered
           ? "0 0 0 1px rgba(241, 216, 106, 0.36), 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 28px rgba(212, 175, 55, 0.16)"
           : "0 0 0 1px rgba(212, 175, 55, 0.26), 0 12px 28px rgba(0, 0, 0, 0.42)",
         transition: "border-color 0.2s, background 0.2s, box-shadow 0.2s",
-        display: "flex",
-        flexDirection: "column",
+        display: "flex", flexDirection: "column",
       }}
     >
       <div
         style={{
-          height: 128,
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          height: 128, position: "relative",
+          display: "flex", alignItems: "center", justifyContent: "center",
           borderBottom: `1px solid ${C.border}`,
-          backgroundImage: `url(${storage.image})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundImage: storage.images && storage.images.length > 0 ? `url("${storage.images[0]}")` : "linear-gradient(135deg, #2a5a2a 0%, #081D0C 100%)",
+          backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat",
         }}
       >
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.42) 100%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.42) 100%)" }} />
         <div style={{ position: "absolute", top: 12, left: 12, zIndex: 1 }}>
-          <StatusBadge status={storage.status} />
-        </div>
-        <div style={{ position: "absolute", bottom: 10, left: 12, display: "flex", alignItems: "center", gap: 4, color: C.textSub, fontSize: 11, zIndex: 1 }}>
-          <svg width="10" height="10" fill="none" viewBox="0 0 24 24">
-            <path d="M12 2C8.5 2 5.5 4.8 5.5 8.5C5.5 13.5 12 21 12 21S18.5 13.5 18.5 8.5C18.5 4.8 15.5 2 12 2Z" fill={C.gold} opacity="0.7" />
-            <circle cx="12" cy="8.5" r="2" fill="#081D0C" />
-          </svg>
-          {storage.distance} away
+          <StatusBadge status={displayStatus} />
         </div>
       </div>
 
@@ -101,21 +97,11 @@ function StorageCard({ storage, onViewDetails }) {
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 24, height: 24, borderRadius: "50%", background: "linear-gradient(135deg, #FFF085 0%, #D4AF37 100%)", color: "#111", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0 }}>
-            {storage.owner?.charAt(0)}
-          </div>
-          <div>
-            <div style={{ fontSize: 9, color: C.textMuted, textTransform: "uppercase", letterSpacing: 0.5 }}>Owner</div>
-            <div style={{ fontSize: 13, color: C.textSub, fontWeight: 600, lineHeight: 1.2 }}>{storage.owner}</div>
-          </div>
-        </div>
-
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
           {[
             { val: `Rs.${storage.price}`, sub: "per day/ton" },
-            { val: storage.available > 0 ? `${storage.available}T` : "-", sub: "available" },
             { val: `${storage.capacity}T`, sub: "total cap." },
+            { val: `Rs.${storage.price * storage.capacity}`, sub: "max/day" },
           ].map((s) => (
             <div key={s.sub} style={{ background: "#050505", border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 6px", textAlign: "center" }}>
               <div style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 14, fontWeight: 700, color: C.goldLight }}>{s.val}</div>
@@ -124,69 +110,30 @@ function StorageCard({ storage, onViewDetails }) {
           ))}
         </div>
 
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-            <span style={{ fontSize: 10, color: C.textMuted, textTransform: "uppercase", letterSpacing: 0.5 }}>Capacity used</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: barColor }}>{fillPct}%</span>
-          </div>
-          <div style={{ background: "#050505", borderRadius: 4, height: 4, border: `1px solid ${C.border}`, overflow: "hidden" }}>
-            <div style={{ width: `${fillPct}%`, height: "100%", background: barColor, borderRadius: 4, transition: "width 0.4s ease" }} />
-          </div>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "auto", paddingTop: 2 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
-            <span style={{ color: "#ffffff", fontWeight: 700 }}>Reviews:</span>
-            <span style={{ color: C.goldLight, fontWeight: 700 }}>{storage.rating}</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill={C.goldLight} aria-hidden="true">
-              <path d="M12 2.8l2.84 5.75 6.34.92-4.59 4.47 1.08 6.32L12 17.28l-5.67 2.98 1.08-6.32L2.82 9.47l6.34-.92L12 2.8z" />
-            </svg>
-            <span style={{ color: C.textMuted }}>|</span>
-            <span style={{ color: C.textSub }}>{storage.reviews}</span>
-          </div>
-
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              onMouseEnter={() => setBtnHover(true)}
-              onMouseLeave={() => setBtnHover(false)}
-              onClick={() => onViewDetails(storage)}
-              disabled={storage.status === "full"}
-              style={{
-                background: storage.status === "full" ? "transparent" : btnHover ? "#ffffff" : C.gold,
-                color: storage.status === "full" ? C.textMuted : "#0a1a0c",
-                border: storage.status === "full" ? `1px solid ${C.border}` : "none",
-                padding: "9px 18px",
-                borderRadius: 8,
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: storage.status === "full" ? "not-allowed" : "pointer",
-                transition: "background 0.18s, transform 0.18s ease, box-shadow 0.18s ease",
-                letterSpacing: 0.2,
-                whiteSpace: "nowrap",
-                transform: btnHover ? "translateY(-1px)" : "translateY(0)",
-                boxShadow: btnHover ? "0 10px 20px rgba(255, 240, 133, 0.18)" : "none",
-              }}
-            >
-              {storage.status === "full" ? "Storage Full" : "View Details ->"}
-            </button>
-          </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+          <button
+            onMouseEnter={() => setBtnHover(true)}
+            onMouseLeave={() => setBtnHover(false)}
+            onClick={() => onViewDetails(storage)}
+            style={{
+              background: btnHover ? "#ffffff" : C.gold,
+              color: "#0a1a0c",
+              border: "none",
+              padding: "9px 18px", borderRadius: 8,
+              fontSize: 12, fontWeight: 700, cursor: "pointer",
+              transition: "background 0.18s, transform 0.18s ease, box-shadow 0.18s ease",
+              whiteSpace: "nowrap",
+              transform: btnHover ? "translateY(-1px)" : "translateY(0)",
+              boxShadow: btnHover ? "0 10px 20px rgba(255, 240, 133, 0.18)" : "none",
+            }}
+          >
+            View Details →
+          </button>
         </div>
       </div>
     </div>
   );
 }
-
-const inputStyle = {
-  width: "100%",
-  background: "#050505",
-  border: "1px solid rgba(212, 175, 55, 0.22)",
-  borderRadius: 12,
-  padding: "12px 14px",
-  color: "#ffffff",
-  fontSize: 13,
-  outline: "none",
-  fontFamily: "'Montserrat', sans-serif",
-};
 
 export default function FarmerStorageContent({
   storages,
@@ -198,98 +145,132 @@ export default function FarmerStorageContent({
   setSortBy,
   onOpenSidebar,
 }) {
-  const { addBooking } = UseAppContext();
+  const { addBooking, axios } = UseAppContext();
   const [selectedStorage, setSelectedStorage] = useState(null);
   const [activeImage, setActiveImage] = useState(null);
-  const [bookHover, setBookHover] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState("about");
+  const [submitting, setSubmitting] = useState(false);
+
+  // Availability state (populated when farmer picks dates)
+  const [availCheck, setAvailCheck] = useState(null); // { availableTonnes, occupiedTonnes, totalCapacity }
+  const [checkingAvail, setCheckingAvail] = useState(false);
+
   const [bookingForm, setBookingForm] = useState({
-    startDate: "",
-    endDate: "",
-    cropName: "",
-    estimatedWeight: "",
-    storageDays: "",
-    transportMode: "",
-    pickupLocation: "",
-    contactNumber: "",
-    specialHandling: "",
-    notes: "",
+    startDate: "", endDate: "",
+    farmerName: "", farmerLocation: "", farmerContact: "",
+    cropName: "", quantity: "", notes: "",
   });
-  const filters = ["All", "Available", "Nearby (<10 km)", "Low Price", "High Capacity", "Top Rated"];
+
+  const filters = ["All", "Available", "Low Price", "High Capacity", "Top Rated"];
 
   const resetBookingForm = () => {
-    setBookingForm({
-      startDate: "",
-      endDate: "",
-      cropName: "",
-      estimatedWeight: "",
-      storageDays: "",
-      transportMode: "",
-      pickupLocation: "",
-      contactNumber: "",
-      specialHandling: "",
-      notes: "",
-    });
+    setBookingForm({ startDate: "", endDate: "", farmerName: "", farmerLocation: "", farmerContact: "", cropName: "", quantity: "", notes: "" });
+    setAvailCheck(null);
   };
 
   const handleBookingInput = (field, value) => {
     setBookingForm((prev) => ({ ...prev, [field]: value }));
+    // Reset availability check when dates change
+    if (field === "startDate" || field === "endDate") {
+      setAvailCheck(null);
+    }
   };
 
-  const handleBookingSubmit = () => {
-    const requiredFields = [
-      bookingForm.startDate,
-      bookingForm.endDate,
-      bookingForm.cropName,
-      bookingForm.estimatedWeight,
-      bookingForm.storageDays,
-      bookingForm.transportMode,
-      bookingForm.pickupLocation,
-      bookingForm.contactNumber,
-    ];
+  // ── Check availability when both dates are set ────────────────────────────
+  const handleCheckAvailability = async () => {
+    if (!bookingForm.startDate || !bookingForm.endDate) {
+      return alert("Please select both start and end dates first.");
+    }
+    if (new Date(bookingForm.endDate) <= new Date(bookingForm.startDate)) {
+      return alert("End date must be after start date.");
+    }
+    setCheckingAvail(true);
+    try {
+      const { data } = await axios.post("/api/coldstorage/check", {
+        storageId: selectedStorage._id,
+        startDate: bookingForm.startDate,
+        endDate:   bookingForm.endDate,
+      });
+      if (data.success) {
+        setAvailCheck(data);
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setCheckingAvail(false);
+    }
+  };
 
-    if (requiredFields.some((value) => !String(value).trim())) {
-      window.alert("Please fill in all required booking details.");
-      return;
+  // ── Submit booking application ─────────────────────────────────────────────
+  const handleBookingSubmit = async () => {
+    const { startDate, endDate, farmerName, farmerLocation, farmerContact, cropName, quantity } = bookingForm;
+    if (!startDate || !endDate || !farmerName || !farmerLocation || !farmerContact || !cropName || !quantity) {
+      return alert("Please fill in all required booking details.");
+    }
+    if (!availCheck) {
+      return alert("Please check availability for your selected dates first.");
+    }
+    if (Number(quantity) > availCheck.availableTonnes) {
+      return alert(`Only ${availCheck.availableTonnes} tonnes available for those dates. Please reduce your quantity.`);
     }
 
-    addBooking({
-      module: "Cold Storage",
-      itemName: selectedStorage.name,
-      providerName: selectedStorage.owner,
-      image: selectedStorage.image,
-      priceLabel: `₹${selectedStorage.price} / day / ton`,
-      summary: `${bookingForm.cropName} • ${bookingForm.estimatedWeight} • ${bookingForm.startDate} to ${bookingForm.endDate}`,
-      notificationTitle: "Cold storage booking request",
-      notificationDetail: `${bookingForm.cropName} storage request for ${selectedStorage.name} from ${bookingForm.startDate} to ${bookingForm.endDate}.`,
-    });
-    window.alert(`Booking request sent successfully to ${selectedStorage.owner} for ${selectedStorage.name}.`);
-    setActiveDetailTab("about");
-    resetBookingForm();
-    setSelectedStorage(null);
+    setSubmitting(true);
+    try {
+      const { data } = await axios.post("/api/coldstorage/apply", {
+        storageId:      selectedStorage._id,
+        farmerName, farmerLocation, farmerContact,
+        cropName,
+        startDate, endDate,
+        quantity:       Number(quantity),
+      });
+
+      if (data.success) {
+        addBooking({
+          module: "Cold Storage",
+          itemName: selectedStorage.name,
+          providerName: selectedStorage.owner,
+          image: selectedStorage.images?.[0] || "/coldstorage.svg",
+          priceLabel: `Rs.${selectedStorage.price} / day / ton`,
+          summary: `${cropName} • ${quantity}T • ${startDate} to ${endDate}`,
+          notificationTitle: "Cold storage booking request",
+          notificationDetail: `${cropName} storage request for ${selectedStorage.name} from ${startDate} to ${endDate}.`,
+        });
+        alert(`Booking application sent successfully to ${selectedStorage.name}.`);
+        setActiveDetailTab("about");
+        resetBookingForm();
+        setSelectedStorage(null);
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  // ── Filter and sort ───────────────────────────────────────────────────────
   const filtered = storages
     .filter((s) => {
-      if (activeFilter === "Available") return s.status === "available";
-      if (activeFilter === "Nearby (<10 km)") return parseFloat(s.distance) < 10;
+      if (activeFilter === "Available") return s.status !== "inactive";
       if (activeFilter === "Low Price") return s.price <= 10;
       if (activeFilter === "High Capacity") return s.capacity >= 1000;
-      if (activeFilter === "Top Rated") return s.rating >= 4.5;
       return true;
     })
     .filter(
       (s) =>
         !search ||
         s.name.toLowerCase().includes(search.toLowerCase()) ||
-        s.location.toLowerCase().includes(search.toLowerCase()),
+        s.location.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) => {
-      if (sortBy === "distance") return parseFloat(a.distance) - parseFloat(b.distance);
       if (sortBy === "price") return a.price - b.price;
-      if (sortBy === "rating") return b.rating - a.rating;
       return 0;
     });
+
+  const fmt = (d) => new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
   return (
     <>
@@ -309,24 +290,17 @@ export default function FarmerStorageContent({
           .kc-grid { grid-template-columns: repeat(2, 1fr); }
         }
         .kc-modal-overlay {
-          position: fixed;
-          inset: 0;
+          position: fixed; inset: 0;
           background: rgba(0, 0, 0, 0.76);
           backdrop-filter: blur(6px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
-          z-index: 300;
+          display: flex; align-items: center; justify-content: center;
+          padding: 20px; z-index: 300;
         }
         .kc-modal-panel {
-          width: min(1080px, 100%);
-          max-height: min(90vh, 980px);
-          overflow-y: auto;
-          background: #000000;
+          width: min(1080px, 100%); max-height: min(90vh, 980px);
+          overflow-y: auto; background: #000000;
           border: 1px solid rgba(212, 175, 55, 0.32);
-          border-radius: 22px;
-          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+          border-radius: 22px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
         }
         .kc-modal-grid { display: grid; grid-template-columns: 1.15fr 1fr; }
         .kc-gallery-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
@@ -346,19 +320,6 @@ export default function FarmerStorageContent({
             <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 14, fontWeight: 700, color: C.goldLight }}>
               {filtered.length} storage{filtered.length !== 1 ? "s" : ""} found
             </span>
-            <span style={{ fontSize: 12, color: C.textMuted, marginLeft: 10 }}>
-              - {activeFilter === "Low Price"
-                ? "sorted by price"
-                : activeFilter === "Top Rated"
-                  ? "sorted by rating"
-                  : activeFilter === "Nearby (<10 km)"
-                    ? "sorted by distance"
-                    : activeFilter === "High Capacity"
-                      ? "filtered by high capacity"
-                      : activeFilter === "Available"
-                        ? "showing available only"
-                        : `sorted by ${sortBy}`}
-            </span>
           </div>
 
           {filtered.length === 0 ? (
@@ -373,11 +334,11 @@ export default function FarmerStorageContent({
             <div className="kc-grid">
               {filtered.map((s) => (
                 <StorageCard
-                  key={s.id}
+                  key={s._id || s.id}
                   storage={s}
                   onViewDetails={(storage) => {
                     setSelectedStorage(storage);
-                    setActiveImage(storage.gallery?.[0] || storage.image);
+                    setActiveImage(storage.images?.[0] || null);
                     setActiveDetailTab("about");
                     resetBookingForm();
                   }}
@@ -388,45 +349,36 @@ export default function FarmerStorageContent({
         </div>
       </main>
 
+      {/* ── Detail / Booking Modal ── */}
       {selectedStorage && (
         <div className="kc-modal-overlay" onClick={() => setSelectedStorage(null)}>
           <div className="kc-modal-panel" onClick={(e) => e.stopPropagation()}>
+            {/* Tab strip */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 14px 0 14px", gap: 12 }}>
               <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
                 <div
                   style={{
-                    width: "fit-content",
-                    maxWidth: "100%",
-                    borderRadius: 999,
-                    background: "rgba(255,255,255,0.12)",
+                    width: "fit-content", maxWidth: "100%",
+                    borderRadius: 999, background: "rgba(255,255,255,0.12)",
                     border: "1px solid rgba(255,255,255,0.22)",
-                    padding: 4,
-                    display: "flex",
-                    gap: 4,
+                    padding: 4, display: "flex", gap: 4,
                     backdropFilter: "blur(12px)",
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
                   }}
                 >
-                  {[
-                    { id: "about", label: "About Cold Storage" },
-                    { id: "book", label: "Book Now" },
-                  ].map((tab) => (
+                  {[{ id: "about", label: "About Cold Storage" }, { id: "book", label: "Book Now" }].map((tab) => (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveDetailTab(tab.id)}
+                      onClick={() => { setActiveDetailTab(tab.id); resetBookingForm(); }}
                       style={{
-                        border: "none",
-                        borderRadius: 999,
-                        padding: "10px 16px",
-                        cursor: "pointer",
-                        fontSize: 13,
-                        fontWeight: 700,
+                        border: "none", borderRadius: 999,
+                        padding: "10px 16px", cursor: "pointer",
+                        fontSize: 13, fontWeight: 700,
                         color: activeDetailTab === tab.id ? "#111111" : "#FFF085",
                         background: activeDetailTab === tab.id
                           ? "linear-gradient(135deg, #D4AF37 0%, #FFF085 100%)"
                           : "transparent",
-                        transition: "all 0.18s ease",
-                        whiteSpace: "nowrap",
+                        transition: "all 0.18s ease", whiteSpace: "nowrap",
                       }}
                     >
                       {tab.label}
@@ -437,329 +389,244 @@ export default function FarmerStorageContent({
               <button
                 onClick={() => setSelectedStorage(null)}
                 style={{
-                  border: "none",
-                  background: "rgba(255, 255, 255, 0.08)",
-                  color: "#ffffff",
-                  width: 34,
-                  height: 34,
-                  borderRadius: "50%",
-                  cursor: "pointer",
-                  fontSize: 18,
+                  border: "none", background: "rgba(255,255,255,0.08)",
+                  color: "#ffffff", width: 34, height: 34,
+                  borderRadius: "50%", cursor: "pointer", fontSize: 18,
                 }}
               >
-                x
+                ×
               </button>
             </div>
 
-            <div
-              className="kc-modal-grid"
-              style={{
-                gridTemplateColumns: activeDetailTab === "book" ? "1fr" : undefined,
-              }}
-            >
+            <div className="kc-modal-grid" style={{ gridTemplateColumns: activeDetailTab === "book" ? "1fr" : undefined }}>
+              {/* About tab — image gallery */}
               {activeDetailTab === "about" && (
                 <div style={{ padding: 20, paddingTop: 8, borderRight: "1px solid rgba(212, 175, 55, 0.18)" }}>
                   <div
                     style={{
-                      position: "relative",
-                      height: 290,
-                      borderRadius: 18,
-                      overflow: "hidden",
-                      backgroundImage: `url(${activeImage || selectedStorage.image})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      marginBottom: 14,
+                      position: "relative", height: 290, borderRadius: 18, overflow: "hidden",
+                      backgroundImage: activeImage ? `url("${activeImage}")` : "linear-gradient(135deg, #2a5a2a 0%, #081D0C 100%)",
+                      backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", marginBottom: 14,
                     }}
                   >
                     <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.45) 100%)" }} />
-                    <div style={{ position: "absolute", left: 16, bottom: 16 }}>
-                      <StatusBadge status={selectedStorage.status} />
-                    </div>
+                    {selectedStorage.images?.length > 0 && (
+                      <div style={{ position: "absolute", left: 16, bottom: 16 }}>
+                        <StatusBadge status={selectedStorage.status || "available"} />
+                      </div>
+                    )}
+                    {(!selectedStorage.images || selectedStorage.images.length === 0) && (
+                      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="64" height="64" fill="none" viewBox="0 0 24 24" opacity="0.3">
+                          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="#D4AF37" strokeWidth="1.5" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="kc-gallery-row">
-                    {(selectedStorage.gallery || [selectedStorage.image]).map((image, index) => (
-                      <button
-                        key={`${selectedStorage.id}-${index}`}
-                        onClick={() => setActiveImage(image)}
-                        style={{
-                          border: activeImage === image ? "2px solid #E7C957" : "1px solid rgba(212, 175, 55, 0.18)",
-                          borderRadius: 14,
-                          overflow: "hidden",
-                          padding: 0,
-                          background: "#050505",
-                          cursor: "pointer",
-                          height: 92,
-                        }}
-                      >
-                        <div
+                  {selectedStorage.images?.length > 0 && (
+                    <div className="kc-gallery-row">
+                      {selectedStorage.images.map((image, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setActiveImage(image)}
                           style={{
-                            width: "100%",
-                            height: "100%",
-                            backgroundImage: `url(${image})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
+                            border: activeImage === image ? "2px solid #E7C957" : "1px solid rgba(212,175,55,0.18)",
+                            borderRadius: 14, overflow: "hidden", padding: 0,
+                            background: "#050505", cursor: "pointer", height: 92,
                           }}
-                        />
-                      </button>
-                    ))}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 16,
-                      background: "#081D0C",
-                      border: "1px solid rgba(212, 175, 55, 0.18)",
-                      borderRadius: 16,
-                      padding: 16,
-                    }}
-                  >
-                    <div style={{ color: "#E7C957", fontWeight: 700, fontSize: 16, marginBottom: 8 }}>
-                      About This Storage
+                        >
+                          <div style={{ width: "100%", height: "100%", backgroundImage: `url(${image})`, backgroundSize: "cover", backgroundPosition: "center" }} />
+                        </button>
+                      ))}
                     </div>
+                  )}
+
+                  <div style={{ marginTop: 16, background: "#081D0C", border: "1px solid rgba(212,175,55,0.18)", borderRadius: 16, padding: 16 }}>
+                    <div style={{ color: "#E7C957", fontWeight: 700, fontSize: 16, marginBottom: 8 }}>About This Storage</div>
                     <div style={{ color: C.textSub, fontSize: 14, lineHeight: 1.7 }}>
-                      {selectedStorage.description}
+                      {selectedStorage.description || "A reliable cold storage facility. Select Book Now to check availability and apply for your dates."}
                     </div>
                   </div>
                 </div>
               )}
 
-              <div
-                style={{
-                  padding: 24,
-                  paddingTop: 8,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 18,
-                  alignItems: activeDetailTab === "book" ? "center" : "stretch",
-                }}
-              >
+              {/* Right panel */}
+              <div style={{ padding: 24, paddingTop: 8, display: "flex", flexDirection: "column", gap: 18, alignItems: activeDetailTab === "book" ? "center" : "stretch" }}>
                 {activeDetailTab === "about" && (
                   <>
                     <div>
                       <div style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 26, fontWeight: 800, color: "#E7C957", lineHeight: 1.15 }}>
                         {selectedStorage.name}
                       </div>
-                      <div style={{ marginTop: 8, color: C.textSub, fontSize: 14 }}>
-                        {selectedStorage.location} - {selectedStorage.distance} away
-                      </div>
+                      <div style={{ marginTop: 8, color: C.textSub, fontSize: 14 }}>{selectedStorage.location}</div>
                     </div>
 
-                    <div
-                      style={{
-                        background: "#081D0C",
-                        border: "1px solid rgba(212, 175, 55, 0.18)",
-                        borderRadius: 16,
-                        padding: 16,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 12,
-                          paddingBottom: 14,
-                          marginBottom: 14,
-                          borderBottom: "1px solid rgba(212, 175, 55, 0.12)",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: 46,
-                            height: 46,
-                            borderRadius: "50%",
-                            background: "linear-gradient(135deg, #FFF085 0%, #D4AF37 100%)",
-                            color: "#111111",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontFamily: "'Montserrat', sans-serif",
-                            fontSize: 18,
-                            fontWeight: 800,
-                            flexShrink: 0,
-                          }}
-                        >
-                          {selectedStorage.owner?.charAt(0)}
-                        </div>
-                        <div>
-                          <div style={{ fontSize: 11, color: C.textMuted, textTransform: "uppercase", letterSpacing: 0.6 }}>
-                            Owner
-                          </div>
-                          <div style={{ color: "#ffffff", fontSize: 16, fontWeight: 700, marginTop: 2 }}>
-                            {selectedStorage.owner}
-                          </div>
-                        </div>
-                      </div>
-
+                    <div style={{ background: "#081D0C", border: "1px solid rgba(212,175,55,0.18)", borderRadius: 16, padding: 16 }}>
                       {[
-                        { label: "Price", value: `Rs.${selectedStorage.price} per day/ton` },
-                        { label: "Available", value: `${selectedStorage.available}T` },
-                        { label: "Total Capacity", value: `${selectedStorage.capacity}T` },
-                        { label: "Established", value: selectedStorage.established },
-                        { label: "Hours", value: selectedStorage.operatingHours },
+                        { label: "Price",           value: `Rs.${selectedStorage.price} per day/ton` },
+                        { label: "Total Capacity",  value: `${selectedStorage.capacity}T` },
                       ].map((item, index, arr) => (
-                        <div
-                          key={item.label}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: 16,
-                            padding: "10px 0",
-                            borderBottom: index !== arr.length - 1 ? "1px solid rgba(212, 175, 55, 0.12)" : "none",
-                          }}
-                        >
-                          <div style={{ fontSize: 12, color: C.textMuted, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                            {item.label}
-                          </div>
-                          <div style={{ color: "#ffffff", fontSize: 14, fontWeight: 600, textAlign: "right" }}>
-                            {item.value}
-                          </div>
+                        <div key={item.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, padding: "10px 0", borderBottom: index !== arr.length - 1 ? "1px solid rgba(212,175,55,0.12)" : "none" }}>
+                          <div style={{ fontSize: 12, color: C.textMuted, textTransform: "uppercase", letterSpacing: 0.5 }}>{item.label}</div>
+                          <div style={{ color: "#ffffff", fontSize: 14, fontWeight: 600, textAlign: "right" }}>{item.value}</div>
                         </div>
                       ))}
                     </div>
                   </>
                 )}
 
-                {activeDetailTab === "about" && (
-                  <div
-                    style={{
-                      background: "#081D0C",
-                      border: "1px solid rgba(212, 175, 55, 0.18)",
-                      borderRadius: 16,
-                      padding: 16,
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                      <div style={{ color: "#ffffff", fontWeight: 700, fontSize: 16 }}>Rating and Storage Info</div>
-                      <StatusBadge status={selectedStorage.status} />
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                      <span style={{ color: "#ffffff", fontWeight: 700, fontSize: 14 }}>Reviews:</span>
-                      <span style={{ color: C.goldLight, fontWeight: 700, fontSize: 14 }}>{selectedStorage.rating}</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill={C.goldLight} aria-hidden="true">
-                        <path d="M12 2.8l2.84 5.75 6.34.92-4.59 4.47 1.08 6.32L12 17.28l-5.67 2.98 1.08-6.32L2.82 9.47l6.34-.92L12 2.8z" />
-                      </svg>
-                      <span style={{ color: C.textMuted, fontSize: 13 }}>| {selectedStorage.reviews}</span>
-                    </div>
-                    <div style={{ color: C.textSub, fontSize: 14, lineHeight: 1.6 }}>
-                      Best suited for: {selectedStorage.produce}
-                    </div>
-                  </div>
-                )}
-
+                {/* ── Book Now form ── */}
                 {activeDetailTab === "book" && (
                   <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
                     <div
                       style={{
                         width: "min(760px, 100%)",
-                        background: "linear-gradient(180deg, rgba(16, 31, 21, 0.96) 0%, rgba(7, 13, 9, 0.98) 100%)",
-                        border: "1px solid rgba(212, 175, 55, 0.24)",
-                        borderRadius: 24,
-                        padding: 24,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 16,
-                        boxShadow: "0 20px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
+                        background: "linear-gradient(180deg, rgba(16,31,21,0.96) 0%, rgba(7,13,9,0.98) 100%)",
+                        border: "1px solid rgba(212,175,55,0.24)", borderRadius: 24, padding: 24,
+                        display: "flex", flexDirection: "column", gap: 16,
+                        boxShadow: "0 20px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
                       }}
                     >
                       <div>
-                        <div style={{ color: "#FFF085", fontSize: 18, fontWeight: 800 }}>
-                          Booking Details
-                        </div>
+                        <div style={{ color: "#FFF085", fontSize: 18, fontWeight: 800 }}>Booking Details</div>
                         <div style={{ color: C.textMuted, fontSize: 13, marginTop: 4 }}>
-                          Add the crop, schedule, and handling details before sending the request.
+                          Select your dates, check availability, then fill your details to send the application.
                         </div>
                       </div>
 
+                      {/* Dates + availability check */}
                       <div className="kc-booking-grid">
                         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Start Date</span>
+                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Start Date *</span>
                           <input type="date" value={bookingForm.startDate} onChange={(e) => handleBookingInput("startDate", e.target.value)} style={inputStyle} />
                         </label>
                         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>End Date</span>
+                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>End Date *</span>
                           <input type="date" value={bookingForm.endDate} onChange={(e) => handleBookingInput("endDate", e.target.value)} style={inputStyle} />
                         </label>
+                      </div>
+
+                      {/* Check availability button */}
+                      <button
+                        onClick={handleCheckAvailability}
+                        disabled={checkingAvail || !bookingForm.startDate || !bookingForm.endDate}
+                        style={{
+                          border: "1px solid rgba(212,175,55,0.4)", background: "transparent",
+                          color: "#FFF085", borderRadius: 12, padding: "10px 16px",
+                          fontSize: 13, fontWeight: 700, cursor: "pointer",
+                          opacity: (!bookingForm.startDate || !bookingForm.endDate) ? 0.5 : 1,
+                        }}
+                      >
+                        {checkingAvail ? "Checking..." : "Check Availability for Selected Dates"}
+                      </button>
+
+                      {/* Availability result */}
+                      {availCheck && (
+                        <div
+                          style={{
+                            background: availCheck.availableTonnes > 0 ? "rgba(74,222,128,0.08)" : "rgba(239,68,68,0.08)",
+                            border: `1px solid ${availCheck.availableTonnes > 0 ? "rgba(74,222,128,0.4)" : "rgba(239,68,68,0.4)"}`,
+                            borderRadius: 12, padding: "12px 16px",
+                          }}
+                        >
+                          {availCheck.availableTonnes > 0 ? (
+                            <div>
+                              <p style={{ color: "#4ade80", fontWeight: 700, fontSize: 13, margin: 0 }}>
+                                ✓ {availCheck.availableTonnes}T available for your selected dates
+                              </p>
+                              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, margin: "4px 0 0" }}>
+                                {availCheck.occupiedTonnes}T already booked · {availCheck.totalCapacity}T total capacity
+                              </p>
+                            </div>
+                          ) : (
+                            <div>
+                              <p style={{ color: "#f87171", fontWeight: 700, fontSize: 13, margin: 0 }}>
+                                Storage is fully booked for these dates
+                              </p>
+                              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, margin: "4px 0 0" }}>
+                                Try different dates — capacity may be available for other periods
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Farmer details */}
+                      <div className="kc-booking-grid">
                         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Crop Name</span>
-                          <input type="text" placeholder="Tomato, grapes, chilli..." value={bookingForm.cropName} onChange={(e) => handleBookingInput("cropName", e.target.value)} style={inputStyle} />
+                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Your Name *</span>
+                          <input type="text" placeholder="Full name" value={bookingForm.farmerName} onChange={(e) => handleBookingInput("farmerName", e.target.value)} style={inputStyle} />
                         </label>
                         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Crop Weight Estimate</span>
-                          <input type="text" placeholder="Ex: 1200 kg or 12T" value={bookingForm.estimatedWeight} onChange={(e) => handleBookingInput("estimatedWeight", e.target.value)} style={inputStyle} />
+                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Contact Number *</span>
+                          <input type="tel" placeholder="Phone number" value={bookingForm.farmerContact} onChange={(e) => handleBookingInput("farmerContact", e.target.value)} style={inputStyle} />
                         </label>
                         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>No. of Days</span>
-                          <input type="number" min="1" placeholder="Storage duration" value={bookingForm.storageDays} onChange={(e) => handleBookingInput("storageDays", e.target.value)} style={inputStyle} />
+                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Your Location *</span>
+                          <input type="text" placeholder="Village / Town" value={bookingForm.farmerLocation} onChange={(e) => handleBookingInput("farmerLocation", e.target.value)} style={inputStyle} />
                         </label>
                         <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Transport Mode</span>
-                          <select value={bookingForm.transportMode} onChange={(e) => handleBookingInput("transportMode", e.target.value)} style={inputStyle}>
-                            <option value="">Select transport</option>
-                            <option value="Mini Truck">Mini Truck</option>
-                            <option value="Pickup Van">Pickup Van</option>
-                            <option value="Tractor Trolley">Tractor Trolley</option>
-                            <option value="Reefer Vehicle">Reefer Vehicle</option>
-                            <option value="Self Delivery">Self Delivery</option>
-                          </select>
+                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Crop Name *</span>
+                          <input type="text" placeholder="e.g. Tomato, Chilli..." value={bookingForm.cropName} onChange={(e) => handleBookingInput("cropName", e.target.value)} style={inputStyle} />
                         </label>
                       </div>
 
                       <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                        <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Pickup or Farm Location</span>
-                        <input type="text" placeholder="Village, farm address, or mandi point" value={bookingForm.pickupLocation} onChange={(e) => handleBookingInput("pickupLocation", e.target.value)} style={inputStyle} />
+                        <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>
+                          Quantity Needed (tonnes) *
+                          {availCheck && (
+                            <span style={{ color: availCheck.availableTonnes > 0 ? "#4ade80" : "#f87171", marginLeft: 8, fontSize: 11 }}>
+                              max {availCheck.availableTonnes}T available
+                            </span>
+                          )}
+                        </span>
+                        <input
+                          type="number" min="1"
+                          max={availCheck ? availCheck.availableTonnes : undefined}
+                          placeholder={`Max ${selectedStorage.capacity}T`}
+                          value={bookingForm.quantity}
+                          onChange={(e) => handleBookingInput("quantity", e.target.value)}
+                          style={inputStyle}
+                        />
                       </label>
-
-                      <div className="kc-booking-grid">
-                        <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Contact Number</span>
-                          <input type="tel" placeholder="Enter phone number" value={bookingForm.contactNumber} onChange={(e) => handleBookingInput("contactNumber", e.target.value)} style={inputStyle} />
-                        </label>
-                        <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Special Handling</span>
-                          <input type="text" placeholder="Humidity control, fragile load, etc." value={bookingForm.specialHandling} onChange={(e) => handleBookingInput("specialHandling", e.target.value)} style={inputStyle} />
-                        </label>
-                      </div>
 
                       <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                         <span style={{ color: "#FFF085", fontSize: 12, fontWeight: 700 }}>Additional Notes</span>
-                        <textarea rows={3} placeholder="Mention preferred loading time, crop condition, or extra requests." value={bookingForm.notes} onChange={(e) => handleBookingInput("notes", e.target.value)} style={{ ...inputStyle, resize: "vertical", minHeight: 88 }} />
+                        <textarea
+                          rows={2}
+                          placeholder="Special handling, preferred loading time, crop condition..."
+                          value={bookingForm.notes}
+                          onChange={(e) => handleBookingInput("notes", e.target.value)}
+                          style={{ ...inputStyle, resize: "vertical", minHeight: 72 }}
+                        />
                       </label>
 
                       <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 4 }}>
                         <button
-                          onClick={() => {
-                            setActiveDetailTab("about");
-                            resetBookingForm();
-                          }}
+                          onClick={() => { setActiveDetailTab("about"); resetBookingForm(); }}
                           style={{
-                            border: "1px solid rgba(212, 175, 55, 0.28)",
-                            background: "transparent",
-                            color: "#FFF085",
-                            borderRadius: 12,
-                            padding: "11px 16px",
-                            fontSize: 13,
-                            fontWeight: 700,
-                            cursor: "pointer",
+                            border: "1px solid rgba(212,175,55,0.28)", background: "transparent",
+                            color: "#FFF085", borderRadius: 12, padding: "11px 16px",
+                            fontSize: 13, fontWeight: 700, cursor: "pointer",
                           }}
                         >
                           Cancel
                         </button>
                         <button
                           onClick={handleBookingSubmit}
+                          disabled={submitting || !availCheck || availCheck.availableTonnes <= 0}
                           style={{
                             border: "none",
-                            background: "linear-gradient(135deg, #FFF085 0%, #D4AF37 100%)",
-                            color: "#111111",
-                            borderRadius: 12,
-                            padding: "11px 18px",
-                            fontSize: 13,
-                            fontWeight: 800,
-                            cursor: "pointer",
+                            background: submitting || !availCheck || availCheck.availableTonnes <= 0
+                              ? "rgba(212,175,55,0.3)"
+                              : "linear-gradient(135deg, #FFF085 0%, #D4AF37 100%)",
+                            color: "#111111", borderRadius: 12, padding: "11px 18px",
+                            fontSize: 13, fontWeight: 800, cursor: "pointer",
+                            opacity: submitting ? 0.7 : 1,
                           }}
                         >
-                          Book For Now
+                          {submitting ? "Sending..." : "Send Booking Request"}
                         </button>
                       </div>
                     </div>

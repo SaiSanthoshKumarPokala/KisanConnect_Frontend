@@ -2,6 +2,7 @@ import { useLayoutEffect } from 'react';
 import './App.css';
 import './index.css';
 import { AppProvider, UseAppContext } from './context/AppContext';
+import { LanguageProvider } from './context/LanguageContext';
 import Authentication from './pages/Authentication';
 import { Routes, Route, useLocation, Navigate } from 'react-router';
 import UserInfo from './pages/UserInfo';
@@ -34,57 +35,65 @@ const Wrapper = ({ children }) => {
 	const location = useLocation();
 
 	useLayoutEffect(() => {
-		// Scroll to the top of the page when the route changes
 		window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 	}, [location.pathname]);
 
 	return children;
 };
 
+const AIToolkitRedirect = () => {
+	const { role } = UseAppContext();
+	const fallbackRole = role || localStorage.getItem('role') || 'farmer';
+	return <Navigate to={`/${fallbackRole}/aitoolkit`} replace />;
+};
 
 export default function App() {
 	return (
 		<>
 			<Wrapper>
-				<AppProvider>
-					<Routes>
-						<Route path='/' element={<Landing />} />
-						<Route path='/auth' element={<Authentication />} />
-						<Route path='/role' element={<Role />} />
-						<Route path='/userinfo' element={<UserInfo />} />
-						<Route path='/services' element={<Services />} />
-						<Route path='/filters' element={<Filters />} />
-						<Route path='/farmer'>
-							<Route index element={<Dashboard />} />
-							<Route path='/farmer/shop' element={<Shop />} />
-							<Route path='/farmer/marketplace' element={<Marketplace />} />
-							<Route path='/farmer/rentals' element={<Rentals />} />
-							<Route path='/farmer/transport' element={<Transport />} />
-							<Route path='/farmer/coldstorage' element={<FarmerStorageListing />} />
-							<Route path='/farmer/cart' element={<Cart />} />
-							<Route path='/farmer/bookings' element={<Bookings />} />
-							<Route path='/farmer/profile' element={<FProfile />} />
-							<Route path='/farmer/contract' element={<ContractFarming />} />
-							<Route path='/farmer/aitoolkit' element={<AIToolkit />} />
-						</Route>
-						<Route path='/serviceprovider'>
-							<Route index element={<Dashboard />} />
-							<Route path='/serviceprovider/transport' element={<TransportService />} />
-							<Route path='/serviceprovider/rentals' element={<RentalsService />} />
-							<Route path='/serviceprovider/shop' element={<ShopService />} />
-							<Route path='/serviceprovider/marketplace' element={<Marketplace />} />
-							<Route path='/serviceprovider/coldstorage' element={<ServiceProviderStorageListing />} />
-							<Route path='/serviceprovider/cart' element={<Cart />} />
-							<Route path='/serviceprovider/bookings' element={<Bookings />} />
-							<Route path='/serviceprovider/profile' element={<SPProfile />} />
-							<Route path='/serviceprovider/contract' element={<ContractFarmingService/>} />
-						</Route>
-						<Route path='*' element={<NotFound />} />
-					</Routes>
-					<GoUp />
-					<NotificationPanel />
-				</AppProvider>
+				<LanguageProvider>
+					<AppProvider>
+						<Routes>
+							<Route path='/' element={<Landing />} />
+							<Route path='/auth' element={<Authentication />} />
+							<Route path='/role' element={<Role />} />
+							<Route path='/userinfo' element={<UserInfo />} />
+							<Route path='/aitoolkit' element={<AIToolkitRedirect />} />
+							<Route path='/services' element={<Services />} />
+							<Route path='/filters' element={<Filters />} />
+							<Route path='/farmer'>
+								<Route index element={<Dashboard />} />
+								<Route path='/farmer/shop' element={<Shop />} />
+								<Route path='/farmer/marketplace' element={<Marketplace />} />
+								<Route path='/farmer/rentals' element={<Rentals />} />
+								<Route path='/farmer/transport' element={<Transport />} />
+								<Route path='/farmer/coldstorage' element={<FarmerStorageListing />} />
+								<Route path='/farmer/cart' element={<Cart />} />
+								<Route path='/farmer/bookings' element={<Bookings />} />
+								<Route path='/farmer/profile' element={<FProfile />} />
+								<Route path='/farmer/contract' element={<ContractFarming />} />
+								<Route path='/farmer/aitoolkit' element={<AIToolkit />} />
+							</Route>
+							<Route path='/serviceprovider'>
+								<Route index element={<Dashboard />} />
+								<Route path='/serviceprovider/transport' element={<TransportService />} />
+								<Route path='/serviceprovider/rentals' element={<RentalsService />} />
+								<Route path='/serviceprovider/shop' element={<ShopService />} />
+								<Route path='/serviceprovider/marketplace' element={<Marketplace />} />
+								<Route path='/serviceprovider/coldstorage' element={<ServiceProviderStorageListing />} />
+								<Route path='/serviceprovider/cart' element={<Cart />} />
+								<Route path='/serviceprovider/bookings' element={<Bookings />} />
+								<Route path='/serviceprovider/profile' element={<SPProfile />} />
+								<Route path='/serviceprovider/contract' element={<ContractFarmingService/>} />
+								<Route path='/serviceprovider/aitoolkit' element={<AIToolkit />} />
+							</Route>
+							<Route path='*' element={<NotFound />} />
+						</Routes>
+						<GoUp />
+						<NotificationPanel />
+					</AppProvider>
+				</LanguageProvider>
 			</Wrapper>
 		</>
-	)
+	);
 }
