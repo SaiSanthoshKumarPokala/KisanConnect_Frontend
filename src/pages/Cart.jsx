@@ -43,9 +43,9 @@ function CartItemRow({ item, onIncrease, onDecrease, onRemove }) {
 
 // ─── Saved-for-later row ───────────────────────────────────────────────────────
 function SavedItemRow({ item, onRemove }) {
-  const title    = item.name || item.vehicleType || "Saved Item";
+  const title = item.name || item.vehicleType || "Saved Item";
   const subtitle = item.seller || item.owner || item.location || "Kisan Connect";
-  const price    = item.priceLabel || (item.price ? `₹${item.price}` : "—");
+  const price = item.priceLabel || (item.price ? `₹${item.price}` : "—");
   return (
     <div className="flex items-center gap-4 rounded-[14px] border border-gold/15 bg-[#050505] p-4">
       <div className="h-12 w-12 shrink-0 rounded-[10px] border border-gold/15 bg-cover bg-center"
@@ -71,18 +71,19 @@ function PurchasableSection({ title, subtitle, items, total, onIncrease, onDecre
   // Step 2: Open Razorpay checkout with the order from backend
   const initPay = (order, items, total) => {
     const options = {
-      key:         import.meta.env.VITE_RAZORPAY_KEY_ID,
-      amount:      order.amount,
-      currency:    order.currency || "INR",
-      name:        "KisanConnect",
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: order.currency || "INR",
+      name: "KisanConnect",
       description: `${moduleLabel} Purchase`,
-      order_id:    order.id,
-      handler:     async (response) => {
+      order_id: order.id,
+      handler: async (response) => {
         // Step 3: Verify payment on backend after Razorpay callback
         try {
           const { data } = await axios.post("/api/buy/verify", {
-            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
           });
 
           if (data.success) {
@@ -99,8 +100,8 @@ function PurchasableSection({ title, subtitle, items, total, onIncrease, onDecre
         }
       },
       prefill: { name: "", email: "", contact: "" },
-      theme:   { color: "#D4AF37" },
-      modal:   {
+      theme: { color: "#D4AF37" },
+      modal: {
         ondismiss: () => { setPaying(false); }
       },
     };
@@ -116,12 +117,12 @@ function PurchasableSection({ title, subtitle, items, total, onIncrease, onDecre
 
     try {
       const product = items.map((item) => ({
-        id:       item._id || item.id,
-        name:     item.name,
-        brand:    item.brand || item.seller || item.category || "",
-        price:    item.price,
+        id: item._id || item.id,
+        name: item.name,
+        brand: item.brand || item.seller || item.category || "",
+        price: item.price,
         quantity: item.quantity || 1,
-        owner:    item.owner || null,
+        owner: item.owner || null,
       }));
 
       const { data } = await axios.post("/api/buy/order", {
@@ -171,9 +172,9 @@ function PurchasableSection({ title, subtitle, items, total, onIncrease, onDecre
         disabled={paying}
         className="w-full rounded-[14px] py-4 text-[15px] font-black text-[#0a1a0c] transition hover:-translate-y-px"
         style={{
-          background:  paying ? "rgba(212,175,55,0.4)" : "linear-gradient(135deg,#FFF085 0%,#D4AF37 100%)",
-          boxShadow:   "0 8px 24px rgba(212,175,55,0.3)",
-          cursor:      paying ? "not-allowed" : "pointer",
+          background: paying ? "rgba(212,175,55,0.4)" : "linear-gradient(135deg,#FFF085 0%,#D4AF37 100%)",
+          boxShadow: "0 8px 24px rgba(212,175,55,0.3)",
+          cursor: paying ? "not-allowed" : "pointer",
         }}
       >
         {paying ? "Opening Payment..." : `Pay Now — ₹${total.toLocaleString()}`}
@@ -193,17 +194,17 @@ export default function Cart() {
 
   const baseRolePath = location.pathname.startsWith("/serviceprovider") ? "/serviceprovider" : "/farmer";
 
-  const shopItems  = cart.filter((item) => item.cartModule === "Shop");
-  const mktItems   = cart.filter((item) => item.cartModule === "Marketplace");
+  const shopItems = cart.filter((item) => item.cartModule === "Shop");
+  const mktItems = cart.filter((item) => item.cartModule === "Marketplace");
   const otherItems = cart.filter((item) => item.cartModule !== "Shop" && item.cartModule !== "Marketplace");
 
   const shopTotal = shopItems.reduce((sum, i) => sum + (i.price || 0) * (i.quantity || 1), 0);
-  const mktTotal  = mktItems.reduce((sum, i)  => sum + (i.price || 0) * (i.quantity || 1), 0);
+  const mktTotal = mktItems.reduce((sum, i) => sum + (i.price || 0) * (i.quantity || 1), 0);
 
   // Shop handlers
   const handleShopIncrease = (id) => updateShopQty(id, "Shop", 1);
   const handleShopDecrease = (id) => updateShopQty(id, "Shop", -1);
-  const handleShopRemove   = (id) => removeShopItem(id, "Shop");
+  const handleShopRemove = (id) => removeShopItem(id, "Shop");
   const handleShopPay = (items, total) => {
     placeShopOrder(items, total);
     setCart((prev) => prev.filter((item) => item.cartModule !== "Shop"));
@@ -212,7 +213,7 @@ export default function Cart() {
   // Marketplace handlers
   const handleMktIncrease = (id) => updateMarketplaceQty(id, "Marketplace", 1);
   const handleMktDecrease = (id) => updateMarketplaceQty(id, "Marketplace", -1);
-  const handleMktRemove   = (id) => removeMarketplaceItem(id, "Marketplace");
+  const handleMktRemove = (id) => removeMarketplaceItem(id, "Marketplace");
   const handleMktPay = (items, total) => {
     placeMarketplaceOrder(items, total);
     setCart((prev) => prev.filter((item) => item.cartModule !== "Marketplace"));
@@ -225,7 +226,7 @@ export default function Cart() {
       <SideNav />
       <div className={`flex min-h-dvh flex-col transition-all duration-300 ${isOpen ? "md:ml-[250px]" : "md:ml-[80px]"}`}>
         <div className="mx-2 my-4 flex flex-1 flex-col overflow-hidden rounded-[26px] border border-gold/30 bg-black shadow-2xl md:mx-6">
-          <ModuleHeader title="Cart" search="" onSearchChange={() => {}} onOpenSidebar={() => setIsOpen(!isOpen)} />
+          <ModuleHeader title="Cart" search="" onSearchChange={() => { }} onOpenSidebar={() => setIsOpen(!isOpen)} />
 
           <div className="flex-1 overflow-y-auto p-6 md:p-7">
             {cart.length === 0 ? (
