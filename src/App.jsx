@@ -31,6 +31,8 @@ import Marketplace from './pages/Marketplace';
 import AIToolkit from './pages/AIToolkit';
 import Bookings from './pages/Bookings';
 import VoiceSupportWidget from './components/VoiceSupportWidget';
+import About from './pages/About';
+import Faqs from './pages/Faqs';
 
 const Wrapper = ({ children }) => {
 	const location = useLocation();
@@ -61,6 +63,8 @@ export default function App() {
 							<Route path='/userinfo' element={<UserInfo />} />
 							<Route path='/aitoolkit' element={<AIToolkitRedirect />} />
 							<Route path='/services' element={<Services />} />
+							<Route path='/about' element={<About />} />
+							<Route path='/faqs' element={<Faqs />} />
 							<Route path='/filters' element={<Filters />} />
 							<Route path='/farmer'>
 								<Route index element={<Dashboard />} />
