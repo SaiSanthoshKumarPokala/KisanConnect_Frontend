@@ -1,100 +1,90 @@
 import { useState } from "react";
 import { UseAppContext } from "../context/AppContext";
-
-const ROLE_OPTIONS = [
-    {
-        id: 1,
-        label: "Farmer",
-        value: "farmer",
-        desc: "Use Kisan Connect to access rentals, transport, storage, contract farming, and marketplace support.",
-        image: "/farmericon.png",
-    },
-    {
-        id: 2,
-        label: "Service Provider",
-        value: "serviceprovider",
-        desc: "Use Kisan Connect to manage services, listings, requests, and the support tools built for providers.",
-        image: "/serviceprovider.png",
-    },
-];
+import useDocumentTitle from "../hooks/useDocumentTitle";
+import RoleOptionCard from "../components/role/RoleOptionCard";
+import { ROLE_OPTIONS } from "../constants/roleData";
 
 export default function Role() {
-    const { navigate, setRole, axios } = UseAppContext();
-    const [active, setActive] = useState("");
-    const [selectedRoleLabel, setSelectedRoleLabel] = useState("");
+  useDocumentTitle("Select Your Role");
 
-    const submit = async () => {
-        try {
-            if (!active) {
-                window.alert("Select a role to proceed.");
-                return;
-            }
+  const { navigate, setRole, axios } = UseAppContext();
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-            setRole(active);
-            localStorage.setItem("role", active);
+  const handleSelectRole = (option) => {
+    setSelectedRole(option);
+    setRole(option.value);
+    localStorage.setItem("role", option.value);
+  };
 
-            try {
-                await axios.post("/api/user/role", { role: active });
-            } catch (error) {
-                // Keep the frontend flow usable even when backend role persistence is not ready.
-            }
+  const handleSubmit = async () => {
+    if (!selectedRole) {
+      window.alert("Select a role to proceed.");
+      return;
+    }
 
-            navigate("/userinfo");
-        } catch (error) {
-            window.alert(error.message);
-        }
-    };
+    setIsSubmitting(true);
+    try {
+      try {
+        await axios.post("/api/user/role", { role: selectedRole.value });
+      } catch (error) {
+        // Retain flow usability if backend role endpoint is not provisioned
+      }
+      navigate("/userinfo");
+    } catch (error) {
+      window.alert(error.response?.data?.message || error.message || "Failed to proceed.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    return (
-        <div className="min-h-dvh bg-darkgreen font-montserrat">
-            <div className="mx-auto flex min-h-dvh w-11/12 max-w-6xl flex-col items-center justify-around gap-8 py-10 text-gold">
-                <div className="flex max-w-3xl flex-col items-center gap-3 text-center">
-                    <h1 className="text-3xl font-extrabold md:text-4xl">How do you want to use Kisan Connect?</h1>
-                    <p className="text-lg font-normal text-white/80">
-                        Choose the role you want to start with. You can switch roles later inside the app whenever needed.
-                    </p>
-                </div>
-
-                <div className="flex w-full flex-col items-stretch justify-center gap-5 md:flex-row">
-                    {ROLE_OPTIONS.map((option) => (
-                        <button
-                            key={option.id}
-                            type="button"
-                            className={`flex w-full cursor-pointer flex-col items-center justify-between rounded-[24px] border p-6 text-center transition-all duration-200 md:min-h-[360px] md:w-[360px] ${
-                                active === option.value
-                                    ? "border-gold bg-black shadow-[0_16px_38px_rgba(212,175,55,0.18)]"
-                                    : "border-white/20 bg-black/45 hover:border-gold/40 hover:bg-black/55"
-                            }`}
-                            onClick={() => {
-                                setActive(option.value);
-                                setSelectedRoleLabel(option.label);
-                                setRole(option.value);
-                                localStorage.setItem("role", option.value);
-                            }}
-                        >
-                            <img src={option.image} alt={option.label} className="h-36 w-auto object-contain" />
-                            <div className="mt-6 flex flex-col items-center gap-3">
-                                <h2 className="text-2xl font-extrabold text-gold">{option.label}</h2>
-                                <p className="text-sm font-normal leading-7 text-white/75">{option.desc}</p>
-                            </div>
-                        </button>
-                    ))}
-                </div>
-
-                <div className="flex flex-col items-center gap-4">
-                    <p className="text-lg text-gold">
-                        Selected Role:
-                        <span className="ml-2 font-extrabold">{selectedRoleLabel || "None"}</span>
-                    </p>
-                    <button
-                        type="button"
-                        onClick={submit}
-                        className="rounded-xl border border-gold/30 bg-gold px-6 py-3 text-lg font-extrabold text-darkgreen transition-all duration-150 hover:bg-white"
-                    >
-                        Continue
-                    </button>
-                </div>
-            </div>
+  return (
+    <div className="min-h-dvh bg-darkgreen font-montserrat">
+      <main className="mx-auto flex min-h-dvh w-11/12 max-w-6xl flex-col items-center justify-around gap-8 py-10 text-gold">
+        {/* Header Introduction */}
+        <div className="flex max-w-3xl flex-col items-center gap-3 text-center">
+          <h1 className="text-3xl font-extrabold text-gold md:text-4xl">
+            How do you want to use Kisan Connect?
+          </h1>
+          <p className="text-lg font-normal text-white/80">
+            Choose the role you want to start with. You can switch roles later inside the app whenever needed.
+          </p>
         </div>
-    );
+
+        {/* Role Options */}
+        <div
+          role="radiogroup"
+          aria-label="Account role selection"
+          className="flex w-full flex-col items-stretch justify-center gap-5 md:flex-row"
+        >
+          {ROLE_OPTIONS.map((option) => (
+            <RoleOptionCard
+              key={option.id}
+              option={option}
+              isSelected={selectedRole?.value === option.value}
+              onSelect={handleSelectRole}
+            />
+          ))}
+        </div>
+
+        {/* Confirmation & Continue */}
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-lg text-gold">
+            Selected Role:
+            <span className="ml-2 font-extrabold">
+              {selectedRole?.label || "None"}
+            </span>
+          </p>
+          <button
+            type="button"
+            disabled={isSubmitting || !selectedRole}
+            onClick={handleSubmit}
+            className="cursor-pointer rounded-xl border border-gold/30 bg-gold px-8 py-3 text-lg font-extrabold text-darkgreen transition-all duration-150 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting ? "Proceeding..." : "Continue"}
+          </button>
+        </div>
+      </main>
+    </div>
+  );
 }

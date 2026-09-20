@@ -52,13 +52,11 @@ function BookingRow({ booking, onDecide }) {
             {booking.farmerContact}
           </p>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, margin: "4px 0 0" }}>
-            📅 {fmt(booking.startDate)} → {fmt(booking.endDate)}
+            🌾 {booking.cropName} · {booking.estimatedWeight} · {fmt(booking.pickupDate)}
           </p>
-          {booking.deliveryAddress && (
-            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 11, margin: "2px 0 0" }}>
-              📍 {booking.deliveryAddress}
-            </p>
-          )}
+          <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 11, margin: "2px 0 0" }}>
+            {booking.pickupLocation} → {booking.dropLocation}
+          </p>
         </div>
       </div>
       {booking.status === "Pending" && (
@@ -89,7 +87,7 @@ function BookingRow({ booking, onDecide }) {
   );
 }
 
-export default function RentalsServiceCard({ item, onEdit, onDelete, onDecideBooking }) {
+export default function TransportServiceCard({ item, onEdit, onDelete, onDecideBooking }) {
   const [showBookings, setShowBookings] = useState(false);
   const bookings = item.bookings || [];
   const pending  = bookings.filter((b) => b.status === "Pending").length;
@@ -105,36 +103,40 @@ export default function RentalsServiceCard({ item, onEdit, onDelete, onDecideBoo
     >
       {/* Image */}
       <div
-        className="relative h-40 border-b"
+        className="relative h-40 border-b bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: item.image ? `url("${item.image}")` : "linear-gradient(135deg, #1a3a1a 0%, #050505 100%)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
+          backgroundImage: item.image ? `url('${item.image}')` : "none",
+          background: item.image ? undefined : "linear-gradient(135deg, #1a3a1a 0%, #050505 100%)",
           borderColor: "rgba(201, 168, 76, 0.2)",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/60" />
-        <div className="absolute left-3 top-3 z-[1] rounded-full border border-[#FFF085]/35 bg-black/60 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.5px] text-[#FFF085]">
+        <div className="absolute inset-0 bg-linear-to-b from-black/10 to-black/60" />
+        <div className="absolute left-3 top-3 z-1 rounded-full border border-[#FFF085]/35 bg-black/60 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.5px] text-[#FFF085]">
           {item.category}
         </div>
+        {/* Booked badge */}
+        {item.bookedToday && (
+          <div className="absolute right-3 top-3 z-1 rounded-full border border-red-400/50 bg-red-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.5px] text-red-400">
+            Booked Today
+          </div>
+        )}
       </div>
 
       {/* Body */}
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
           <div className="mb-1 text-[15px] font-bold text-white">{item.name}</div>
-          <div className="text-xs text-white/60">{item.location}</div>
+          <div className="text-xs text-white/60">{item.route}</div>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-lg border border-gold/20 bg-[#050505] px-2 py-3 text-center">
             <div className="text-sm font-bold text-white">Rs. {item.price}</div>
-            <div className="mt-1 text-[9px] uppercase tracking-[0.5px] text-white/50">Per Day</div>
+            <div className="mt-1 text-[9px] uppercase tracking-[0.5px] text-white/50">Per Km</div>
           </div>
           <div className="rounded-lg border border-gold/20 bg-[#050505] px-2 py-3 text-center">
-            <div className="text-sm font-bold text-white">{item.category}</div>
-            <div className="mt-1 text-[9px] uppercase tracking-[0.5px] text-white/50">Category</div>
+            <div className="text-sm font-bold text-white">{item.capacity}</div>
+            <div className="mt-1 text-[9px] uppercase tracking-[0.5px] text-white/50">Capacity</div>
           </div>
         </div>
 
@@ -187,21 +189,23 @@ export default function RentalsServiceCard({ item, onEdit, onDelete, onDecideBoo
           </div>
         )}
 
-        {/* Always-visible Edit / Delete buttons */}
+        {/* ── Always-visible Edit / Delete buttons ── */}
         <div className="flex gap-3 mt-auto pt-1">
           <button
             type="button"
             onClick={() => onEdit(item)}
             className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#FFF085] text-sm font-bold text-black shadow-lg shadow-black/30 transition hover:brightness-95"
           >
-            <PencilIcon className="size-4" /> Edit
+            <PencilIcon className="size-4" />
+            Edit
           </button>
           <button
             type="button"
             onClick={() => onDelete(item._id || item.id)}
             className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-red-600 text-sm font-bold text-white shadow-lg shadow-black/30 transition hover:bg-red-500"
           >
-            <TrashIcon className="size-4" /> Delete
+            <TrashIcon className="size-4" />
+            Delete
           </button>
         </div>
       </div>

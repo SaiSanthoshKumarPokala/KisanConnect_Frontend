@@ -1,85 +1,61 @@
 import { useLanguage } from "../context/LanguageContext";
 
 const LANGS = [
-  { code: "en", label: "EN",  title: "English" },
-  { code: "hi", label: "हि",  title: "हिन्दी" },
-  { code: "te", label: "తె",  title: "తెలుగు" },
+  { code: "en", label: "EN", title: "English" },
+  { code: "hi", label: "हि", title: "हिन्दी" },
+  { code: "te", label: "తె", title: "తెలుగు" },
 ];
 
 export default function LanguageSwitcher({ collapsed = false }) {
   const { language, changeLanguage } = useLanguage();
 
   if (collapsed) {
-    // Compact icon-only version for collapsed sidebar
-    const current = LANGS.find((l) => l.code === language);
     return (
       <div className="flex flex-col items-center gap-1">
-        {LANGS.map((lang) => (
-          <button
-            key={lang.code}
-            onClick={() => changeLanguage(lang.code)}
-            title={lang.title}
-            style={{
-              width: 32, height: 24,
-              background: language === lang.code
-                ? "linear-gradient(135deg, #D4AF37 0%, #FFF085 100%)"
-                : "transparent",
-              border: language === lang.code
-                ? "none"
-                : "1px solid rgba(212,175,55,0.3)",
-              borderRadius: 6,
-              color: language === lang.code ? "#111" : "#D4AF37",
-              fontSize: 10,
-              fontWeight: 800,
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
-          >
-            {lang.label}
-          </button>
-        ))}
+        {LANGS.map((lang) => {
+          const isActive = language === lang.code;
+          return (
+            <button
+              key={lang.code}
+              type="button"
+              onClick={() => changeLanguage(lang.code)}
+              title={lang.title}
+              className={`flex h-6 w-8 cursor-pointer items-center justify-center rounded-md text-[10px] font-extrabold transition-all duration-150 ${
+                isActive
+                  ? "border-none bg-linear-to-br from-gold to-[#FFF085] text-[#111]"
+                  : "border border-gold/30 bg-transparent text-gold hover:border-gold/60"
+              }`}
+            >
+              {lang.label}
+            </button>
+          );
+        })}
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 0,
-        background: "rgba(0,0,0,0.35)",
-        border: "1px solid rgba(212,175,55,0.3)",
-        borderRadius: 10,
-        overflow: "hidden",
-        width: "100%",
-      }}
-    >
-      {LANGS.map((lang, i) => (
-        <button
-          key={lang.code}
-          onClick={() => changeLanguage(lang.code)}
-          title={lang.title}
-          style={{
-            flex: 1,
-            padding: "7px 4px",
-            background: language === lang.code
-              ? "linear-gradient(135deg, #D4AF37 0%, #FFF085 100%)"
-              : "transparent",
-            border: "none",
-            borderRight: i < LANGS.length - 1 ? "1px solid rgba(212,175,55,0.2)" : "none",
-            color: language === lang.code ? "#111111" : "#D4AF37",
-            fontSize: 12,
-            fontWeight: 800,
-            cursor: "pointer",
-            transition: "all 0.15s ease",
-            fontFamily: "'Montserrat', sans-serif",
-            letterSpacing: 0.3,
-          }}
-        >
-          {lang.label}
-        </button>
-      ))}
+    <div className="flex w-full items-center gap-0 overflow-hidden rounded-[10px] border border-gold/30 bg-black/35">
+      {LANGS.map((lang, i) => {
+        const isActive = language === lang.code;
+        return (
+          <button
+            key={lang.code}
+            type="button"
+            onClick={() => changeLanguage(lang.code)}
+            title={lang.title}
+            className={`flex-1 cursor-pointer border-none py-1.75 px-1 font-montserrat text-xs font-extrabold tracking-[0.3px] transition-all duration-150 ${
+              i < LANGS.length - 1 ? "border-r border-r-gold/20" : ""
+            } ${
+              isActive
+                ? "bg-linear-to-br from-gold to-[#FFF085] text-[#111111]"
+                : "bg-transparent text-gold hover:bg-white/5"
+            }`}
+          >
+            {lang.label}
+          </button>
+        );
+      })}
     </div>
   );
 }

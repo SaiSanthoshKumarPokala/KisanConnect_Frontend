@@ -1,25 +1,28 @@
-import { useState } from "react";
 import { UseAppContext } from "../context/AppContext";
 
 function CategoryBadge({ category }) {
   return (
-    <span
-      className="inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.5px]"
-      style={{ background: "rgba(0,0,0,0.56)", borderColor: "rgba(255,240,133,0.34)", color: "#FFF085" }}
-    >
+    <span className="inline-flex items-center rounded-full border border-[#FFF085]/34 bg-black/[0.56] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.5px] text-[#FFF085]">
       {category}
     </span>
   );
 }
 
 export default function ProductCard({
-  name, seller, location, price,
-  category, image, description, availability,
-  onViewDetails, showAddToCart = false, cartModule = "Shop",
+  name,
+  seller,
+  location,
+  price,
+  category,
+  image,
+  description,
+  availability,
+  onViewDetails,
+  showAddToCart = false,
+  cartModule = "Shop",
   _id,
 }) {
   const { cart, addShopItem, updateShopQty, removeShopItem } = UseAppContext();
-  const [btnHover, setBtnHover] = useState(false);
 
   const itemPayload = { _id, name, seller, location, price, category, image, description, availability };
   const isUnavailable = availability === "Out of Stock" || availability === "Booked";
@@ -48,20 +51,17 @@ export default function ProductCard({
   const subtitle = description || "Reliable agricultural supply for day-to-day farm needs.";
 
   return (
-    <div
-      className="flex h-full flex-col overflow-hidden rounded-[18px] border bg-black font-montserrat transition-all duration-200 hover:-translate-y-1"
-      style={{ borderColor: "#d4af37", boxShadow: "0 0 0 1px rgba(212,175,55,0.26), 0 12px 28px rgba(0,0,0,0.42)" }}
-    >
+    <div className="flex h-full flex-col overflow-hidden rounded-[18px] border border-[#d4af37] bg-black font-montserrat shadow-[0_0_0_1px_rgba(212,175,55,0.26),0_12px_28px_rgba(0,0,0,0.42)] transition-all duration-200 hover:-translate-y-1">
       <div
-        className="relative h-36 border-b bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${image || "/urea.png"})`, borderColor: "rgba(201,168,76,0.2)" }}
+        className="relative h-36 border-b border-[#c9a84c]/20 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${image || "/urea.png"})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/55" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/20 to-black/55" />
         <div className="absolute left-3 top-3 z-10">
           <CategoryBadge category={category || "Product"} />
         </div>
         <div className="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-[11px] text-white/80">
-          <span className="text-gold">•</span>
+          <span className="text-[#d4af37]">•</span>
           <span>{location || "Available across your region"}</span>
         </div>
       </div>
@@ -74,8 +74,8 @@ export default function ProductCard({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 rounded-[12px] border border-gold/20 bg-[#050505] px-3 py-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#FFF085] to-[#D4AF37] text-[12px] font-extrabold text-black">
+        <div className="flex items-center gap-3 rounded-xl border border-[#d4af37]/20 bg-[#050505] px-3 py-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-[#FFF085] to-gold text-[12px] font-extrabold text-black">
             {ownerInitial}
           </div>
           <div>
@@ -85,11 +85,11 @@ export default function ProductCard({
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg border border-gold/20 bg-[#050505] px-2 py-3 text-center">
+          <div className="rounded-lg border border-[#d4af37]/20 bg-[#050505] px-2 py-3 text-center">
             <div className="text-[16px] font-black leading-none text-[#FFF085]">₹{price || 500}</div>
             <div className="mt-1 text-[9px] text-white/45">per kg</div>
           </div>
-          <div className="rounded-lg border border-gold/20 bg-[#050505] px-2 py-3 text-center">
+          <div className="rounded-lg border border-[#d4af37]/20 bg-[#050505] px-2 py-3 text-center">
             <div className={`text-[16px] font-black leading-none ${isUnavailable ? "text-red-400" : "text-green-400"}`}>
               {isUnavailable ? "Sold out" : "In Stock"}
             </div>
@@ -100,20 +100,14 @@ export default function ProductCard({
         <div className="mt-auto flex gap-2">
           {/* View Details button */}
           <button
-            onMouseEnter={() => setBtnHover(true)}
-            onMouseLeave={() => setBtnHover(false)}
+            type="button"
             onClick={() => onViewDetails && onViewDetails(itemPayload)}
             disabled={isUnavailable}
-            style={{
-              flex: 1,
-              background: isUnavailable ? "transparent" : btnHover ? "#ffffff" : "#D4AF37",
-              color: isUnavailable ? "rgba(255,255,255,0.5)" : "#0a1a0c",
-              border: isUnavailable ? "1px solid rgba(212,175,55,0.28)" : "none",
-              padding: "9px 0", borderRadius: 8, fontSize: 12, fontWeight: 700,
-              cursor: isUnavailable ? "not-allowed" : "pointer",
-              transition: "background 0.18s, transform 0.18s ease",
-              transform: btnHover && !isUnavailable ? "translateY(-1px)" : "translateY(0)",
-            }}
+            className={`flex-1 rounded-lg py-2.25 text-xs font-bold transition-all duration-180 ease-out ${
+              isUnavailable
+                ? "cursor-not-allowed border border-[#d4af37]/[0.28] bg-transparent text-white/50"
+                : "cursor-pointer border-none bg-gold text-[#0a1a0c] hover:-translate-y-px hover:bg-white"
+            }`}
           >
             {isUnavailable ? "Sold out" : "View Details"}
           </button>
@@ -122,24 +116,20 @@ export default function ProductCard({
           {showAddToCart && (
             cartQty > 0 ? (
               /* ── Inline qty adjuster ── */
-              <div
-                style={{
-                  flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between",
-                  border: "1px solid rgba(212,175,55,0.5)", borderRadius: 8,
-                  background: "rgba(212,175,55,0.08)", overflow: "hidden",
-                }}
-              >
+              <div className="flex flex-1 items-center justify-between overflow-hidden rounded-lg border border-[#d4af37]/50 bg-[#d4af37]/8">
                 <button
+                  type="button"
                   onClick={handleDecrease}
-                  style={{ width: 34, height: "100%", background: "transparent", border: "none", color: "#FFF085", fontSize: 18, fontWeight: 800, cursor: "pointer", flexShrink: 0 }}
+                  className="flex h-full w-8.5 shrink-0 cursor-pointer items-center justify-center border-none bg-transparent text-lg font-extrabold text-[#FFF085]"
                 >
                   −
                 </button>
-                <span style={{ color: "#FFF085", fontSize: 14, fontWeight: 800 }}>{cartQty}</span>
+                <span className="text-sm font-extrabold text-[#FFF085]">{cartQty}</span>
                 <button
+                  type="button"
                   onClick={handleIncrease}
                   disabled={isUnavailable}
-                  style={{ width: 34, height: "100%", background: "transparent", border: "none", color: "#FFF085", fontSize: 18, fontWeight: 800, cursor: "pointer", flexShrink: 0 }}
+                  className="flex h-full w-8.5 shrink-0 cursor-pointer items-center justify-center border-none bg-transparent text-lg font-extrabold text-[#FFF085] disabled:cursor-not-allowed"
                 >
                   +
                 </button>
@@ -147,16 +137,14 @@ export default function ProductCard({
             ) : (
               /* ── Add to Cart button ── */
               <button
+                type="button"
                 onClick={handleAddToCart}
                 disabled={isUnavailable}
-                style={{
-                  flex: 1, background: "transparent",
-                  color: isUnavailable ? "rgba(255,255,255,0.35)" : "#FFF085",
-                  border: `1px solid ${isUnavailable ? "rgba(212,175,55,0.12)" : "rgba(212,175,55,0.28)"}`,
-                  padding: "9px 0", borderRadius: 8, fontSize: 12, fontWeight: 700,
-                  cursor: isUnavailable ? "not-allowed" : "pointer",
-                  transition: "background 0.18s",
-                }}
+                className={`flex-1 rounded-lg py-2.25 text-xs font-bold transition-colors duration-180 ${
+                  isUnavailable
+                    ? "cursor-not-allowed border border-[#d4af37]/12 bg-transparent text-white/35"
+                    : "cursor-pointer border border-[#d4af37]/[0.28] bg-transparent text-[#FFF085] hover:bg-[#d4af37]/10"
+                }`}
               >
                 Add to Cart
               </button>

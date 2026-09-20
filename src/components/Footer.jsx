@@ -26,11 +26,11 @@ export default function Footer() {
                     <div className="flex flex-col items-start gap-0.5 py-2">
                         <label htmlFor="Email" className="text-white text-xl">Email Address</label>
                         <div className="flex flex-row gap-1 items-center bg-white border border-black w-full p-2 rounded-sm">
-                            <EnvelopeIcon className="size-8 fill-activetab" />
+                            <EnvelopeIcon className="size-8 fill-[#d4af37]" />
                             <input type="email" value={mail} name="Email" id="Email" placeholder="xyz@gmail.com" className="focus:outline-0 w-full font-normal text-black" onChange={(e) => setMail(e.target.value)} />
                         </div>
                     </div>
-                    <input type="submit" value="Join" className="bg-linear-to-r font-bold from-activetab to-yellow-200 cursor-pointer p-2 rounded-sm border border-black text-black hover:scale-105 transition-all ease-in duration-200" />
+                    <input type="submit" value="Join" className="bg-linear-to-r font-bold from-[#d4af37] to-yellow-200 cursor-pointer p-2 rounded-sm border border-black text-black hover:scale-105 transition-all ease-in duration-200" />
                 </div>
                 <hr className="border-amber-50 md:hidden block" />
 

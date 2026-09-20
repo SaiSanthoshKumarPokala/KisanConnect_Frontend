@@ -7,13 +7,13 @@ import { useLocation } from "react-router";
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 function Avatar({ label, color = "gold" }) {
   const styles = {
-    gold:   { border: "border-gold/30",      bg: "bg-gold/10",      text: "text-gold" },
-    red:    { border: "border-red-400/30",   bg: "bg-red-400/10",   text: "text-red-400" },
-    blue:   { border: "border-blue-400/30",  bg: "bg-blue-400/10",  text: "text-blue-400" },
-    green:  { border: "border-green-400/30", bg: "bg-green-400/10", text: "text-green-400" },
-    purple: { border: "border-purple-400/30",bg: "bg-purple-400/10",text: "text-purple-400" },
-    amber:  { border: "border-amber-400/30", bg: "bg-amber-400/10", text: "text-amber-400" },
-    orange: { border: "border-orange-400/30",bg: "bg-orange-400/10",text: "text-orange-400" },
+    gold:   { border: "border-[#d4af37]/30",   bg: "bg-[#d4af37]/10",   text: "text-[#d4af37]" },
+    red:    { border: "border-red-400/30",    bg: "bg-red-400/10",    text: "text-red-400" },
+    blue:   { border: "border-blue-400/30",   bg: "bg-blue-400/10",   text: "text-blue-400" },
+    green:  { border: "border-green-400/30",  bg: "bg-green-400/10",  text: "text-green-400" },
+    purple: { border: "border-purple-400/30", bg: "bg-purple-400/10", text: "text-purple-400" },
+    amber:  { border: "border-amber-400/30",  bg: "bg-amber-400/10",  text: "text-amber-400" },
+    orange: { border: "border-orange-400/30", bg: "bg-orange-400/10", text: "text-orange-400" },
   };
   const s = styles[color] || styles.gold;
   return (
@@ -25,21 +25,21 @@ function Avatar({ label, color = "gold" }) {
 
 function fmt(d) { return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }); }
 function fmtTime(d) { return new Date(d).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }); }
-function SectionHeading({ label }) { return <p className="mb-3 text-[10px] font-black uppercase tracking-[0.3em] text-gold/50">{label}</p>; }
+function SectionHeading({ label }) { return <p className="mb-3 text-[10px] font-black uppercase tracking-[0.3em] text-[#d4af37]/50">{label}</p>; }
 
 // ─── Payment status badge ─────────────────────────────────────────────────────
 function PaymentBadge({ paid, paidAt }) {
   if (paid) {
     return (
-      <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6, background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 8, padding: "5px 10px", width: "fit-content" }}>
-        <span style={{ color: "#4ade80", fontSize: 12, fontWeight: 800 }}>✓ Payment Done</span>
-        {paidAt && <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 11 }}>· {fmt(paidAt)}</span>}
+      <div className="mt-2 flex w-fit items-center gap-1.5 rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1">
+        <span className="text-xs font-extrabold text-[#4ade80]">✓ Payment Done</span>
+        {paidAt && <span className="text-[11px] text-white/45">· {fmt(paidAt)}</span>}
       </div>
     );
   }
   return (
-    <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6, background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.25)", borderRadius: 8, padding: "5px 10px", width: "fit-content" }}>
-      <span style={{ color: "#fbbf24", fontSize: 12, fontWeight: 700 }}>⏳ Awaiting Payment</span>
+    <div className="mt-2 flex w-fit items-center gap-1.5 rounded-lg border border-amber-400/25 bg-amber-400/8 px-2.5 py-1">
+      <span className="text-xs font-bold text-[#fbbf24]">⏳ Awaiting Payment</span>
     </div>
   );
 }
@@ -59,7 +59,7 @@ function ColdStorageDealCard({ deal, effectiveRole, onPayClick }) {
   const isPaid = deal.paymentStatus === "paid";
 
   return (
-    <div className="rounded-[20px] border border-gold/20 bg-black/50 p-4">
+    <div className="rounded-[20px] border border-[#d4af37]/20 bg-black/50 p-4">
       <div className="flex items-start gap-3">
         <Avatar label={initials} />
         <div className="min-w-0 flex-1">
@@ -67,10 +67,10 @@ function ColdStorageDealCard({ deal, effectiveRole, onPayClick }) {
             <span className="text-sm font-bold text-white">{effectiveRole === "serviceprovider" ? deal.farmerName : deal.storage?.name}</span>
             <span className="rounded-full border border-green-400/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-green-400">Cold Storage</span>
           </div>
-          <p className="text-sm font-semibold text-gold">{effectiveRole === "serviceprovider" ? `${deal.cropName} at ${deal.storage?.name}` : `Your ${deal.cropName} at ${deal.storage?.name}`}</p>
+          <p className="text-sm font-semibold text-[#d4af37]">{effectiveRole === "serviceprovider" ? `${deal.cropName} at ${deal.storage?.name}` : `Your ${deal.cropName} at ${deal.storage?.name}`}</p>
           <p className="mt-1 text-sm text-white/60">{deal.quantity}T · {fmt(deal.startDate)} → {fmt(deal.endDate)}</p>
           {effectiveRole === "serviceprovider" && <p className="mt-0.5 text-xs text-white/40">{deal.farmerLocation} · {deal.farmerContact}</p>}
-          <p className="mt-2 text-xs font-semibold text-gold/70">{daysLeft <= 0 ? "Ends today" : daysLeft === 1 ? "1 day remaining" : `${daysLeft} days remaining`}</p>
+          <p className="mt-2 text-xs font-semibold text-[#d4af37]/70">{daysLeft <= 0 ? "Ends today" : daysLeft === 1 ? "1 day remaining" : `${daysLeft} days remaining`}</p>
 
           {/* Payment section */}
           {effectiveRole === "farmer" ? (
@@ -78,8 +78,9 @@ function ColdStorageDealCard({ deal, effectiveRole, onPayClick }) {
               <PaymentBadge paid paidAt={deal.paidAt} />
             ) : (
               <button
+                type="button"
                 onClick={() => onPayClick({ deal, module: "coldstorage", amount, label: `Cold Storage — ${deal.storage?.name}` })}
-                style={{ marginTop: 10, border: "none", background: "linear-gradient(135deg,#FFF085 0%,#D4AF37 100%)", color: "#111", borderRadius: 8, padding: "7px 16px", fontSize: 12, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                className="mt-2.5 flex cursor-pointer items-center gap-1.5 rounded-lg border-none bg-linear-to-br from-[#FFF085] to-gold px-4 py-1.75 text-xs font-extrabold text-[#111]"
               >
                 💳 Pay Now — ₹{amount.toLocaleString()}
               </button>
@@ -105,7 +106,7 @@ function TransportDealCard({ deal, effectiveRole, onPayClick }) {
   const isPaid = deal.paymentStatus === "paid";
 
   return (
-    <div className="rounded-[20px] border border-gold/20 bg-black/50 p-4">
+    <div className="rounded-[20px] border border-[#d4af37]/20 bg-black/50 p-4">
       <div className="flex items-start gap-3">
         <Avatar label={initials} color="blue" />
         <div className="min-w-0 flex-1">
@@ -113,18 +114,19 @@ function TransportDealCard({ deal, effectiveRole, onPayClick }) {
             <span className="text-sm font-bold text-white">{effectiveRole === "serviceprovider" ? deal.farmerName : deal.transport?.name}</span>
             <span className="rounded-full border border-blue-400/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-400">Transport</span>
           </div>
-          <p className="text-sm font-semibold text-gold">{deal.cropName} · {deal.pickupLocation} → {deal.dropLocation}</p>
+          <p className="text-sm font-semibold text-[#d4af37]">{deal.cropName} · {deal.pickupLocation} → {deal.dropLocation}</p>
           <p className="mt-1 text-sm text-white/60">{deal.estimatedWeight} · {fmt(deal.pickupDate)}</p>
           {effectiveRole === "serviceprovider" && <p className="mt-0.5 text-xs text-white/40">{deal.farmerContact}</p>}
-          <p className="mt-2 text-xs font-semibold text-gold/70">{daysLeft <= 0 ? "Pickup today" : daysLeft === 1 ? "Pickup tomorrow" : `${daysLeft} days until pickup`}</p>
+          <p className="mt-2 text-xs font-semibold text-[#d4af37]/70">{daysLeft <= 0 ? "Pickup today" : daysLeft === 1 ? "Pickup tomorrow" : `${daysLeft} days until pickup`}</p>
 
           {effectiveRole === "farmer" ? (
             isPaid ? (
               <PaymentBadge paid paidAt={deal.paidAt} />
             ) : (
               <button
+                type="button"
                 onClick={() => onPayClick({ deal, module: "transport", amount, label: `Transport — ${deal.transport?.name}` })}
-                style={{ marginTop: 10, border: "none", background: "linear-gradient(135deg,#FFF085 0%,#D4AF37 100%)", color: "#111", borderRadius: 8, padding: "7px 16px", fontSize: 12, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                className="mt-2.5 flex cursor-pointer items-center gap-1.5 rounded-lg border-none bg-linear-to-br from-[#FFF085] to-gold px-4 py-1.75 text-xs font-extrabold text-[#111]"
               >
                 💳 Pay Now — ₹{amount.toLocaleString()}
               </button>
@@ -152,7 +154,7 @@ function RentalDealCard({ deal, effectiveRole, onPayClick }) {
   const isPaid = deal.paymentStatus === "paid";
 
   return (
-    <div className="rounded-[20px] border border-gold/20 bg-black/50 p-4">
+    <div className="rounded-[20px] border border-[#d4af37]/20 bg-black/50 p-4">
       <div className="flex items-start gap-3">
         <Avatar label={initials} color="green" />
         <div className="min-w-0 flex-1">
@@ -160,19 +162,20 @@ function RentalDealCard({ deal, effectiveRole, onPayClick }) {
             <span className="text-sm font-bold text-white">{effectiveRole === "serviceprovider" ? deal.farmerName : deal.rental?.name}</span>
             <span className="rounded-full border border-green-400/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-green-400">Rental</span>
           </div>
-          <p className="text-sm font-semibold text-gold">{effectiveRole === "serviceprovider" ? `${deal.rental?.name} rented by ${deal.farmerName}` : `Your rental: ${deal.rental?.name}`}</p>
+          <p className="text-sm font-semibold text-[#d4af37]">{effectiveRole === "serviceprovider" ? `${deal.rental?.name} rented by ${deal.farmerName}` : `Your rental: ${deal.rental?.name}`}</p>
           <p className="mt-1 text-sm text-white/60">{fmt(deal.startDate)} → {fmt(deal.endDate)} · {days} day{days !== 1 ? "s" : ""}</p>
           {deal.deliveryAddress && <p className="mt-0.5 text-xs text-white/40">📍 {deal.deliveryAddress}</p>}
           {effectiveRole === "serviceprovider" && <p className="mt-0.5 text-xs text-white/40">{deal.farmerContact}</p>}
-          <p className="mt-2 text-xs font-semibold text-gold/70">{daysLeft <= 0 ? "Ends today" : daysLeft === 1 ? "1 day remaining" : `${daysLeft} days remaining`}</p>
+          <p className="mt-2 text-xs font-semibold text-[#d4af37]/70">{daysLeft <= 0 ? "Ends today" : daysLeft === 1 ? "1 day remaining" : `${daysLeft} days remaining`}</p>
 
           {effectiveRole === "farmer" ? (
             isPaid ? (
               <PaymentBadge paid paidAt={deal.paidAt} />
             ) : (
               <button
+                type="button"
                 onClick={() => onPayClick({ deal, module: "rentals", amount, label: `Rental — ${deal.rental?.name} (${days} days)` })}
-                style={{ marginTop: 10, border: "none", background: "linear-gradient(135deg,#FFF085 0%,#D4AF37 100%)", color: "#111", borderRadius: 8, padding: "7px 16px", fontSize: 12, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                className="mt-2.5 flex cursor-pointer items-center gap-1.5 rounded-lg border-none bg-linear-to-br from-[#FFF085] to-gold px-4 py-1.75 text-xs font-extrabold text-[#111]"
               >
                 💳 Pay Now — ₹{amount.toLocaleString()}
               </button>
@@ -193,7 +196,7 @@ function ContractDealCard({ deal, effectiveRole }) {
     ? (deal.name || "FA").split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
     : (contract.company || "CF").split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
   return (
-    <div className="rounded-[20px] border border-gold/20 bg-black/50 p-4">
+    <div className="rounded-[20px] border border-[#d4af37]/20 bg-black/50 p-4">
       <div className="flex items-start gap-3">
         <Avatar label={initials} color="amber" />
         <div className="min-w-0 flex-1">
@@ -201,7 +204,7 @@ function ContractDealCard({ deal, effectiveRole }) {
             <span className="text-sm font-bold text-white">{effectiveRole === "serviceprovider" ? deal.name : contract.company}</span>
             <span className="rounded-full border border-amber-400/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-400">Contract</span>
           </div>
-          <p className="text-sm font-semibold text-gold">{contract.crop}{contract.variety ? ` (${contract.variety})` : ""} · {contract.region}</p>
+          <p className="text-sm font-semibold text-[#d4af37]">{contract.crop}{contract.variety ? ` (${contract.variety})` : ""} · {contract.region}</p>
           <p className="mt-1 text-sm text-white/60">Season: {contract.season} · Duration: {contract.duration}</p>
           <p className="mt-0.5 text-sm text-white/60">Price: ₹{contract.priceMin}–{contract.priceMax} / quintal</p>
           {effectiveRole === "serviceprovider" && <p className="mt-0.5 text-xs text-white/40">{deal.land} acres · {deal.phone}</p>}
@@ -226,7 +229,7 @@ function OrderCard({ order, effectiveRole, type, t }) {
   const badge   = isShop ? "Shop"   : "Marketplace";
 
   return (
-    <div className="rounded-[20px] border border-gold/20 bg-black/50 p-4">
+    <div className="rounded-[20px] border border-[#d4af37]/20 bg-black/50 p-4">
       <div className="flex items-start gap-3">
         <Avatar label={isShop ? "🛒" : "🌾"} color={color} />
         <div className="min-w-0 flex-1">
@@ -234,7 +237,7 @@ function OrderCard({ order, effectiveRole, type, t }) {
             <span className="text-sm font-bold text-white">{label}</span>
             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] ${isShop ? "border-purple-400/40 text-purple-400" : "border-orange-400/40 text-orange-400"}`}>{badge}</span>
           </div>
-          <p className="text-sm font-semibold text-gold mt-1">{itemSummary}</p>
+          <p className="text-sm font-semibold text-[#d4af37] mt-1">{itemSummary}</p>
           <p className="mt-1 text-sm text-white/60">Total: <span className="font-bold text-[#FFF085]">₹{(order.totalAmount || 0).toLocaleString()}</span></p>
           <p className="mt-1 text-xs text-white/40">{paidAt ? `${fmt(paidAt)} at ${fmtTime(paidAt)}` : "—"}</p>
         </div>
@@ -367,33 +370,33 @@ export default function NotificationPanel() {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-[190] bg-black/40 backdrop-blur-[2px] transition ${notificationsOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-190 bg-black/40 backdrop-blur-[2px] transition ${notificationsOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={() => setNotificationsOpen(false)}
       />
 
       {/* Panel */}
-      <aside className={`fixed right-0 top-0 z-[200] flex h-dvh w-full max-w-[420px] flex-col border-l border-gold/20 bg-black/80 shadow-[-24px_0_60px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-transform duration-300 ${notificationsOpen ? "translate-x-0" : "translate-x-full"}`}>
+      <aside className={`fixed right-0 top-0 z-200 flex h-dvh w-full max-w-105 flex-col border-l border-[#d4af37]/20 bg-black/80 shadow-[-24px_0_60px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-transform duration-300 ${notificationsOpen ? "translate-x-0" : "translate-x-full"}`}>
 
         {/* Header */}
-        <div className="border-b border-gold/20 bg-gradient-to-b from-gold/10 to-transparent px-6 py-5 shrink-0">
+        <div className="border-b border-[#d4af37]/20 bg-linear-to-b from-[#d4af37]/10 to-transparent px-6 py-5 shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gold/60">{t("notif_activity")}</p>
-              <h2 className="mt-2 text-2xl font-extrabold text-gold">{t("notif_title")}</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#d4af37]/60">{t("notif_activity")}</p>
+              <h2 className="mt-2 text-2xl font-extrabold text-[#d4af37]">{t("notif_title")}</h2>
               <p className="mt-2 text-sm text-white/60">
                 {effectiveRole === "serviceprovider" ? t("notif_sp_subtitle") : t("notif_farmer_subtitle")}
               </p>
             </div>
-            <button type="button" onClick={() => setNotificationsOpen(false)} className="rounded-full border border-gold/20 p-2 text-gold transition hover:bg-gold/10">
+            <button type="button" onClick={() => setNotificationsOpen(false)} className="rounded-full border border-[#d4af37]/20 p-2 text-[#d4af37] transition hover:bg-[#d4af37]/10 cursor-pointer">
               <XMarkIcon className="size-6" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto bg-[#081D0C] px-5 py-5 space-y-6">
+        <div className="flex-1 overflow-y-auto bg-darkgreen px-5 py-5 space-y-6">
           {totalCount === 0 ? (
-            <div className="rounded-[24px] border border-dashed border-gold/25 bg-black/30 p-8 text-center">
+            <div className="rounded-3xl border border-dashed border-[#d4af37]/25 bg-black/30 p-8 text-center">
               <div className="text-lg font-bold text-white">{t("notif_empty")}</div>
               <div className="mt-2 text-sm text-white/60">{t("notif_empty_sub")}</div>
             </div>
@@ -466,7 +469,6 @@ export default function NotificationPanel() {
           )}
         </div>
       </aside>
-
     </>
   );
 }

@@ -108,11 +108,9 @@ const knowledgeBase = [
       "soil type",
       "एनपीके",
       "मिट्टी",
-      "gps",
       "soil",
       "మట్టి",
       "వాతావరణం",
-      "gps",
     ],
     answer: {
       en: "For crop recommendation, upload a soil image, allow GPS access, and click Generate. The system classifies the soil image, fetches weather from your current latitude and longitude, derives proxy NPK and pH values, and then predicts a recommended crop.",
@@ -471,4 +469,3 @@ export function getContextualSupportResponse({ query, language = "en", pathname 
     actions,
   };
 }
-

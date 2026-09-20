@@ -78,8 +78,8 @@ export default function SideNav() {
         <>
             {/* ── Desktop Sidebar ── */}
             <div
-                className={`hidden md:flex md:flex-col h-dvh fixed top-0 left-0 bg-linear-to-b from-gold to-yellow-200 border-r border-darkgreen text-white font-bold z-10 transition-all duration-300 overflow-hidden
-                    ${isOpen ? "w-[250px] p-6" : "w-[80px] p-4 items-center"}`}
+                className={`hidden md:flex md:flex-col h-dvh fixed top-0 left-0 bg-linear-to-b from-[#d4af37] to-yellow-200 border-r border-darkgreen text-white font-bold z-10 transition-all duration-300 overflow-hidden
+                    ${isOpen ? "w-62.5 p-6" : "w-20 p-4 items-center"}`}
             >
                 {isOpen ? (
                     /* ── EXPANDED ── */
@@ -92,7 +92,7 @@ export default function SideNav() {
                                     <p className="font-bold text-darkgreen">CONNECT</p>
                                 </div>
                             </Link>
-                            <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-xl hover:bg-darkgreen/10 cursor-pointer transition-normal" aria-label="Close sidebar">
+                            <button type="button" onClick={() => setIsOpen(false)} className="p-1.5 rounded-xl hover:bg-darkgreen/10 cursor-pointer transition-colors" aria-label="Close sidebar">
                                 <XMarkIcon className="size-6 text-darkgreen" />
                             </button>
                         </div>
@@ -131,22 +131,23 @@ export default function SideNav() {
                         </div>
 
                         {/* Language Switcher */}
-                        <div className="mb-3">
+                        <div className="mb-3 w-full">
                             <LanguageSwitcher collapsed={false} />
                         </div>
 
                         <div className="flex flex-col items-start justify-center gap-3 border-t border-darkgreen/60 pt-4">
                             <Link to={profilePath} className="flex flex-row items-center justify-start gap-3 pt-2 px-2">
-                                <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-gradient-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                                <div className="flex size-11 items-center justify-center rounded-full border border-[#d4af37]/40 bg-linear-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
                                     {profileInitials}
                                 </div>
                                 <p className="text-xl font-semibold text-darkgreen">{t("nav_profile")}</p>
                             </Link>
                             <button
+                                type="button"
                                 onClick={() => changeRole()}
-                                className="group flex flex-row items-center justify-between gap-2 p-2 text-gold rounded-xl border-gold border cursor-pointer hover:bg-gold hover:text-darkgreen bg-darkgreen transition-all ease-in duration-100 w-full"
+                                className="group flex flex-row items-center justify-between gap-2 p-2 text-[#d4af37] rounded-xl border-[#d4af37] border cursor-pointer hover:bg-[#d4af37] hover:text-darkgreen bg-darkgreen transition-all ease-in duration-100 w-full"
                             >
-                                <ArrowsRightLeftIcon className="size-8 stroke-gold group-hover:stroke-darkgreen" />
+                                <ArrowsRightLeftIcon className="size-8 stroke-[#d4af37] group-hover:stroke-darkgreen" />
                                 {effectiveRole === "serviceprovider" ? (
                                     <p>{t("nav_switch_farmer")}</p>
                                 ) : (
@@ -161,7 +162,7 @@ export default function SideNav() {
                 ) : (
                     /* ── COLLAPSED ── */
                     <>
-                        <button onClick={() => setIsOpen(true)} className="p-2 rounded-xl hover:bg-darkgreen/10 cursor-pointer transition-normal mb-4" aria-label="Open sidebar">
+                        <button type="button" onClick={() => setIsOpen(true)} className="p-2 rounded-xl hover:bg-darkgreen/10 cursor-pointer transition-colors mb-4" aria-label="Open sidebar">
                             <Bars3Icon className="size-7 text-darkgreen" />
                         </button>
 
@@ -208,11 +209,11 @@ export default function SideNav() {
 
                         <div className="flex flex-col items-center gap-2 border-t border-darkgreen/60 pt-3 mt-auto">
                             <Link to={profilePath} className="flex items-center justify-center p-1">
-                                <div className="flex size-9 items-center justify-center rounded-full border border-gold/40 bg-gradient-to-br from-[#0f2d18] to-[#07150c] text-xs font-extrabold text-[#fff2a1]">
+                                <div className="flex size-9 items-center justify-center rounded-full border border-[#d4af37]/40 bg-linear-to-br from-[#0f2d18] to-[#07150c] text-xs font-extrabold text-[#fff2a1]">
                                     {profileInitials}
                                 </div>
                             </Link>
-                            <button onClick={() => changeRole()} className="p-2 rounded-xl hover:bg-darkgreen/10 cursor-pointer transition-colors" aria-label="Switch role">
+                            <button type="button" onClick={() => changeRole()} className="p-2 rounded-xl hover:bg-darkgreen/10 cursor-pointer transition-colors" aria-label="Switch role">
                                 <ArrowsRightLeftIcon className="size-6 text-darkgreen" />
                             </button>
                         </div>
@@ -222,20 +223,20 @@ export default function SideNav() {
 
             {/* ── Mobile Sidebar ── */}
             {!mobileOpen && (
-                <div className="w-full flex flex-col md:hidden sticky top-0 items-center p-4 font-montserrat z-100 text-darkgreen bg-linear-to-b from-gold to-yellow-200">
+                <div className="w-full flex flex-col md:hidden sticky top-0 items-center p-4 font-montserrat z-100 text-darkgreen bg-linear-to-b from-[#d4af37] to-yellow-200">
                     <div className="flex w-full flex-row items-center justify-between">
                         <Link to="/"><img src="/Kisan Connect Logo 1.png" className="size-14 rounded-full" alt="Logo" /></Link>
-                        <button className="p-2 cursor-pointer" onClick={() => setMobileOpen(true)}>
+                        <button type="button" className="p-2 cursor-pointer" onClick={() => setMobileOpen(true)}>
                             <Bars3Icon className="size-10" />
                         </button>
                     </div>
                 </div>
             )}
             {mobileOpen && (
-                <div className="w-full flex flex-col md:hidden sticky top-0 items-center p-4 font-montserrat z-100 text-darkgreen bg-gold h-dvh">
+                <div className="w-full flex flex-col md:hidden sticky top-0 items-center p-4 font-montserrat z-100 text-darkgreen bg-[#d4af37] h-dvh">
                     <div className="flex w-full flex-row items-center justify-between">
                         <Link to="/"><img src="/Kisan Connect Logo 1.png" className="size-14 rounded-full" alt="Logo" /></Link>
-                        <button className="p-2 cursor-pointer" onClick={() => setMobileOpen(false)}>
+                        <button type="button" className="p-2 cursor-pointer" onClick={() => setMobileOpen(false)}>
                             <XMarkIcon className="size-10" />
                         </button>
                     </div>
@@ -281,13 +282,13 @@ export default function SideNav() {
 
                             <div className="flex flex-col items-start justify-center gap-3 border-t border-darkgreen/60 pt-4 w-full mt-auto">
                                 <Link to={profilePath} onClick={() => setMobileOpen(false)} className="flex flex-row items-center justify-start gap-3 pt-2 px-2 w-full">
-                                    <div className="flex size-11 items-center justify-center rounded-full border border-gold/40 bg-gradient-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
+                                    <div className="flex size-11 items-center justify-center rounded-full border border-[#d4af37]/40 bg-linear-to-br from-[#0f2d18] to-[#07150c] text-sm font-extrabold text-[#fff2a1] shadow-[0_6px_18px_rgba(0,0,0,0.18)]">
                                         {profileInitials}
                                     </div>
                                     <p className="text-xl font-semibold text-darkgreen">{t("nav_profile")}</p>
                                 </Link>
-                                <button onClick={() => changeRole()} className="group flex flex-row items-center justify-start gap-2 p-2 text-gold rounded-xl border-gold border cursor-pointer hover:bg-gold hover:text-darkgreen bg-darkgreen transition-all ease-in duration-100 w-full">
-                                    <ArrowsRightLeftIcon className="size-8 stroke-gold group-hover:stroke-darkgreen" />
+                                <button type="button" onClick={() => changeRole()} className="group flex flex-row items-center justify-start gap-2 p-2 text-[#d4af37] rounded-xl border-[#d4af37] border cursor-pointer hover:bg-[#d4af37] hover:text-darkgreen bg-darkgreen transition-all ease-in duration-100 w-full">
+                                    <ArrowsRightLeftIcon className="size-8 stroke-[#d4af37] group-hover:stroke-darkgreen" />
                                     <p>{effectiveRole === "serviceprovider" ? t("nav_switch_farmer") : t("nav_switch_sp")}</p>
                                 </button>
                             </div>

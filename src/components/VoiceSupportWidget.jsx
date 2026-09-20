@@ -11,7 +11,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { UseAppContext } from "../context/AppContext";
 import { useLanguage } from "../context/LanguageContext";
-import { SUPPORT_LANGUAGES, getContextualSupportResponse } from "./voiceSupportKnowledge";
+import { SUPPORT_LANGUAGES, getContextualSupportResponse } from "../data/voiceSupportKnowledge";
 import { useLocation } from "react-router";
 
 function getSpeechRecognitionConstructor() {
@@ -250,12 +250,12 @@ export default function VoiceSupportWidget() {
 
   return (
     <>
-      <div className="fixed bottom-5 right-5 z-[120]">
+      <div className="fixed bottom-5 right-5 z-120">
         {!isOpen ? (
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="group flex h-16 w-16 items-center justify-center rounded-full border border-[#f0d97b]/40 bg-gradient-to-br from-[#D4AF37] to-[#FFF085] text-[#0a1a0c] shadow-[0_20px_40px_rgba(0,0,0,0.35)] transition hover:-translate-y-1"
+            className="group flex h-16 w-16 cursor-pointer items-center justify-center rounded-full border border-[#f0d97b]/40 bg-linear-to-br from-gold to-[#FFF085] text-[#0a1a0c] shadow-[0_20px_40px_rgba(0,0,0,0.35)] transition hover:-translate-y-1"
             aria-label="Open voice support"
           >
             <ChatBubbleOvalLeftEllipsisIcon className="size-8" />
@@ -264,11 +264,11 @@ export default function VoiceSupportWidget() {
       </div>
 
       {isOpen ? (
-        <div className="fixed bottom-3 right-3 z-[120] w-[calc(100vw-2rem)] max-w-[390px] rounded-[28px] border border-[#f0d97b]/20 bg-[#060606]/97 text-white shadow-[0_28px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-          <div className="rounded-t-[28px] border-b border-white/10 bg-[radial-gradient(circle_at_top,_rgba(212,175,55,0.25),_rgba(6,6,6,0.98)_55%)] px-5 py-4">
+        <div className="fixed bottom-3 right-3 z-120 w-[calc(100vw-2rem)] max-w-97.5 rounded-[28px] border border-[#f0d97b]/20 bg-[#060606]/97 text-white shadow-[0_28px_70px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+          <div className="rounded-t-[28px] border-b border-white/10 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.25),rgba(6,6,6,0.98)_55%)] px-5 py-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-montserrat text-xs font-bold uppercase tracking-[0.24em] text-gold/85">
+                <p className="font-montserrat text-xs font-bold uppercase tracking-[0.24em] text-[#d4af37]">
                   Voice Support
                 </p>
                 <p className="mt-1 font-montserrat text-sm text-white/70">
@@ -281,7 +281,7 @@ export default function VoiceSupportWidget() {
                   stopListening();
                   setIsOpen(false);
                 }}
-                className="rounded-full border border-white/10 bg-white/5 p-2 text-white/75 transition hover:bg-white/10"
+                className="cursor-pointer rounded-full border border-white/10 bg-white/5 p-2 text-white/75 transition hover:bg-white/10"
                 aria-label="Close assistant"
               >
                 <XMarkIcon className="size-5" />
@@ -293,13 +293,13 @@ export default function VoiceSupportWidget() {
                 <button
                   type="button"
                   onClick={() => setShowLanguageMenu((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-full border border-white/10 bg-black/35 px-3 py-2 text-xs font-semibold text-gold"
+                  className="flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-black/35 px-3 py-2 text-xs font-semibold text-[#d4af37]"
                 >
                   <LanguageIcon className="size-4" />
                   {selectedLanguage.label}
                 </button>
                 {showLanguageMenu ? (
-                  <div className="absolute left-0 top-11 w-36 rounded-2xl border border-white/10 bg-[#090909] p-2 shadow-2xl">
+                  <div className="absolute top-11 left-0 w-36 rounded-2xl border border-white/10 bg-[#090909] p-2 shadow-2xl">
                     {SUPPORT_LANGUAGES.map((item) => (
                       <button
                         key={item.code}
@@ -308,9 +308,9 @@ export default function VoiceSupportWidget() {
                           changeLanguage(item.code);
                           setShowLanguageMenu(false);
                         }}
-                        className={`mb-1 w-full rounded-xl px-3 py-2 text-left text-sm transition last:mb-0 ${
+                        className={`mb-1 w-full cursor-pointer rounded-xl px-3 py-2 text-left text-sm transition last:mb-0 ${
                           item.code === language
-                            ? "bg-gold text-[#0a1a0c]"
+                            ? "bg-[#d4af37] text-[#0a1a0c]"
                             : "bg-white/5 text-white hover:bg-white/10"
                         }`}
                       >
@@ -324,7 +324,7 @@ export default function VoiceSupportWidget() {
               <button
                 type="button"
                 onClick={() => setSpeechEnabled((prev) => !prev)}
-                className="rounded-full border border-white/10 bg-black/35 p-2 text-gold transition hover:bg-white/10"
+                className="cursor-pointer rounded-full border border-white/10 bg-black/35 p-2 text-[#d4af37] transition hover:bg-white/10"
                 aria-label={speechEnabled ? "Mute voice responses" : "Enable voice responses"}
               >
                 {speechEnabled ? <SpeakerWaveIcon className="size-4" /> : <SpeakerXMarkIcon className="size-4" />}
@@ -336,7 +336,7 @@ export default function VoiceSupportWidget() {
             </div>
           </div>
 
-          <div ref={scrollRef} className="max-h-[360px] space-y-3 overflow-y-auto px-4 py-4">
+          <div ref={scrollRef} className="max-h-90 space-y-3 overflow-y-auto px-4 py-4">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -345,7 +345,7 @@ export default function VoiceSupportWidget() {
                 <div
                   className={`max-w-[85%] rounded-[22px] px-4 py-3 font-montserrat text-sm leading-6 ${
                     message.sender === "user"
-                      ? "bg-gold text-[#0a1a0c]"
+                      ? "bg-[#d4af37] text-[#0a1a0c]"
                       : "border border-white/10 bg-white/5 text-white"
                   }`}
                 >
@@ -357,7 +357,7 @@ export default function VoiceSupportWidget() {
                           key={`${message.id}-${action.path}`}
                           type="button"
                           onClick={() => navigate(action.path)}
-                          className="rounded-full border border-gold/30 bg-black px-3 py-1 text-xs font-semibold text-gold transition hover:bg-white/10"
+                          className="cursor-pointer rounded-full border border-[#d4af37]/30 bg-black px-3 py-1 text-xs font-semibold text-[#d4af37] transition hover:bg-white/10"
                         >
                           {action.label}
                         </button>
@@ -376,7 +376,7 @@ export default function VoiceSupportWidget() {
                   key={prompt}
                   type="button"
                   onClick={() => handleAssistantQuery(prompt)}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/10"
+                  className="cursor-pointer rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/10"
                 >
                   {prompt}
                 </button>
@@ -399,17 +399,17 @@ export default function VoiceSupportWidget() {
                   className="w-full resize-none bg-transparent font-montserrat text-sm text-white outline-none placeholder:text-white/35"
                 />
                 {statusText ? (
-                  <p className="mt-1 font-montserrat text-[11px] text-gold/85">{statusText}</p>
+                  <p className="mt-1 font-montserrat text-[11px] text-[#d4af37]">{statusText}</p>
                 ) : null}
               </div>
 
               <button
                 type="button"
                 onClick={startListening}
-                className={`rounded-full border p-3 transition ${
+                className={`cursor-pointer rounded-full border p-3 transition ${
                   isListening
                     ? "border-[#ff9d9d]/30 bg-[#3a0f0f] text-[#ffb3b3]"
-                    : "border-white/10 bg-white/5 text-gold hover:bg-white/10"
+                    : "border-white/10 bg-white/5 text-[#d4af37] hover:bg-white/10"
                 }`}
                 aria-label={isListening ? "Stop listening" : "Start voice input"}
               >
@@ -419,7 +419,7 @@ export default function VoiceSupportWidget() {
               <button
                 type="button"
                 onClick={() => handleAssistantQuery(inputValue)}
-                className="rounded-full border border-gold/20 bg-gold p-3 text-[#0a1a0c] transition hover:brightness-110"
+                className="cursor-pointer rounded-full border border-[#d4af37]/20 bg-[#d4af37] p-3 text-[#0a1a0c] transition hover:brightness-110"
                 aria-label="Send question"
               >
                 <PaperAirplaneIcon className="size-5" />
@@ -431,4 +431,3 @@ export default function VoiceSupportWidget() {
     </>
   );
 }
-

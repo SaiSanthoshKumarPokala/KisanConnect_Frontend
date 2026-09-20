@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 
 export default function AddModuleCard({
@@ -7,49 +6,29 @@ export default function AddModuleCard({
   subtitle,
   minHeight = 300,
 }) {
-  const [hovered, setHovered] = useState(false);
-
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      role="button"
+      tabIndex={0}
       onClick={onAdd}
-      style={{
-        background: hovered ? "rgba(255, 240, 133, 0.08)" : "transparent",
-        border: hovered ? "1px solid #FFF085" : "1px dashed rgba(212, 175, 55, 0.4)",
-        borderRadius: 14,
-        boxShadow: hovered ? "0 0 0 1px rgba(241, 216, 106, 0.36), 0 18px 40px rgba(0, 0, 0, 0.5)" : "none",
-        transition: "border-color 0.2s, background 0.2s, box-shadow 0.2s",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 16,
-        padding: 40,
-        textAlign: "center",
-        cursor: "pointer",
-        minHeight,
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onAdd?.();
+        }
       }}
+      style={{ minHeight }}
+      className="group flex cursor-pointer flex-col items-center justify-center gap-4 rounded-[14px] border border-dashed border-[#c9a84c]/40 bg-transparent p-10 text-center font-montserrat transition-all duration-200 hover:border-solid hover:border-[#FFF085] hover:bg-[#FFF085]/8 hover:shadow-[0_0_0_1px_rgba(241,216,106,0.36),0_18px_40px_rgba(0,0,0,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
     >
-      <div
-        style={{
-          width: 80,
-          height: 80,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, #FFF085 0%, #D4AF37 100%)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#111111",
-        }}
-      >
-        <PlusIcon style={{ width: 48, height: 48, fontWeight: 700 }} />
+      <div className="flex size-20 items-center justify-center rounded-full bg-linear-to-br from-[#FFF085] to-gold text-[#111111] shadow-md transition-transform duration-200 group-hover:scale-105">
+        <PlusIcon className="size-12 stroke-[2.5]" aria-hidden="true" />
       </div>
+
       <div>
-        <div style={{ fontSize: 18, fontWeight: 700, color: "#FFF085", marginBottom: 8 }}>
+        <div className="mb-2 text-lg font-bold text-[#FFF085]">
           {title}
         </div>
-        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.56)" }}>
+        <div className="text-sm font-normal text-white/60">
           {subtitle}
         </div>
       </div>
